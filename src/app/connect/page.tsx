@@ -1,23 +1,25 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Github, ArrowRight, Loader2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 
-export function ConnectGithub() {
+export default function ConnectGithubPage() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const router = useRouter();
   const setGithubUser = useStore((state) => state.setGithubUser);
   const setRepos = useStore((state) => state.setRepos);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/auth');
+      router.push('/auth');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, router]);
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,27 +29,24 @@ export function ConnectGithub() {
     setError('');
 
     try {
-      // Fetch user profile
       const userRes = await fetch(`https://api.github.com/users/${username}`);
       if (!userRes.ok) {
         throw new Error(userRes.status === 404 ? 'User not found' : 'Failed to fetch user');
       }
       const userData = await userRes.json();
 
-      // Fetch user repos
       const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
       if (!reposRes.ok) {
         throw new Error('Failed to fetch repositories');
       }
       const reposData = await reposRes.json();
 
-      // Filter out forks and uninteresting repos
       const filteredRepos = reposData.filter((r: any) => !r.fork && r.description).slice(0, 20);
 
       setGithubUser(userData);
       setRepos(filteredRepos);
       
-      navigate('/');
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     } finally {
@@ -59,7 +58,6 @@ export function ConnectGithub() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white relative overflow-hidden">
-      {/* Background effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
       
       <motion.div 

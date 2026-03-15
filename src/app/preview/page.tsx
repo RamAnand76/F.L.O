@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -8,12 +10,12 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Extracted Feature Components
+// Components
 import { EditorSidebar } from '@/components/features/editor/EditorSidebar';
 import { BrowserChrome } from '@/components/features/editor/BrowserChrome';
 import { PreviewFrame } from '@/components/features/editor/PreviewFrame';
 
-export function PreviewEditor() {
+export default function PreviewEditorPage() {
   const [activeTab, setActiveTab] = useState<'editor' | 'templates'>('editor');
   const [deviceMode, setDeviceMode] = useState<'desktop' | 'mobile'>('desktop');
   const [chatInput, setChatInput] = useState('');
@@ -195,9 +197,14 @@ export function PreviewEditor() {
     </div>
   );
 
-  if (isFullscreen) {
+  // Use createPortal for full screen mode if we are on client
+  if (typeof document !== 'undefined' && isFullscreen) {
     return createPortal(editorContent, document.body);
   }
 
-  return editorContent;
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {editorContent}
+    </div>
+  );
 }

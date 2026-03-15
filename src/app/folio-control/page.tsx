@@ -1,8 +1,9 @@
+'use client';
+
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
-import { Plus, GitFork, Filter, ArrowUpDown, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus, Filter, ArrowUpDown, AlertCircle } from 'lucide-react';
 
 // Extracted Components
 import { RepoCard } from '@/components/features/dashboard/RepoCard';
@@ -10,7 +11,7 @@ import { SkillBadge } from '@/components/features/dashboard/SkillBadge';
 import { Modal } from '@/components/ui/Modal';
 import { Dropdown } from '@/components/ui/Dropdown';
 
-export function FolioControl() {
+export default function FolioControlPage() {
   const repos = useStore((state) => state.repos);
   const selectedRepoIds = useStore((state) => state.selectedRepoIds);
   const toggleRepoSelection = useStore((state) => state.toggleRepoSelection);
@@ -68,7 +69,7 @@ export function FolioControl() {
   }, [repos, sortBy, filterLang]);
 
   return (
-    <div className="space-y-12">
+    <div className="container mx-auto px-4 py-8 space-y-12">
       <header className="border-b border-white/5 pb-8">
         <motion.h1 
           className="text-4xl font-semibold tracking-tighter mb-2"
@@ -212,10 +213,6 @@ export function FolioControl() {
         </p>
 
         <div className="flex gap-3">
-          <button
-            onClick={() => setSortBy(sortBy)} // Dummy to keep types happy if needed, but we use handleRemoveSkill
-            className="hidden"
-          />
           <button
             onClick={() => setSkillToDelete(null)}
             className="flex-1 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold transition-colors"

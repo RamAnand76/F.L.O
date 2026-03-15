@@ -1,22 +1,29 @@
-import React from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
+'use client';
+
+import React, { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Dock } from './Dock';
-import { TopNav } from './TopNav';
+import { TopNav } from '@/components/layout/TopNav';
+import { Dock } from '@/components/layout/Dock';
 import { useStore } from '@/store/useStore';
 
-export function Layout() {
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const githubUser = useStore((state) => state.githubUser);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
-  const location = useLocation();
 
-  if (!isAuthenticated && location.pathname !== '/auth') {
-    return <Navigate to="/auth" replace />;
-  }
+  useEffect(() => {
+    if (!isAuthenticated && pathname !== '/auth') {
+      router.push('/auth');
+    } else if (isAuthenticated && !githubUser && pathname !== '/connect') {
+      router.push('/connect');
+    }
+  }, [isAuthenticated, githubUser, pathname, router]);
 
-  if (isAuthenticated && !githubUser && location.pathname !== '/connect') {
-    return <Navigate to="/connect" replace />;
-  }
+  // Hide the shell completely if we're on the auth page or not authenticated yet
+  // This helps avoid layout shifts
+  const isAuthPage = pathname === '/auth' || pathname === '/connect';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans overflow-x-hidden selection:bg-indigo-500/30">
@@ -24,22 +31,22 @@ export function Layout() {
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-zinc-950 to-zinc-950" />
       
       <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-32 min-h-screen">
-        <TopNav />
+        {!isAuthPage && <TopNav />}
         <AnimatePresence mode="wait">
           <motion.div
-            key={location.pathname}
+            key={pathname}
             initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="w-full h-full"
           >
-            <Outlet />
+            {children}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {githubUser && <Dock />}
+      {!isAuthPage && githubUser && <Dock />}
     </div>
   );
 }

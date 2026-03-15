@@ -1,9 +1,11 @@
+'use client';
+
 import React from 'react';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { User, Mail, MapPin, AlignLeft, Save } from 'lucide-react';
 
-export function Profile() {
+export default function ProfilePage() {
   const githubUser = useStore((state) => state.githubUser);
   const customData = useStore((state) => state.customData);
   const updateCustomData = useStore((state) => state.updateCustomData);
@@ -16,7 +18,7 @@ export function Profile() {
   };
 
   return (
-    <div className="space-y-12 max-w-3xl mx-auto">
+    <div className="container mx-auto px-4 py-8 space-y-12 max-w-3xl">
       <header className="border-b border-white/5 pb-8 text-center">
         <motion.div 
           className="relative w-32 h-32 mx-auto mb-6"

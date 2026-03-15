@@ -1,19 +1,21 @@
+'use client';
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { ArrowLeft, ArrowRight, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SpeedometerLoader } from '@/components/ui/SpeedometerLoader';
 
-export function Auth() {
+export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +24,7 @@ export function Auth() {
 
   const handleLoadingComplete = () => {
     setIsAuthenticated(true);
-    navigate('/connect');
+    router.push('/connect');
   };
 
   if (isLoading) {
@@ -58,7 +60,6 @@ export function Auth() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
           
-          {/* Logo */}
           <div className="absolute top-8 left-8 flex items-center gap-2">
             <span className="text-2xl font-semibold tracking-tight">Gen</span>
             <div className="px-2 py-0.5 border border-white/30 rounded-md backdrop-blur-md bg-white/10 flex items-center justify-center">
@@ -132,8 +133,6 @@ export function Auth() {
                     required
                     className="w-full bg-[#18181b] border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/20 transition-all"
                   />
-                  {/* Mock cursor line effect for active input */}
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 w-[1px] h-5 bg-yellow-500/50 hidden group-focus-within:block animate-pulse" />
                 </div>
 
                 <div className="relative group">

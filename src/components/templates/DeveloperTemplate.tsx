@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useStore } from '@/store/useStore';
 import { Github, MapPin, Star, Code2 } from 'lucide-react';

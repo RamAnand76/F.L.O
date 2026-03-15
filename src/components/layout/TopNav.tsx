@@ -1,15 +1,17 @@
+'use client';
+
 import React from 'react';
 import { useStore } from '@/store/useStore';
 import { Bell, ChevronDown } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 
 export function TopNav() {
   const githubUser = useStore((state) => state.githubUser);
-  const location = useLocation();
+  const pathname = usePathname();
 
   if (!githubUser) return null;
 
-  if (location.pathname === '/profile' || location.pathname === '/preview') {
+  if (pathname === '/profile' || pathname === '/preview') {
     return null;
   }
 

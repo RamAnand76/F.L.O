@@ -73,9 +73,9 @@ export function PreviewFrame({
           )}
         >
           <div className="absolute inset-0 overflow-y-auto custom-scrollbar bg-white">
-            {selectedTemplate === 'minimal' && <MinimalTemplate data={customData} />}
-            {selectedTemplate === 'developer' && <DeveloperTemplate data={customData} />}
-            {selectedTemplate === 'creative' && <CreativeTemplate data={customData} />}
+            {selectedTemplate === 'minimal' && <MinimalTemplate />}
+            {selectedTemplate === 'developer' && <DeveloperTemplate />}
+            {selectedTemplate === 'creative' && <CreativeTemplate />}
           </div>
         </div>
       </div>

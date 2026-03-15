@@ -1,76 +1,21 @@
+'use client';
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
-import { useNavigate } from 'react-router-dom';
-import { MinimalTemplate } from '@/components/templates/MinimalTemplate';
-import { DeveloperTemplate } from '@/components/templates/DeveloperTemplate';
-import { CreativeTemplate } from '@/components/templates/CreativeTemplate';
-import { Search, Bell, ChevronDown, Play, Download, MoreHorizontal, X, Check, Star, Flame, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, ChevronDown, Play, Download, MoreHorizontal, X, Check, Flame, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TEMPLATES } from '@/lib/templates';
 
-const TEMPLATES = [
-  { 
-    id: 'creative', 
-    name: 'Spider-Verse', 
-    category: 'Creative • Animation', 
-    tags: ['Animation', 'Adventure', 'Bold'],
-    desc: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its very existence. A bold, highly animated portfolio template.', 
-    component: CreativeTemplate, 
-    color: 'from-[#FF2A2A] via-[#7A00C4] to-[#000000]',
-    textColor: 'text-white'
-  },
-  { 
-    id: 'developer', 
-    name: 'The Matrix', 
-    category: 'Engineering • Sci-Fi', 
-    tags: ['Dark', 'Terminal', 'Code'],
-    desc: 'Dark, monospace, code-centric vibe. Ideal for backend and systems engineers who want to show off their raw technical skills.', 
-    component: DeveloperTemplate, 
-    color: 'from-[#0d1117] via-[#161b22] to-[#003300]',
-    textColor: 'text-[#c9d1d9]'
-  },
-  { 
-    id: 'minimal', 
-    name: 'Interstellar', 
-    category: 'Minimal • Sci-Fi', 
-    tags: ['Clean', 'Space', 'Typography'],
-    desc: 'Clean, typography-focused design. Perfect for a sleek, professional look that lets your work speak for itself across the cosmos.', 
-    component: MinimalTemplate, 
-    color: 'from-zinc-100 via-zinc-300 to-zinc-500',
-    textColor: 'text-zinc-900'
-  },
-  { 
-    id: 'saas', 
-    name: 'Manifest', 
-    category: 'Business • Mystery', 
-    tags: ['Landing', 'Conversion', 'Sleek'],
-    desc: 'Optimized for conversions with a professional SaaS aesthetic. Uncover the mystery of high engagement rates.', 
-    component: MinimalTemplate, 
-    color: 'from-indigo-900 via-blue-900 to-black',
-    textColor: 'text-white'
-  },
-  { 
-    id: 'brutalist', 
-    name: 'The Flash', 
-    category: 'Design • Fantasy', 
-    tags: ['Fast', 'High Contrast', 'Grid'],
-    desc: 'Raw, unpolished, and highly structural. For the bold designers who want to move fast and break things.', 
-    component: CreativeTemplate, 
-    color: 'from-yellow-500 via-orange-600 to-red-700',
-    textColor: 'text-white'
-  }
-] as const;
-
-export function Templates() {
+export default function TemplatesPage() {
   const [focusedId, setFocusedId] = useState<string>(TEMPLATES[0].id);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Templates');
   
   const setSelectedTemplate = useStore(s => s.setSelectedTemplate);
-  const selectedTemplate = useStore(s => s.selectedTemplate);
-  const githubUser = useStore(s => s.githubUser);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const focusedTemplate = TEMPLATES.find(t => t.id === focusedId) || TEMPLATES[0];
   const PreviewComponent = TEMPLATES.find(t => t.id === previewId)?.component;
@@ -85,15 +30,14 @@ export function Templates() {
   });
 
   const handleUseTemplate = (id: string) => {
-    // Map the display IDs back to the actual template IDs supported by the store
     const actualId = ['creative', 'developer', 'minimal'].includes(id) ? id : 'minimal';
     setSelectedTemplate(actualId as any);
     setPreviewId(null);
-    navigate('/preview');
+    router.push('/preview');
   };
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-8 pb-12">
+    <div className="container mx-auto px-4 py-8 h-full flex flex-col lg:flex-row gap-8 pb-12">
       
       {/* Left Sidebar */}
       <div className="w-full lg:w-80 shrink-0 flex flex-col gap-8">
@@ -109,7 +53,7 @@ export function Templates() {
           />
         </div>
 
-        {/* New Arrivals / Trending */}
+        {/* New Arrivals */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold flex items-center gap-2 text-white">
@@ -136,35 +80,6 @@ export function Templates() {
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm font-medium text-white truncate group-hover:text-indigo-400 transition-colors">{t.name}</h4>
                   <p className="text-xs text-zinc-400 truncate mt-0.5">{t.category.split('•')[0]}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Continue Exploring */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 shadow-lg flex-1">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold flex items-center gap-2 text-white">
-              <Clock className="w-4 h-4 text-indigo-400" /> 
-              Recently Viewed
-            </h3>
-          </div>
-          <div className="space-y-5">
-            {TEMPLATES.slice(3, 5).map(t => (
-              <div 
-                key={`recent-${t.id}`} 
-                className="flex items-center gap-4 group cursor-pointer" 
-                onClick={() => setFocusedId(t.id)}
-              >
-                <div className={cn("w-14 h-14 rounded-xl bg-gradient-to-br flex-shrink-0 relative overflow-hidden", t.color)}>
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                    <Play className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 fill-current" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-white truncate group-hover:text-indigo-400 transition-colors">{t.name}</h4>
-                  <p className="text-xs text-zinc-400 truncate mt-0.5">Viewed 2h ago</p>
                 </div>
               </div>
             ))}
@@ -203,17 +118,11 @@ export function Templates() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="relative rounded-[2.5rem] overflow-hidden min-h-[460px] flex flex-col justify-end p-10 md:p-14 border border-white/10 shadow-2xl group"
           >
-            {/* Abstract Background representing the template */}
             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 transition-transform duration-1000 group-hover:scale-105", focusedTemplate.color)} />
-            
-            {/* Decorative abstract shapes */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 mix-blend-overlay" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/40 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
-
-            {/* Gradient Overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
 
-            {/* Content */}
             <div className="relative z-10 w-full max-w-3xl">
               <div className="flex items-center gap-3 mb-6">
                 <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-white border border-white/20 flex items-center gap-1.5">
@@ -247,9 +156,6 @@ export function Templates() {
                 >
                   <Download className="w-5 h-5" /> Use Template
                 </button>
-                <button className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-xl">
-                  <MoreHorizontal className="w-6 h-6" />
-                </button>
               </div>
             </div>
           </motion.div>
@@ -261,69 +167,29 @@ export function Templates() {
             <h3 className="text-xl font-semibold text-white">
               {searchQuery || activeTab !== 'All Templates' ? `Results for "${searchQuery || activeTab}"` : 'You might like'}
             </h3>
-            <button 
-              onClick={() => {
-                setSearchQuery('');
-                setActiveTab('All Templates');
-              }}
-              className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
-            >
-              See all
-            </button>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {filteredTemplates.length > 0 ? (
-              filteredTemplates.filter(t => t.id !== focusedId).map(t => (
-                <motion.div 
-                  key={`grid-${t.id}`} 
-                  onClick={() => setFocusedId(t.id)} 
-                  className="group cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className={cn("w-full aspect-[4/3] rounded-[1.5rem] mb-4 relative overflow-hidden bg-gradient-to-br shadow-lg border border-white/5", t.color)}>
-                     {/* Decorative overlay */}
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
-                     
-                     {/* Play button overlay */}
-                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-                           <Play className="w-5 h-5 text-white fill-current ml-1" />
-                        </div>
-                     </div>
-  
-                     {/* Badges */}
-                     <div className="absolute top-3 left-3">
-                       <span className="px-2.5 py-1 rounded-lg bg-black/40 backdrop-blur-md text-[10px] font-medium text-white border border-white/10">
-                         {t.category.split('•')[0].trim()}
-                       </span>
-                     </div>
-                  </div>
-                  <h4 className="font-semibold text-base text-white mb-1 group-hover:text-indigo-400 transition-colors">{t.name}</h4>
-                  <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{t.desc}</p>
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-white/5 rounded-[2.5rem] border border-dashed border-white/10">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                  <Search className="w-8 h-8 text-zinc-500" />
+            {filteredTemplates.filter(t => t.id !== focusedId).map(t => (
+              <motion.div 
+                key={`grid-${t.id}`} 
+                onClick={() => setFocusedId(t.id)} 
+                className="group cursor-pointer"
+                whileHover={{ y: -5 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className={cn("w-full aspect-[4/3] rounded-[1.5rem] mb-4 relative overflow-hidden bg-gradient-to-br shadow-lg border border-white/5", t.color)}>
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
+                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
+                         <Play className="w-5 h-5 text-white fill-current ml-1" />
+                      </div>
+                   </div>
                 </div>
-                <h4 className="text-xl font-semibold text-white mb-2">No templates found</h4>
-                <p className="text-zinc-500 max-w-xs">
-                  We couldn't find any templates matching your search or filters. Try adjusting your criteria.
-                </p>
-                <button 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setActiveTab('All Templates');
-                  }}
-                  className="mt-6 text-sm font-bold text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            )}
+                <h4 className="font-semibold text-base text-white mb-1 group-hover:text-indigo-400 transition-colors">{t.name}</h4>
+                <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{t.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
@@ -341,10 +207,8 @@ export function Templates() {
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="w-full h-full max-w-7xl bg-zinc-950 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col relative"
             >
-              {/* Modal Header */}
               <div className="flex items-center justify-between px-8 py-5 border-b border-white/10 bg-zinc-900/50 backdrop-blur-md">
                 <div className="flex items-center gap-4">
                   <h2 className="text-xl font-medium text-white">
@@ -367,7 +231,6 @@ export function Templates() {
                 </div>
               </div>
 
-              {/* Modal Content (The Template) */}
               <div className="flex-1 overflow-y-auto relative bg-zinc-950">
                 <PreviewComponent />
               </div>

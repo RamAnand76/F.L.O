@@ -1,20 +1,23 @@
+'use client';
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LayoutDashboard, SlidersHorizontal, MonitorPlay, User, LogOut, LayoutTemplate } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/folio', label: 'Folio Control', icon: SlidersHorizontal },
+  { path: '/folio-control', label: 'Folio Control', icon: SlidersHorizontal },
   { path: '/templates', label: 'Templates', icon: LayoutTemplate },
   { path: '/preview', label: 'Preview & Editor', icon: MonitorPlay },
   { path: '/profile', label: 'Profile', icon: User },
 ];
 
 export function Dock() {
-  const location = useLocation();
+  const pathname = usePathname();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const disconnect = useStore((state) => state.disconnect);
 
@@ -27,13 +30,13 @@ export function Dock() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         {navItems.map((item, index) => {
-          const isActive = location.pathname === item.path;
+          const isActive = pathname === item.path;
           const isHovered = hoveredIndex === index;
           
           return (
             <Link
               key={item.path}
-              to={item.path}
+              href={item.path}
               className="relative group"
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
