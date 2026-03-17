@@ -3,18 +3,32 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
-import { User, Mail, MapPin, AlignLeft, Save } from 'lucide-react';
+import { User, Mail, MapPin, AlignLeft, Save, Loader2, Sparkles } from 'lucide-react';
 
 export default function ProfilePage() {
   const githubUser = useStore((state) => state.githubUser);
   const customData = useStore((state) => state.customData);
   const updateCustomData = useStore((state) => state.updateCustomData);
+  const saveProfile = useStore((state) => state.saveProfile);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   if (!githubUser) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     updateCustomData({ [name]: value });
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await saveProfile();
+      alert('Profile saved successfully!');
+    } catch (error) {
+      alert('Failed to save profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -101,9 +115,27 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="bio" className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-              <AlignLeft className="w-4 h-4 text-zinc-500" /> Bio / About
-            </label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="bio" className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                <AlignLeft className="w-4 h-4 text-zinc-500" /> Bio / About
+              </label>
+              <button
+                type="button"
+                onClick={async () => {
+                  const userPrompt = window.prompt('How would you like to enhance your bio? (e.g. "Make it more professional")');
+                  if (userPrompt) {
+                    try {
+                      await useStore.getState().enhanceWithAI('bio', userPrompt);
+                    } catch (error) {
+                      alert('AI enhancement failed');
+                    }
+                  }
+                }}
+                className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+              >
+                <Sparkles className="w-3 h-3" /> Enhance with AI
+              </button>
+            </div>
             <textarea
               id="bio"
               name="bio"
@@ -117,9 +149,12 @@ export default function ProfilePage() {
           <div className="pt-4 flex justify-end">
             <button
               type="button"
-              className="flex items-center gap-2 bg-white text-black font-medium rounded-xl px-6 py-3 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 bg-white text-black font-medium rounded-xl px-6 py-3 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save className="w-4 h-4" /> Save Changes
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { Github, ArrowRight, Loader2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { githubService } from '@/services/github.service';
 
 export default function ConnectGithubPage() {
   const [username, setUsername] = useState('');
@@ -29,22 +30,25 @@ export default function ConnectGithubPage() {
     setError('');
 
     try {
-      const userRes = await fetch(`https://api.github.com/users/${username}`);
-      if (!userRes.ok) {
-        throw new Error(userRes.status === 404 ? 'User not found' : 'Failed to fetch user');
-      }
-      const userData = await userRes.json();
+      await githubService.connectAccount(username);
+      const profile = await githubService.getProfile();
+      
+      const githubUser = {
+        login: profile.githubLogin,
+        name: profile.name,
+        bio: profile.bio,
+        avatar_url: profile.avatarUrl,
+      };
 
-      const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
-      if (!reposRes.ok) {
-        throw new Error('Failed to fetch repositories');
-      }
-      const reposData = await reposRes.json();
+      const repos = profile.repositories.map((repo: any) => ({
+        id: repo.githubRepoId,
+        name: repo.name,
+        full_name: `${profile.githubLogin}/${repo.name}`,
+        language: repo.language,
+      }));
 
-      const filteredRepos = reposData.filter((r: any) => !r.fork && r.description).slice(0, 20);
-
-      setGithubUser(userData);
-      setRepos(filteredRepos);
+      setGithubUser(githubUser as any);
+      setRepos(repos);
       
       router.push('/');
     } catch (err: any) {

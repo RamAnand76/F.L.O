@@ -1,4 +1,10 @@
+
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { githubService } from '@/services/github.service';
+import { profileService } from '@/services/profile.service';
+import { portfolioService } from '@/services/portfolio.service';
+import { apiClient } from '@/lib/api-client';
 
 export interface GithubUser {
   login: string;
@@ -37,6 +43,7 @@ interface AppState {
   selectedTemplate: 'minimal' | 'developer' | 'creative';
   customData: {
     name: string;
+    description?: string;
     bio: string;
     email: string;
     location: string;
@@ -44,6 +51,7 @@ interface AppState {
     github: string;
     twitter: string;
     linkedin: string;
+    role?: string;
   };
   setIsAuthenticated: (val: boolean) => void;
   setGithubUser: (user: GithubUser | null) => void;
@@ -52,64 +60,166 @@ interface AppState {
   setSkills: (skills: string[]) => void;
   setSelectedTemplate: (template: 'minimal' | 'developer' | 'creative') => void;
   updateCustomData: (data: Partial<AppState['customData']>) => void;
+  enhanceWithAI: (field: string, prompt: string) => Promise<void>;
+  saveProfile: () => Promise<void>;
+  savePortfolioSettings: () => Promise<void>;
   disconnect: () => void;
+  fetchInitialData: () => Promise<void>;
 }
 
-export const useStore = create<AppState>((set) => ({
-  isAuthenticated: false,
-  githubUser: null,
-  repos: [],
-  selectedRepoIds: [],
-  skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'], // Default mock skills
-  selectedTemplate: 'minimal',
-  customData: {
-    name: '',
-    bio: '',
-    email: '',
-    location: '',
-    website: '',
-    github: '',
-    twitter: '',
-    linkedin: '',
-  },
-  setIsAuthenticated: (val) => set({ isAuthenticated: val }),
-  setGithubUser: (user) => set((state) => ({ 
-    githubUser: user,
-    customData: {
-      ...state.customData,
-      name: user?.name || user?.login || '',
-      bio: user?.bio || '',
-      email: user?.email || '',
-      location: user?.location || '',
-      website: user?.blog || '',
-      github: user?.html_url || '',
-      twitter: '',
-      linkedin: '',
+import { aiService } from '@/services/ai.service';
+
+export const useStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      isAuthenticated: false,
+      githubUser: null,
+      repos: [],
+      selectedRepoIds: [],
+      skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      selectedTemplate: 'minimal',
+      customData: {
+        name: '',
+        bio: '',
+        email: '',
+        location: '',
+        website: '',
+        github: '',
+        twitter: '',
+        linkedin: '',
+      },
+      setIsAuthenticated: (val) => set({ isAuthenticated: val }),
+      setGithubUser: (user) => set((state) => ({ 
+        githubUser: user,
+        customData: {
+          ...state.customData,
+          name: user?.name || user?.login || '',
+          bio: user?.bio || '',
+          email: user?.email || '',
+          location: user?.location || '',
+          website: user?.blog || '',
+          github: user?.html_url || '',
+        }
+      })),
+      setRepos: (repos) => set({ repos, selectedRepoIds: repos.slice(0, 6).map(r => r.id) }),
+      toggleRepoSelection: (id) => {
+        const { selectedRepoIds } = get();
+        const newSelected = selectedRepoIds.includes(id)
+          ? selectedRepoIds.filter(repoId => repoId !== id)
+          : [...selectedRepoIds, id];
+        set({ selectedRepoIds: newSelected });
+        get().savePortfolioSettings();
+      },
+      setSkills: (skills) => {
+        set({ skills });
+        get().savePortfolioSettings();
+      },
+      setSelectedTemplate: (template) => {
+        set({ selectedTemplate: template });
+        get().savePortfolioSettings();
+      },
+      updateCustomData: (data) => set((state) => ({ customData: { ...state.customData, ...data } })),
+      
+      enhanceWithAI: async (field, prompt) => {
+        const { customData } = get();
+        const currentValue = (customData as any)[field] || '';
+        try {
+          const response = await aiService.enhanceText(prompt, field, currentValue);
+          if (response.enhancedText) {
+            get().updateCustomData({ [field]: response.enhancedText });
+          }
+        } catch (error) {
+          console.error('AI enhancement failed:', error);
+          throw error;
+        }
+      },
+      
+      saveProfile: async () => {
+        const { customData } = get();
+        try {
+          await profileService.updateProfile(customData);
+        } catch (error) {
+          console.error('Failed to save profile:', error);
+        }
+      },
+
+      savePortfolioSettings: async () => {
+        const { selectedRepoIds, skills, selectedTemplate } = get();
+        try {
+          await portfolioService.updateRepos(selectedRepoIds);
+          await portfolioService.updateSkills(skills);
+          await portfolioService.updateTemplate(selectedTemplate);
+        } catch (error) {
+          console.error('Failed to save portfolio settings:', error);
+        }
+      },
+
+      fetchInitialData: async () => {
+        try {
+          const profile = await profileService.getProfile();
+          const portfolio = await portfolioService.getSettings();
+          const githubProfile = await githubService.getProfile();
+
+          set({
+            customData: {
+              name: profile.name || '',
+              bio: profile.bio || '',
+              email: profile.email || '',
+              location: profile.location || '',
+              website: profile.website || '',
+              github: profile.github || '',
+              twitter: profile.twitter || '',
+              linkedin: profile.linkedin || '',
+            },
+            selectedRepoIds: portfolio.selectedRepoIds || [],
+            skills: portfolio.skills || [],
+            selectedTemplate: portfolio.selectedTemplate || 'minimal',
+            githubUser: {
+               login: githubProfile.githubLogin,
+               name: githubProfile.name,
+               bio: githubProfile.bio,
+               avatar_url: githubProfile.avatarUrl,
+               public_repos: githubProfile.publicRepos,
+               // ... map other fields
+            } as any,
+            repos: githubProfile.repositories.map((r: any) => ({
+              id: r.githubRepoId,
+              name: r.name,
+              full_name: `${githubProfile.githubLogin}/${r.name}`,
+              language: r.language,
+              stargazers_count: r.stargazers_count || 0,
+              updated_at: r.updated_at || new Date().toISOString(),
+            })) as any,
+            isAuthenticated: true,
+          });
+        } catch (error) {
+          console.error('Failed to fetch initial data:', error);
+        }
+      },
+
+      disconnect: () => {
+        githubService.disconnect();
+        apiClient.clearToken();
+        set({ 
+          githubUser: null, 
+          repos: [], 
+          selectedRepoIds: [], 
+          customData: { 
+            name: '', 
+            bio: '', 
+            email: '', 
+            location: '', 
+            website: '', 
+            github: '', 
+            twitter: '', 
+            linkedin: '' 
+          }, 
+          isAuthenticated: false 
+        });
+      },
+    }),
+    {
+      name: 'flo-storage',
     }
-  })),
-  setRepos: (repos) => set({ repos, selectedRepoIds: repos.slice(0, 6).map(r => r.id) }), // Select first 6 by default
-  toggleRepoSelection: (id) => set((state) => ({
-    selectedRepoIds: state.selectedRepoIds.includes(id)
-      ? state.selectedRepoIds.filter(repoId => repoId !== id)
-      : [...state.selectedRepoIds, id]
-  })),
-  setSkills: (skills) => set({ skills }),
-  setSelectedTemplate: (template) => set({ selectedTemplate: template }),
-  updateCustomData: (data) => set((state) => ({ customData: { ...state.customData, ...data } })),
-  disconnect: () => set({ 
-    githubUser: null, 
-    repos: [], 
-    selectedRepoIds: [], 
-    customData: { 
-      name: '', 
-      bio: '', 
-      email: '', 
-      location: '', 
-      website: '', 
-      github: '', 
-      twitter: '', 
-      linkedin: '' 
-    }, 
-    isAuthenticated: false 
-  }),
-}));
+  )
+);

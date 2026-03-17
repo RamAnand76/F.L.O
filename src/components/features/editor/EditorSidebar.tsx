@@ -6,6 +6,7 @@ import {
   Type, Settings, Trash2, X, Send, Paperclip
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useStore } from '@/store/useStore';
 
 interface EditorSidebarProps {
   activeTab: 'editor' | 'templates';
@@ -138,9 +139,30 @@ export function EditorSidebar({
                     placeholder="Ask AI to edit..."
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        try {
+                          // Default to bio for now, or detect field from prompt
+                          await useStore.getState().enhanceWithAI('bio', chatInput);
+                          setChatInput('');
+                        } catch (err) {
+                          alert('AI enhancement failed');
+                        }
+                      }
+                    }}
                     className="w-full bg-black/20 border border-indigo-500/30 rounded-lg pl-3 pr-8 py-2 text-xs text-white placeholder:text-indigo-300/30 focus:outline-none focus:border-indigo-500/50"
                   />
-                  <button className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-300">
+                  <button 
+                    onClick={async () => {
+                      try {
+                        await useStore.getState().enhanceWithAI('bio', chatInput);
+                        setChatInput('');
+                      } catch (err) {
+                        alert('AI enhancement failed');
+                      }
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-300"
+                  >
                     <Send className="w-3 h-3" />
                   </button>
                 </div>

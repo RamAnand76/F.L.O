@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { ArrowLeft, ArrowRight, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { authService } from '@/services/auth.service';
 import { SpeedometerLoader } from '@/components/ui/SpeedometerLoader';
 
 export default function AuthPage() {
@@ -17,9 +18,22 @@ export default function AuthPage() {
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    try {
+      if (isLogin) {
+        await authService.login({ email, password });
+      } else {
+        await authService.register({ name, email, password });
+      }
+      // handleLoadingComplete will be called by the SpeedometerLoader or manually
+      // Since SpeedometerLoader has an onComplete, we can just let it finish its animation
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      setIsLoading(false);
+      alert(error.message || 'Authentication failed');
+    }
   };
 
   const handleLoadingComplete = () => {

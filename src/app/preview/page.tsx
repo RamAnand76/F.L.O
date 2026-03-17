@@ -9,6 +9,8 @@ import {
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { deployService } from '@/services/deploy.service';
+import { Loader2 } from 'lucide-react';
 
 // Components
 import { EditorSidebar } from '@/components/features/editor/EditorSidebar';
@@ -24,6 +26,9 @@ export default function PreviewEditorPage() {
   const [showShareToast, setShowShareToast] = useState(false);
   const [isEditorCollapsed, setIsEditorCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [repoName, setRepoName] = useState('my-portfolio-2024');
+  const [customDomain, setCustomDomain] = useState('');
   
   React.useEffect(() => {
     if (isFullscreen) {
@@ -144,7 +149,8 @@ export default function PreviewEditorPage() {
                     <label className="text-xs text-zinc-400 ml-1">Repository Name</label>
                     <input 
                       type="text" 
-                      defaultValue="my-portfolio-2024"
+                      value={repoName}
+                      onChange={(e) => setRepoName(e.target.value)}
                       className="w-full bg-[#2a2a2a] border border-white/5 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                     />
                   </div>
@@ -154,20 +160,32 @@ export default function PreviewEditorPage() {
                     <input 
                       type="text" 
                       placeholder="portfolio.yourname.com"
+                      value={customDomain}
+                      onChange={(e) => setCustomDomain(e.target.value)}
                       className="w-full bg-[#2a2a2a] border border-white/5 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                     />
                   </div>
                 </div>
 
                 <button 
-                  onClick={() => {
-                    setShowExportModal(false);
-                    setShowShareToast(true);
-                    setTimeout(() => setShowShareToast(false), 5000);
+                  disabled={isDeploying}
+                  onClick={async () => {
+                    setIsDeploying(true);
+                    try {
+                      await deployService.deployToGitHubPages(repoName, customDomain);
+                      setShowExportModal(false);
+                      setShowShareToast(true);
+                      setTimeout(() => setShowShareToast(false), 5000);
+                    } catch (error) {
+                      alert('Deployment failed');
+                    } finally {
+                      setIsDeploying(false);
+                    }
                   }}
-                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <Sparkles className="w-4 h-4" /> Deploy to GitHub
+                  {isDeploying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} 
+                  {isDeploying ? 'Deploying...' : 'Deploy to GitHub'}
                 </button>
               </div>
             </motion.div>

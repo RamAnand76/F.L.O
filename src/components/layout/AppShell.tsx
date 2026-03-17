@@ -13,6 +13,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const githubUser = useStore((state) => state.githubUser);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
 
+  const fetchInitialData = useStore((state) => state.fetchInitialData);
+
+  useEffect(() => {
+    if (isAuthenticated && githubUser) {
+      fetchInitialData();
+    }
+  }, [isAuthenticated, githubUser, fetchInitialData]);
+
   useEffect(() => {
     if (!isAuthenticated && pathname !== '/auth') {
       router.push('/auth');
