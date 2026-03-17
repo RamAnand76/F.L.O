@@ -16,12 +16,22 @@ export default function ConnectGithubPage() {
   const setGithubUser = useStore((state) => state.setGithubUser);
   const setRepos = useStore((state) => state.setRepos);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
+  const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth');
+    // Check BOTH the Zustand flag AND the actual token
+    const token = apiClient.getToken();
+
+    if (!isAuthenticated || !token) {
+      // If Zustand thinks we're logged in but there's no token, fix the stale state
+      if (isAuthenticated && !token) {
+        console.warn('[Connect] Stale auth state detected — isAuthenticated=true but no token. Resetting.');
+        setIsAuthenticated(false);
+      }
+      // Hard redirect to /auth (window.location is more reliable than router.push here)
+      window.location.href = '/auth';
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, setIsAuthenticated]);
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,17 +40,8 @@ export default function ConnectGithubPage() {
     setLoading(true);
     setError('');
 
-    // Pre-flight check: verify we actually have a token before calling a protected endpoint
-    const token = apiClient.getToken();
-    if (!token) {
-      setError('You must log in first. Redirecting...');
-      setLoading(false);
-      setTimeout(() => router.push('/auth'), 1500);
-      return;
-    }
-
     try {
-      console.log('[Connect] Calling /github/connect with token:', token.substring(0, 20) + '...');
+      console.log('[Connect] Calling /github/connect...');
       await githubService.connectAccount(username);
       const profile = await githubService.getProfile();
       
@@ -64,18 +65,15 @@ export default function ConnectGithubPage() {
       router.push('/');
     } catch (err: any) {
       console.error('[Connect] Error:', err);
-      if (err.message === 'Unauthorized') {
-        setError('Session expired. Please log in again.');
-        setTimeout(() => router.push('/auth'), 1500);
-      } else {
-        setError(err.message || 'Failed to connect GitHub account.');
-      }
+      setError(err.message || 'Failed to connect GitHub account.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isAuthenticated) return null;
+  // Don't render the page if there's no valid auth
+  const token = apiClient.getToken();
+  if (!isAuthenticated || !token) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white relative overflow-hidden">

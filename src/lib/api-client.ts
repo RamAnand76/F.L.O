@@ -88,14 +88,20 @@ class ApiClient {
       throw new Error('Unauthorized');
     }
 
-    const data = await response.json();
+    let data: any;
+    try {
+      data = await response.json();
+    } catch {
+      data = { message: `Request failed with status ${response.status}` };
+    }
 
     if (!response.ok) {
-      throw {
-        statusCode: response.status,
-        error: data.error || 'Unknown Error',
-        message: data.message || 'Something went wrong',
-      };
+      const errorMessage = data.message || data.error || `Request failed with status ${response.status}`;
+      console.error(`[ApiClient] Error ${response.status} from ${endpoint}:`, errorMessage);
+      const err = new Error(errorMessage);
+      (err as any).statusCode = response.status;
+      (err as any).data = data;
+      throw err;
     }
 
     return data as T;

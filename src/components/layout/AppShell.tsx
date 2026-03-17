@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { TopNav } from '@/components/layout/TopNav';
 import { Dock } from '@/components/layout/Dock';
 import { useStore } from '@/store/useStore';
+import { apiClient } from '@/lib/api-client';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,12 +15,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useStore((state) => state.isAuthenticated);
 
   const fetchInitialData = useStore((state) => state.fetchInitialData);
+  const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
 
+  // On mount: validate that we have an actual token, not just a stale Zustand flag
   useEffect(() => {
-    if (isAuthenticated && githubUser) {
+    if (typeof window === 'undefined') return;
+    
+    const token = apiClient.getToken();
+
+    if (isAuthenticated && !token) {
+      // Stale state: Zustand says logged in, but JWT is gone
+      console.warn('[AppShell] Stale auth state detected. Resetting.');
+      setIsAuthenticated(false);
+      return;
+    }
+
+    if (isAuthenticated && githubUser && token) {
       fetchInitialData();
     }
-  }, [isAuthenticated, githubUser, fetchInitialData]);
+  }, [isAuthenticated, githubUser, fetchInitialData, setIsAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated && pathname !== '/auth') {
