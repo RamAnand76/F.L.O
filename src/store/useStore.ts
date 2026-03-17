@@ -137,7 +137,23 @@ export const useStore = create<AppState>()(
       saveProfile: async () => {
         const { customData } = get();
         try {
-          await profileService.updateProfile(customData);
+          const response = await profileService.updateProfile(customData);
+          // Map back prefixed fields from Prisma model response if needed
+          if (response.customName !== undefined) {
+             set((state) => ({
+               customData: {
+                 ...state.customData,
+                 name: response.customName || '',
+                 bio: response.customBio || '',
+                 email: response.customEmail || '',
+                 location: response.customLocation || '',
+                 website: response.customWebsite || '',
+                 github: response.customGithub || '',
+                 twitter: response.customTwitter || '',
+                 linkedin: response.customLinkedin || '',
+               }
+             }));
+          }
         } catch (error) {
           console.error('Failed to save profile:', error);
         }
@@ -156,20 +172,20 @@ export const useStore = create<AppState>()(
 
       fetchInitialData: async () => {
         try {
-          const profile = await profileService.getProfile();
+          // GET /portfolio returns the most complete state now including custom fields
           const portfolio = await portfolioService.getSettings();
           const githubProfile = await githubService.getProfile();
 
           set({
             customData: {
-              name: profile.name || '',
-              bio: profile.bio || '',
-              email: profile.email || '',
-              location: profile.location || '',
-              website: profile.website || '',
-              github: profile.github || '',
-              twitter: profile.twitter || '',
-              linkedin: profile.linkedin || '',
+              name: portfolio.customName || portfolio.name || '',
+              bio: portfolio.customBio || portfolio.bio || '',
+              email: portfolio.customEmail || portfolio.email || '',
+              location: portfolio.customLocation || portfolio.location || '',
+              website: portfolio.customWebsite || portfolio.website || '',
+              github: portfolio.customGithub || portfolio.github || '',
+              twitter: portfolio.customTwitter || portfolio.twitter || '',
+              linkedin: portfolio.customLinkedin || portfolio.linkedin || '',
             },
             selectedRepoIds: portfolio.selectedRepoIds || [],
             skills: portfolio.skills || [],
@@ -180,7 +196,6 @@ export const useStore = create<AppState>()(
                bio: githubProfile.bio,
                avatar_url: githubProfile.avatarUrl,
                public_repos: githubProfile.publicRepos,
-               // ... map other fields
             } as any,
             repos: githubProfile.repositories.map((r: any) => ({
               id: r.githubRepoId,

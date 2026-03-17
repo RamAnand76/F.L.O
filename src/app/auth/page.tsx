@@ -4,14 +4,16 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { ArrowLeft, ArrowRight, HelpCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, HelpCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authService } from '@/services/auth.service';
+import { apiClient } from '@/lib/api-client';
 import { SpeedometerLoader } from '@/components/ui/SpeedometerLoader';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,19 +22,30 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
+      let response;
       if (isLogin) {
-        await authService.login({ email, password });
+        response = await authService.login({ email, password });
       } else {
-        await authService.register({ name, email, password });
+        response = await authService.register({ name, email, password });
       }
-      // handleLoadingComplete will be called by the SpeedometerLoader or manually
-      // Since SpeedometerLoader has an onComplete, we can just let it finish its animation
+
+      // Verify the token was actually saved before proceeding
+      const savedToken = apiClient.getToken();
+      if (!savedToken) {
+        throw new Error('Login succeeded but no access token was returned. Please try again.');
+      }
+
+      console.log('[Auth] Token saved successfully, starting loader animation...');
+
+      // Token is confirmed saved. NOW show the success animation.
+      setShowLoader(true);
     } catch (error: any) {
       console.error('Auth error:', error);
-      setIsLoading(false);
       alert(error.message || 'Authentication failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -41,7 +54,7 @@ export default function AuthPage() {
     router.push('/connect');
   };
 
-  if (isLoading) {
+  if (showLoader) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
         <motion.div
@@ -170,12 +183,19 @@ export default function AuthPage() {
 
                 <button 
                   type="submit"
-                  className="w-full mt-2 bg-gradient-to-r from-zinc-300 to-zinc-400 hover:from-white hover:to-zinc-200 text-black rounded-2xl px-5 py-4 font-medium flex items-center justify-center relative transition-all group"
+                  disabled={isSubmitting}
+                  className="w-full mt-2 bg-gradient-to-r from-zinc-300 to-zinc-400 hover:from-white hover:to-zinc-200 text-black rounded-2xl px-5 py-4 font-medium flex items-center justify-center relative transition-all group disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <span>{isLogin ? 'Log In' : 'Start Creating'}</span>
-                  <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors absolute right-4">
-                    <ArrowRight className="w-4 h-4 text-black" />
-                  </div>
+                  {isSubmitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <span>{isLogin ? 'Log In' : 'Start Creating'}</span>
+                      <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors absolute right-4">
+                        <ArrowRight className="w-4 h-4 text-black" />
+                      </div>
+                    </>
+                  )}
                 </button>
               </form>
 

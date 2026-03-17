@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Github, ArrowRight, Loader2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { githubService } from '@/services/github.service';
+import { apiClient } from '@/lib/api-client';
 
 export default function ConnectGithubPage() {
   const [username, setUsername] = useState('');
@@ -29,7 +30,17 @@ export default function ConnectGithubPage() {
     setLoading(true);
     setError('');
 
+    // Pre-flight check: verify we actually have a token before calling a protected endpoint
+    const token = apiClient.getToken();
+    if (!token) {
+      setError('You must log in first. Redirecting...');
+      setLoading(false);
+      setTimeout(() => router.push('/auth'), 1500);
+      return;
+    }
+
     try {
+      console.log('[Connect] Calling /github/connect with token:', token.substring(0, 20) + '...');
       await githubService.connectAccount(username);
       const profile = await githubService.getProfile();
       
@@ -52,7 +63,13 @@ export default function ConnectGithubPage() {
       
       router.push('/');
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      console.error('[Connect] Error:', err);
+      if (err.message === 'Unauthorized') {
+        setError('Session expired. Please log in again.');
+        setTimeout(() => router.push('/auth'), 1500);
+      } else {
+        setError(err.message || 'Failed to connect GitHub account.');
+      }
     } finally {
       setLoading(false);
     }

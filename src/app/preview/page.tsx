@@ -29,6 +29,7 @@ export default function PreviewEditorPage() {
   const [isDeploying, setIsDeploying] = useState(false);
   const [repoName, setRepoName] = useState('my-portfolio-2024');
   const [customDomain, setCustomDomain] = useState('');
+  const [deployedUrl, setDeployedUrl] = useState<string | null>(null);
   
   React.useEffect(() => {
     if (isFullscreen) {
@@ -172,10 +173,11 @@ export default function PreviewEditorPage() {
                   onClick={async () => {
                     setIsDeploying(true);
                     try {
-                      await deployService.deployToGitHubPages(repoName, customDomain);
+                      const res = await deployService.deployToGitHubPages(repoName, customDomain);
+                      setDeployedUrl(res.deployedUrl || null);
                       setShowExportModal(false);
                       setShowShareToast(true);
-                      setTimeout(() => setShowShareToast(false), 5000);
+                      setTimeout(() => setShowShareToast(false), 8000);
                     } catch (error) {
                       alert('Deployment failed');
                     } finally {
@@ -204,7 +206,13 @@ export default function PreviewEditorPage() {
             </div>
             <div>
               <h4 className="text-sm font-bold text-white">Deployment Started!</h4>
-              <p className="text-xs text-zinc-400">Your site will be live in a few minutes.</p>
+              {deployedUrl ? (
+                <p className="text-xs text-zinc-400">
+                  Your site will be live at: <a href={deployedUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">{deployedUrl}</a>
+                </p>
+              ) : (
+                <p className="text-xs text-zinc-400">Your site will be live in a few minutes.</p>
+              )}
             </div>
             <button onClick={() => setShowShareToast(false)} className="ml-4 text-zinc-500 hover:text-white">
               <X className="w-4 h-4" />
