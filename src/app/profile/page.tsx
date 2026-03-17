@@ -41,11 +41,13 @@ export default function ProfilePage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <img 
-            src={githubUser.avatar_url} 
-            alt={githubUser.login} 
-            className="w-full h-full object-cover rounded-full border-4 border-zinc-900 shadow-2xl"
-          />
+          {githubUser.avatar_url && (
+            <img 
+              src={githubUser.avatar_url} 
+              alt={githubUser.login} 
+              className="w-full h-full object-cover rounded-full border-4 border-zinc-900 shadow-2xl"
+            />
+          )}
           <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-white/10" />
         </motion.div>
         <motion.h1 

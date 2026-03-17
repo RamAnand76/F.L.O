@@ -86,7 +86,7 @@ export function ActivityHeatmap({
       </div>
       
       <div className="flex justify-between text-[10px] text-zinc-500 mt-3 pl-8">
-        {Array.from(new Set(heatmapDays.map(d => d.toLocaleString('default', { month: 'short' })))).map(m => (
+        {Array.from(new Set(heatmapDays.filter(Boolean).map(d => d.toLocaleString('default', { month: 'short' })))).map(m => (
           <span key={m}>{m}</span>
         ))}
       </div>

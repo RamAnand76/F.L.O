@@ -12,7 +12,9 @@ export function DeveloperTemplate() {
     <div className="min-h-full bg-[#0d1117] text-[#c9d1d9] font-mono p-8 md:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="border-b border-[#30363d] pb-10 mb-10 flex flex-col md:flex-row items-start md:items-center gap-8">
-          <img src={githubUser?.avatar_url} alt="Avatar" className="w-32 h-32 rounded-full border-4 border-[#30363d]" />
+          {githubUser?.avatar_url && (
+            <img src={githubUser.avatar_url} alt="Avatar" className="w-32 h-32 rounded-full border-4 border-[#30363d]" />
+          )}
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">~/{customData.name.toLowerCase().replace(/\s+/g, '-')}</h1>
             <p className="text-[#8b949e] mb-4 text-lg">{customData.bio}</p>

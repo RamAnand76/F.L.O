@@ -25,7 +25,9 @@ export function CreativeTemplate() {
 
         {/* Profile Bento */}
         <div className="md:col-span-4 bg-white rounded-[2rem] p-8 flex flex-col items-center justify-center text-center shadow-sm">
-          <img src={githubUser?.avatar_url} alt="Avatar" className="w-32 h-32 rounded-full mb-6 shadow-lg" />
+          {githubUser?.avatar_url && (
+            <img src={githubUser.avatar_url} alt="Avatar" className="w-32 h-32 rounded-full mb-6 shadow-lg" />
+          )}
           <div className="flex flex-col gap-3 w-full">
             {customData.email && (
               <a href={`mailto:${customData.email}`} className="flex items-center justify-center gap-2 bg-zinc-100 hover:bg-zinc-200 py-3 rounded-xl font-medium transition-colors">

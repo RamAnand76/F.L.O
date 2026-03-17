@@ -162,7 +162,7 @@ export default function DashboardPage() {
           <div className="relative z-10">
             <div className="flex items-baseline gap-2 mb-1">
               <h3 className="text-6xl font-bold tracking-tighter text-white">
-                {githubUser.public_repos.toLocaleString()}
+                {(githubUser.public_repos || 0).toLocaleString()}
               </h3>
               <span className="text-zinc-500 text-sm font-medium">Total</span>
             </div>
@@ -312,7 +312,9 @@ export default function DashboardPage() {
               <p className="text-xs text-zinc-500 mb-3 truncate">Added new installation instructions...</p>
               <div className="flex items-center justify-between">
                 <div className="flex -space-x-2">
-                  <img src={githubUser.avatar_url} className="w-6 h-6 rounded-full border-2 border-[#18181b]" alt="" />
+                  {githubUser.avatar_url && (
+                    <img src={githubUser.avatar_url} className="w-6 h-6 rounded-full border-2 border-[#18181b]" alt="" />
+                  )}
                   <div className="w-6 h-6 rounded-full border-2 border-[#18181b] bg-zinc-800 flex items-center justify-center text-[10px]">+2</div>
                 </div>
                 <span className="text-xs text-zinc-500 flex items-center gap-1"><RefreshCw className="w-3 h-3" /> 09:00 AM</span>
@@ -332,7 +334,7 @@ export default function DashboardPage() {
           <StatCard 
             icon={<Users className="w-4 h-4 text-zinc-300" />}
             label="Followers"
-            value={githubUser.followers.toLocaleString()}
+            value={(githubUser.followers || 0).toLocaleString()}
             trend="+12.4%"
             trendUp={true}
             delay={0.5}
@@ -340,7 +342,7 @@ export default function DashboardPage() {
           <StatCard 
             icon={<Star className="w-4 h-4 text-zinc-300" />}
             label="Total Stars"
-            value={totalStars.toLocaleString()}
+            value={(totalStars || 0).toLocaleString()}
             trend="+5.2%"
             trendUp={true}
             delay={0.6}

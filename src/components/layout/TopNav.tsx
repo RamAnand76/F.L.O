@@ -23,7 +23,9 @@ export function TopNav() {
       </button>
       <div className="flex items-center gap-2 sm:gap-3 bg-[#18181b]/80 backdrop-blur-md border border-white/10 rounded-full pl-1 pr-3 sm:pr-4 py-1 shadow-lg cursor-pointer hover:bg-[#27272a] transition-all group">
         <div className="relative">
-          <img src={githubUser?.avatar_url} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 group-hover:border-white/30 transition-colors" alt="Profile" />
+          {githubUser?.avatar_url && (
+            <img src={githubUser.avatar_url} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 group-hover:border-white/30 transition-colors" alt="Profile" />
+          )}
           <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#18181b]" />
         </div>
         <div className="flex flex-col items-start leading-none hidden sm:flex">
