@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
+import { useToast } from '@/components/ui/Toast';
 
 interface EditorSidebarProps {
   activeTab: 'editor' | 'templates';
@@ -39,6 +40,7 @@ export function EditorSidebar({
   chatInput,
   setChatInput
 }: EditorSidebarProps) {
+  const { toast } = useToast();
   return (
     <motion.div 
       animate={{ 
@@ -146,7 +148,7 @@ export function EditorSidebar({
                           await useStore.getState().enhanceWithAI('bio', chatInput);
                           setChatInput('');
                         } catch (err) {
-                          alert('AI enhancement failed');
+                          toast.error('AI enhancement failed');
                         }
                       }
                     }}
@@ -158,7 +160,7 @@ export function EditorSidebar({
                         await useStore.getState().enhanceWithAI('bio', chatInput);
                         setChatInput('');
                       } catch (err) {
-                        alert('AI enhancement failed');
+                        toast.error('AI enhancement failed');
                       }
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-300"

@@ -7,28 +7,27 @@ import { Github, ArrowRight, Loader2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { githubService } from '@/services/github.service';
 import { apiClient } from '@/lib/api-client';
+import { useToast } from '@/components/ui/Toast';
 
 export default function ConnectGithubPage() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { toast } = useToast();
   const setGithubUser = useStore((state) => state.setGithubUser);
   const setRepos = useStore((state) => state.setRepos);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
 
   useEffect(() => {
-    // Check BOTH the Zustand flag AND the actual token
     const token = apiClient.getToken();
 
     if (!isAuthenticated || !token) {
-      // If Zustand thinks we're logged in but there's no token, fix the stale state
       if (isAuthenticated && !token) {
-        console.warn('[Connect] Stale auth state detected — isAuthenticated=true but no token. Resetting.');
+        console.warn('[Connect] Stale auth state detected. Resetting.');
         setIsAuthenticated(false);
       }
-      // Hard redirect to /auth (window.location is more reliable than router.push here)
       window.location.href = '/auth';
     }
   }, [isAuthenticated, setIsAuthenticated]);
@@ -43,29 +42,50 @@ export default function ConnectGithubPage() {
     try {
       console.log('[Connect] Calling /github/connect...');
       await githubService.connectAccount(username);
-      const profile = await githubService.getProfile();
-      
+
+      let profile: any;
+      try {
+        profile = await githubService.getProfile();
+      } catch (profileErr: any) {
+        console.error('[Connect] Failed to fetch profile after connect:', profileErr);
+        // Connect succeeded but profile fetch failed — still proceed with what we have
+        toast.warning('Connected, but could not load full profile. You can refresh later.');
+        setGithubUser({ login: username, name: username } as any);
+        setRepos([]);
+        router.push('/');
+        return;
+      }
+
       const githubUser = {
-        login: profile.githubLogin,
-        name: profile.name,
-        bio: profile.bio,
-        avatar_url: profile.avatarUrl,
+        login: profile.githubLogin || username,
+        name: profile.name || username,
+        bio: profile.bio || '',
+        avatar_url: profile.avatarUrl || '',
       };
 
-      const repos = profile.repositories.map((repo: any) => ({
-        id: repo.githubRepoId,
-        name: repo.name,
-        full_name: `${profile.githubLogin}/${repo.name}`,
-        language: repo.language,
+      const repositories = profile.repositories || [];
+      const repos = repositories.map((repo: any) => ({
+        id: repo.githubRepoId || repo.id || 0,
+        name: repo.name || 'unknown',
+        full_name: `${profile.githubLogin || username}/${repo.name || 'unknown'}`,
+        language: repo.language || null,
+        description: repo.description || null,
+        stargazers_count: repo.stargazers_count || repo.stars || 0,
+        updated_at: repo.updated_at || repo.updatedAt || new Date().toISOString(),
+        html_url: repo.html_url || '',
+        homepage: repo.homepage || null,
       }));
 
       setGithubUser(githubUser as any);
       setRepos(repos);
-      
+
+      toast.success(`Connected as ${githubUser.login}! Found ${repos.length} repositories.`);
       router.push('/');
     } catch (err: any) {
       console.error('[Connect] Error:', err);
-      setError(err.message || 'Failed to connect GitHub account.');
+      const message = err.message || 'Failed to connect GitHub account.';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -140,3 +160,4 @@ export default function ConnectGithubPage() {
     </div>
   );
 }
+

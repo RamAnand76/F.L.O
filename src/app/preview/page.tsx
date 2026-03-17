@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import { deployService } from '@/services/deploy.service';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 // Components
 import { EditorSidebar } from '@/components/features/editor/EditorSidebar';
@@ -18,6 +19,7 @@ import { BrowserChrome } from '@/components/features/editor/BrowserChrome';
 import { PreviewFrame } from '@/components/features/editor/PreviewFrame';
 
 export default function PreviewEditorPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'editor' | 'templates'>('editor');
   const [deviceMode, setDeviceMode] = useState<'desktop' | 'mobile'>('desktop');
   const [chatInput, setChatInput] = useState('');
@@ -178,8 +180,8 @@ export default function PreviewEditorPage() {
                       setShowExportModal(false);
                       setShowShareToast(true);
                       setTimeout(() => setShowShareToast(false), 8000);
-                    } catch (error) {
-                      alert('Deployment failed');
+                    } catch (error: any) {
+                      toast.error(error.message || 'Deployment failed. Please try again.');
                     } finally {
                       setIsDeploying(false);
                     }

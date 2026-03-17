@@ -4,25 +4,29 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { ArrowLeft, ArrowRight, HelpCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, HelpCircle, Loader2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authService } from '@/services/auth.service';
 import { apiClient } from '@/lib/api-client';
 import { SpeedometerLoader } from '@/components/ui/SpeedometerLoader';
+import { useToast } from '@/components/ui/Toast';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const [error, setError] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
     try {
       let response;
       if (isLogin) {
@@ -38,12 +42,15 @@ export default function AuthPage() {
       }
 
       console.log('[Auth] Token saved successfully, starting loader animation...');
+      toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
 
       // Token is confirmed saved. NOW show the success animation.
       setShowLoader(true);
     } catch (error: any) {
       console.error('Auth error:', error);
-      alert(error.message || 'Authentication failed');
+      const message = error.message || 'Authentication failed. Please try again.';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -197,6 +204,22 @@ export default function AuthPage() {
                     </>
                   )}
                 </button>
+
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-xs mt-1">
+                        <XCircle className="w-4 h-4 shrink-0 text-red-400" />
+                        <span>{error}</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </form>
 
               <div className="mt-8 text-[11px] text-zinc-500 leading-relaxed max-w-[400px]">

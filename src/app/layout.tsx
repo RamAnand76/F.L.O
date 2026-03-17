@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { AppShell } from "@/components/layout/AppShell";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export default function RootLayout({
   children,
@@ -27,9 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="antialiased">
-        <AppShell>
-          {children}
-        </AppShell>
+        <ToastProvider>
+          <AppShell>
+            {children}
+          </AppShell>
+        </ToastProvider>
       </body>
     </html>
   );

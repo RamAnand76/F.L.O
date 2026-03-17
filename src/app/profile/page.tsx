@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { User, Mail, MapPin, AlignLeft, Save, Loader2, Sparkles } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 export default function ProfilePage() {
   const githubUser = useStore((state) => state.githubUser);
@@ -11,6 +12,7 @@ export default function ProfilePage() {
   const updateCustomData = useStore((state) => state.updateCustomData);
   const saveProfile = useStore((state) => state.saveProfile);
   const [isSaving, setIsSaving] = React.useState(false);
+  const { toast } = useToast();
 
   if (!githubUser) return null;
 
@@ -23,9 +25,9 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       await saveProfile();
-      alert('Profile saved successfully!');
+      toast.success('Profile saved successfully!');
     } catch (error) {
-      alert('Failed to save profile');
+      toast.error('Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -126,8 +128,9 @@ export default function ProfilePage() {
                   if (userPrompt) {
                     try {
                       await useStore.getState().enhanceWithAI('bio', userPrompt);
+                      toast.success('Bio enhanced with AI!');
                     } catch (error) {
-                      alert('AI enhancement failed');
+                      toast.error('AI enhancement failed. Please try again.');
                     }
                   }
                 }}
