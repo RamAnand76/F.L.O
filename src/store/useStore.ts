@@ -101,7 +101,7 @@ export const useStore = create<AppState>()(
           github: user?.html_url || '',
         }
       })),
-      setRepos: (repos) => set({ repos, selectedRepoIds: repos.slice(0, 6).map(r => r.id) }),
+      setRepos: (repos) => set({ repos: repos || [], selectedRepoIds: (repos || []).slice(0, 6).map(r => r.id) }),
       toggleRepoSelection: (id) => {
         const { selectedRepoIds } = get();
         const newSelected = selectedRepoIds.includes(id)
@@ -175,6 +175,8 @@ export const useStore = create<AppState>()(
           // GET /portfolio returns the most complete state now including custom fields
           const portfolio = await portfolioService.getSettings();
           const githubProfile = await githubService.getProfile();
+          if (!portfolio) throw new Error('Portfolio settings not found');
+          if (!githubProfile) throw new Error('GitHub profile not found');
 
           set({
             customData: {
@@ -197,7 +199,7 @@ export const useStore = create<AppState>()(
                avatar_url: githubProfile.avatarUrl,
                public_repos: githubProfile.publicRepos,
             } as any,
-            repos: githubProfile.repositories.map((r: any) => ({
+            repos: (githubProfile.repositories || []).map((r: any) => ({
               id: r.githubRepoId,
               name: r.name,
               full_name: `${githubProfile.githubLogin}/${r.name}`,

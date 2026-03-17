@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
   // Early return if no user is connected - in Next.js we might want to redirect
   // but for now keeping it consistent with the original logic.
-  if (!githubUser) return null;
+
 
   const totalStars = repos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
 
@@ -57,7 +57,7 @@ export default function DashboardPage() {
   const activityMap = useMemo(() => {
     const map = new Map<string, number>();
     const today = new Date();
-    let seed = githubUser.login.charCodeAt(0) || 1;
+    let seed = githubUser?.login?.charCodeAt(0) || 1;
     const random = () => {
       const x = Math.sin(seed++) * 10000;
       return x - Math.floor(x);
@@ -71,7 +71,7 @@ export default function DashboardPage() {
       map.set(d.toDateString(), level);
     }
     return map;
-  }, [githubUser.login]);
+  }, [githubUser?.login]);
 
   // Calculate the 14 weeks (98 days) ending at the end of viewDate's month
   const heatmapDays = useMemo(() => {
@@ -115,6 +115,8 @@ export default function DashboardPage() {
   const handleNextMonth = () => {
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
   };
+
+  if (!githubUser) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6 pb-12 font-sans text-white">
