@@ -62,7 +62,6 @@ interface AppState {
   updateCustomData: (data: Partial<AppState['customData']>) => void;
   enhanceWithAI: (field: string, prompt: string) => Promise<void>;
   saveProfile: () => Promise<void>;
-  savePortfolioSettings: () => Promise<void>;
   disconnect: () => void;
   fetchInitialData: () => Promise<void>;
   hasFetchedInitialData: boolean;
@@ -103,22 +102,26 @@ export const useStore = create<AppState>()(
           github: user?.html_url || '',
         }
       })),
-      setRepos: (repos) => set({ repos: repos || [], selectedRepoIds: (repos || []).slice(0, 6).map(r => r.id) }),
+      setRepos: (repos) => {
+        const newSelected = (repos || []).slice(0, 6).map((r: any) => r.id);
+        set({ repos: repos || [], selectedRepoIds: newSelected });
+        portfolioService.updateRepos(newSelected).catch(err => console.error('Failed to init repos:', err));
+      },
       toggleRepoSelection: (id) => {
         const { selectedRepoIds } = get();
         const newSelected = selectedRepoIds.includes(id)
           ? selectedRepoIds.filter(repoId => repoId !== id)
           : [...selectedRepoIds, id];
         set({ selectedRepoIds: newSelected });
-        get().savePortfolioSettings();
+        portfolioService.updateRepos(newSelected).catch(err => console.error('Failed to update repos:', err));
       },
       setSkills: (skills) => {
         set({ skills });
-        get().savePortfolioSettings();
+        portfolioService.updateSkills(skills).catch(err => console.error('Failed to update skills:', err));
       },
       setSelectedTemplate: (template) => {
         set({ selectedTemplate: template });
-        get().savePortfolioSettings();
+        portfolioService.updateTemplate(template).catch(err => console.error('Failed to update template:', err));
       },
       updateCustomData: (data) => set((state) => ({ customData: { ...state.customData, ...data } })),
       
@@ -161,17 +164,6 @@ export const useStore = create<AppState>()(
         }
       },
 
-      savePortfolioSettings: async () => {
-        const { selectedRepoIds, skills, selectedTemplate } = get();
-        try {
-          await portfolioService.updateRepos(selectedRepoIds);
-          await portfolioService.updateSkills(skills);
-          await portfolioService.updateTemplate(selectedTemplate);
-        } catch (error) {
-          console.error('Failed to save portfolio settings:', error);
-        }
-      },
-
       fetchInitialData: async () => {
         // Use a dedicated flag rather than githubUser to prevent duplicate fetches
         const { hasFetchedInitialData } = get();
@@ -198,7 +190,9 @@ export const useStore = create<AppState>()(
               twitter: portfolio.customTwitter || portfolio.twitter || '',
               linkedin: portfolio.customLinkedin || portfolio.linkedin || '',
             },
-            selectedRepoIds: portfolio.selectedRepoIds || [],
+            selectedRepoIds: (portfolio.selectedRepoIds && portfolio.selectedRepoIds.length > 0) 
+              ? portfolio.selectedRepoIds 
+              : (ghRepos || []).slice(0, 6).map((r: any) => r.id),
             skills: portfolio.skills || [],
             selectedTemplate: portfolio.selectedTemplate || 'minimal',
             githubUser: {
@@ -236,7 +230,9 @@ export const useStore = create<AppState>()(
       },
 
       disconnect: () => {
-        githubService.disconnect();
+        // Run async but catch errors so they don't bubble up as unhandled promise rejections
+        githubService.disconnect().catch(err => console.warn('Backend disconnect failed or aborted:', err));
+        
         apiClient.clearToken();
         set({ 
           githubUser: null, 

@@ -23,6 +23,8 @@ export default function AuthPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const fetchInitialData = useStore((state) => state.fetchInitialData);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -44,6 +46,9 @@ export default function AuthPage() {
       console.log('[Auth] Token saved successfully, starting loader animation...');
       toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
 
+      // Pre-fetch initial data to see if user has already connected github
+      await fetchInitialData();
+
       // Token is confirmed saved. NOW show the success animation.
       setShowLoader(true);
     } catch (error: any) {
@@ -58,7 +63,12 @@ export default function AuthPage() {
 
   const handleLoadingComplete = () => {
     setIsAuthenticated(true);
-    router.push('/connect');
+    const hasGithub = useStore.getState().githubUser !== null;
+    if (hasGithub) {
+      router.push('/');
+    } else {
+      router.push('/connect');
+    }
   };
 
   if (showLoader) {
