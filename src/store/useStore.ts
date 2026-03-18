@@ -65,6 +65,7 @@ interface AppState {
   savePortfolioSettings: () => Promise<void>;
   disconnect: () => void;
   fetchInitialData: () => Promise<void>;
+  hasFetchedInitialData: boolean;
 }
 
 import { aiService } from '@/services/ai.service';
@@ -73,6 +74,7 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       isAuthenticated: false,
+      hasFetchedInitialData: false,
       githubUser: null,
       repos: [],
       selectedRepoIds: [],
@@ -171,9 +173,9 @@ export const useStore = create<AppState>()(
       },
 
       fetchInitialData: async () => {
-        // Skip if we already have data — prevents repeated calls from triggering 429s
-        const { githubUser } = get();
-        if (githubUser) return;
+        // Use a dedicated flag rather than githubUser to prevent duplicate fetches
+        const { hasFetchedInitialData } = get();
+        if (hasFetchedInitialData) return;
 
         try {
           // GET /portfolio returns the most complete state now including custom fields
@@ -181,6 +183,9 @@ export const useStore = create<AppState>()(
           const githubProfile = await githubService.getProfile();
           if (!portfolio) throw new Error('Portfolio settings not found');
           if (!githubProfile) throw new Error('GitHub profile not found');
+
+          // Backend GET /github/profile returns { user: {...}, repos: [...] }
+          const { user, repos: ghRepos } = githubProfile;
 
           set({
             customData: {
@@ -197,21 +202,33 @@ export const useStore = create<AppState>()(
             skills: portfolio.skills || [],
             selectedTemplate: portfolio.selectedTemplate || 'minimal',
             githubUser: {
-               login: githubProfile.githubLogin,
-               name: githubProfile.name,
-               bio: githubProfile.bio,
-               avatar_url: githubProfile.avatarUrl,
-               public_repos: githubProfile.publicRepos,
-            } as any,
-            repos: (githubProfile.repositories || []).map((r: any) => ({
-              id: r.githubRepoId,
+               login: user.login,
+               id: user.id,
+               name: user.name,
+               bio: user.bio,
+               avatar_url: user.avatar_url,
+               html_url: user.html_url,
+               company: user.company,
+               blog: user.blog,
+               location: user.location,
+               email: user.email,
+               public_repos: user.public_repos,
+               followers: user.followers,
+               following: user.following,
+            },
+            repos: (ghRepos || []).map((r: any) => ({
+              id: r.id,
               name: r.name,
-              full_name: `${githubProfile.githubLogin}/${r.name}`,
+              full_name: r.full_name,
+              html_url: r.html_url,
+              description: r.description,
               language: r.language,
               stargazers_count: r.stargazers_count || 0,
+              homepage: r.homepage,
               updated_at: r.updated_at || new Date().toISOString(),
-            })) as any,
+            })),
             isAuthenticated: true,
+            hasFetchedInitialData: true,
           });
         } catch (error) {
           console.error('Failed to fetch initial data:', error);
@@ -235,7 +252,8 @@ export const useStore = create<AppState>()(
             twitter: '', 
             linkedin: '' 
           }, 
-          isAuthenticated: false 
+          isAuthenticated: false,
+          hasFetchedInitialData: false,
         });
       },
     }),

@@ -56,22 +56,24 @@ export default function ConnectGithubPage() {
         return;
       }
 
+      // Backend returns { user: {...}, repos: [...] }
+      const { user: profileUser, repos: profileRepos } = profile;
+
       const githubUser = {
-        login: profile.githubLogin || username,
-        name: profile.name || username,
-        bio: profile.bio || '',
-        avatar_url: profile.avatarUrl || '',
+        login: profileUser.login || username,
+        name: profileUser.name || username,
+        bio: profileUser.bio || '',
+        avatar_url: profileUser.avatar_url || '',
       };
 
-      const repositories = profile.repositories || [];
-      const repos = repositories.map((repo: any) => ({
-        id: repo.githubRepoId || repo.id || 0,
+      const repos = (profileRepos || []).map((repo: any) => ({
+        id: repo.id || 0,
         name: repo.name || 'unknown',
-        full_name: `${profile.githubLogin || username}/${repo.name || 'unknown'}`,
+        full_name: repo.full_name || `${profileUser.login || username}/${repo.name || 'unknown'}`,
         language: repo.language || null,
         description: repo.description || null,
-        stargazers_count: repo.stargazers_count || repo.stars || 0,
-        updated_at: repo.updated_at || repo.updatedAt || new Date().toISOString(),
+        stargazers_count: repo.stargazers_count || 0,
+        updated_at: repo.updated_at || new Date().toISOString(),
         html_url: repo.html_url || '',
         homepage: repo.homepage || null,
       }));

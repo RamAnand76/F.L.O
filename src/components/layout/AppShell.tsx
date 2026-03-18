@@ -16,6 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const fetchInitialData = useStore((state) => state.fetchInitialData);
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
+  const hasFetchedInitialData = useStore((state) => state.hasFetchedInitialData);
 
   // On mount: validate that we have an actual token, not just a stale Zustand flag
   useEffect(() => {
@@ -30,10 +31,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (isAuthenticated && githubUser && token) {
+    if (isAuthenticated && githubUser && token && !hasFetchedInitialData) {
       fetchInitialData();
     }
-  }, [isAuthenticated, githubUser, fetchInitialData, setIsAuthenticated]);
+  }, [isAuthenticated, githubUser, hasFetchedInitialData, fetchInitialData, setIsAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated && pathname !== '/auth') {
