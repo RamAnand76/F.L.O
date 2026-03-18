@@ -65,6 +65,15 @@ export default function ConnectGithubPage() {
         name: profileUser.name || username,
         bio: profileUser.bio || '',
         avatar_url: profileUser.avatar_url || '',
+        id: profileUser.id || 0,
+        html_url: profileUser.html_url || '',
+        company: profileUser.company || '',
+        blog: profileUser.blog || '',
+        location: profileUser.location || '',
+        email: profileUser.email || '',
+        public_repos: profileUser.public_repos || 0,
+        followers: profileUser.followers || 0,
+        following: profileUser.following || 0,
       };
 
       const repos = (profileRepos || []).map((repo: any) => ({

@@ -182,7 +182,7 @@ export const useStore = create<AppState>()(
         try {
           // GET /portfolio returns the most complete state now including custom fields
           const portfolio = await portfolioService.getSettings();
-          const githubProfile = await githubService.getProfile(1, 10);
+          const githubProfile = await githubService.getProfile(1, 100);
           if (!portfolio) throw new Error('Portfolio settings not found');
           if (!githubProfile) throw new Error('GitHub profile not found');
 
@@ -242,7 +242,7 @@ export const useStore = create<AppState>()(
 
       fetchMoreRepos: async (page: number) => {
         try {
-          const response = await githubService.getRepos(page, 10);
+          const response = await githubService.getRepos(page, 100);
           // Depending on API, response might just be { repos, pagination } or wrapped identically
           const reposRaw = response.repos || response;
           const pagination = response.pagination || null;
