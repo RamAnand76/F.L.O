@@ -18,9 +18,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
   const hasFetchedInitialData = useStore((state) => state.hasFetchedInitialData);
 
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // On mount: validate that we have an actual token, not just a stale Zustand flag
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !mounted) return;
     
     const token = apiClient.getToken();
 
@@ -34,15 +40,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (isAuthenticated && githubUser && token && !hasFetchedInitialData) {
       fetchInitialData();
     }
-  }, [isAuthenticated, githubUser, hasFetchedInitialData, fetchInitialData, setIsAuthenticated]);
+  }, [isAuthenticated, githubUser, hasFetchedInitialData, fetchInitialData, setIsAuthenticated, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
     if (!isAuthenticated && pathname !== '/auth') {
       router.push('/auth');
     } else if (isAuthenticated && !githubUser && pathname !== '/connect') {
       router.push('/connect');
     }
-  }, [isAuthenticated, githubUser, pathname, router]);
+  }, [isAuthenticated, githubUser, pathname, router, mounted]);
 
   // Hide the shell completely if we're on the auth page or not authenticated yet
   // This helps avoid layout shifts

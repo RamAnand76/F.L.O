@@ -30,6 +30,9 @@ class ApiClient {
   }
 
   getToken() {
+    if (!this.accessToken && typeof window !== 'undefined') {
+      this.accessToken = localStorage.getItem('accessToken');
+    }
     return this.accessToken;
   }
 
