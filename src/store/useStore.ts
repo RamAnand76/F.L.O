@@ -299,7 +299,8 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: 'flo-storage',
+      name: 'flo-storage-v2',
+      partialize: (state) => ({ ...state, hasFetchedInitialData: false })
     }
   )
 );
