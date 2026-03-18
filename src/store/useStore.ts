@@ -171,6 +171,10 @@ export const useStore = create<AppState>()(
       },
 
       fetchInitialData: async () => {
+        // Skip if we already have data — prevents repeated calls from triggering 429s
+        const { githubUser } = get();
+        if (githubUser) return;
+
         try {
           // GET /portfolio returns the most complete state now including custom fields
           const portfolio = await portfolioService.getSettings();
