@@ -53,6 +53,13 @@ interface AppState {
     linkedin: string;
     role?: string;
   };
+  repoPagination: {
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    itemsPerPage: number;
+  } | null;
+  setRepoPagination: (pagination: AppState['repoPagination']) => void;
   setIsAuthenticated: (val: boolean) => void;
   setGithubUser: (user: GithubUser | null) => void;
   setRepos: (repos: Repository[]) => void;
@@ -64,6 +71,7 @@ interface AppState {
   saveProfile: () => Promise<void>;
   disconnect: () => void;
   fetchInitialData: () => Promise<void>;
+  fetchMoreRepos: (page: number) => Promise<void>;
   hasFetchedInitialData: boolean;
 }
 
@@ -76,6 +84,7 @@ export const useStore = create<AppState>()(
       hasFetchedInitialData: false,
       githubUser: null,
       repos: [],
+      repoPagination: null,
       selectedRepoIds: [],
       skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
       selectedTemplate: 'minimal',
@@ -102,6 +111,7 @@ export const useStore = create<AppState>()(
           github: user?.html_url || '',
         }
       })),
+      setRepoPagination: (pagination) => set({ repoPagination: pagination }),
       setRepos: (repos) => {
         const newSelected = (repos || []).slice(0, 6).map((r: any) => r.id);
         set({ repos: repos || [], selectedRepoIds: newSelected });
@@ -172,22 +182,22 @@ export const useStore = create<AppState>()(
         try {
           // GET /portfolio returns the most complete state now including custom fields
           const portfolio = await portfolioService.getSettings();
-          const githubProfile = await githubService.getProfile();
+          const githubProfile = await githubService.getProfile(1, 10);
           if (!portfolio) throw new Error('Portfolio settings not found');
           if (!githubProfile) throw new Error('GitHub profile not found');
 
-          // Backend GET /github/profile returns { user: {...}, repos: [...] }
-          const { user, repos: ghRepos } = githubProfile;
+          // Backend GET /github/profile returns { user: {...}, repos: [...], pagination: {...} }
+          const { user, repos: ghRepos, pagination } = githubProfile;
 
           set({
             customData: {
-              name: portfolio.customName || portfolio.name || '',
-              bio: portfolio.customBio || portfolio.bio || '',
-              email: portfolio.customEmail || portfolio.email || '',
-              location: portfolio.customLocation || portfolio.location || '',
-              website: portfolio.customWebsite || portfolio.website || '',
-              github: portfolio.customGithub || portfolio.github || '',
-              twitter: portfolio.customTwitter || portfolio.twitter || '',
+              name: portfolio.customName || portfolio.name || user.name || user.login || '',
+              bio: portfolio.customBio || portfolio.bio || user.bio || '',
+              email: portfolio.customEmail || portfolio.email || user.email || '',
+              location: portfolio.customLocation || portfolio.location || user.location || '',
+              website: portfolio.customWebsite || portfolio.website || user.blog || '',
+              github: portfolio.customGithub || portfolio.github || user.html_url || '',
+              twitter: portfolio.customTwitter || portfolio.twitter || user.twitter_username || '',
               linkedin: portfolio.customLinkedin || portfolio.linkedin || '',
             },
             selectedRepoIds: (portfolio.selectedRepoIds && portfolio.selectedRepoIds.length > 0) 
@@ -221,11 +231,46 @@ export const useStore = create<AppState>()(
               homepage: r.homepage,
               updated_at: r.updated_at || new Date().toISOString(),
             })),
+            repoPagination: pagination || null,
             isAuthenticated: true,
             hasFetchedInitialData: true,
           });
         } catch (error) {
           console.error('Failed to fetch initial data:', error);
+        }
+      },
+
+      fetchMoreRepos: async (page: number) => {
+        try {
+          const response = await githubService.getRepos(page, 10);
+          // Depending on API, response might just be { repos, pagination } or wrapped identically
+          const reposRaw = response.repos || response;
+          const pagination = response.pagination || null;
+
+          const newRepos = (reposRaw || []).map((r: any) => ({
+              id: r.id,
+              name: r.name,
+              full_name: r.full_name,
+              html_url: r.html_url,
+              description: r.description,
+              language: r.language,
+              stargazers_count: r.stargazers_count || 0,
+              homepage: r.homepage,
+              updated_at: r.updated_at || new Date().toISOString(),
+          }));
+
+          // Avoid duplicating repos
+          set((state) => {
+            const existingIds = new Set(state.repos.map(r => r.id));
+            const uniqueNew = newRepos.filter((r: any) => !existingIds.has(r.id));
+            return {
+              repos: [...state.repos, ...uniqueNew],
+              // Only update pagination if backend provided it
+              repoPagination: pagination || state.repoPagination 
+            };
+          });
+        } catch (error) {
+          console.error('Failed to fetch more repos:', error);
         }
       },
 

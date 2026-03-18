@@ -6,12 +6,12 @@ export const githubService = {
     return apiClient.post<any>('/github/connect', { username });
   },
 
-  async getProfile() {
-    return apiClient.get<any>('/github/profile');
+  async getProfile(page: number = 1, limit: number = 10) {
+    return apiClient.get<any>(`/github/profile?page=${page}&limit=${limit}`);
   },
 
-  async getRepos() {
-    return apiClient.get<any>('/github/repos');
+  async getRepos(page: number = 1, limit: number = 10) {
+    return apiClient.get<any>(`/github/repos?page=${page}&limit=${limit}`);
   },
 
   async refreshData() {

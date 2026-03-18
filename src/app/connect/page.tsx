@@ -17,6 +17,7 @@ export default function ConnectGithubPage() {
   const { toast } = useToast();
   const setGithubUser = useStore((state) => state.setGithubUser);
   const setRepos = useStore((state) => state.setRepos);
+  const setRepoPagination = useStore((state) => state.setRepoPagination);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
   const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
 
@@ -56,8 +57,8 @@ export default function ConnectGithubPage() {
         return;
       }
 
-      // Backend returns { user: {...}, repos: [...] }
-      const { user: profileUser, repos: profileRepos } = profile;
+      // Backend returns { user: {...}, repos: [...], pagination?: {...} }
+      const { user: profileUser, repos: profileRepos, pagination: profilePagination } = profile;
 
       const githubUser = {
         login: profileUser.login || username,
@@ -80,6 +81,7 @@ export default function ConnectGithubPage() {
 
       setGithubUser(githubUser as any);
       setRepos(repos);
+      setRepoPagination(profilePagination || null);
 
       toast.success(`Connected as ${githubUser.login}! Found ${repos.length} repositories.`);
       router.push('/');
