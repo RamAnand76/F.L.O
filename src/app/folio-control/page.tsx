@@ -152,7 +152,7 @@ export default function FolioControlPage() {
               </AnimatePresence>
             </div>
             
-            {((repoPagination && repoPagination.currentPage < repoPagination.totalPages) || repos.length >= (repoPagination?.currentPage || 1) * (repoPagination?.itemsPerPage || 10)) && (
+            {repos.length >= 10 && (
               <motion.div 
                 className="mt-8 flex justify-center"
                 initial={{ opacity: 0 }}
