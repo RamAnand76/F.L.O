@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { StatCard } from '@/components/features/dashboard/StatCard';
 import { ActivityHeatmap } from '@/components/features/dashboard/ActivityHeatmap';
 import { FeaturedProjects } from '@/components/features/dashboard/FeaturedProjects';
+import { LanguageIcon } from '@/components/ui/LanguageIcon';
 
 export default function DashboardPage() {
   const githubUser = useStore((state) => state.githubUser);
@@ -216,7 +217,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-2">
               {languageStats.slice(0, 2).map((stat, i) => (
                 <div key={stat.name} className="flex items-center gap-2 bg-white/5 p-2 rounded-xl border border-white/5">
-                  <div className={cn("w-1.5 h-1.5 rounded-full", i === 0 ? "bg-blue-500" : "bg-indigo-500")} />
+                  <LanguageIcon language={stat.name} className="w-3.5 h-3.5" />
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-zinc-200 truncate">{stat.name}</span>
                     <span className="text-[9px] text-zinc-500 font-medium">{stat.percentage}%</span>

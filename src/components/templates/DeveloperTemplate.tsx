@@ -3,6 +3,7 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
 import { Github, MapPin, Star, Code2 } from 'lucide-react';
+import { LanguageIcon } from '@/components/ui/LanguageIcon';
 
 export function DeveloperTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills } = useStore();
@@ -49,8 +50,9 @@ export function DeveloperTemplate() {
                     <p className="text-sm text-[#8b949e] mb-4">{repo.description}</p>
                     <div className="flex items-center gap-4 text-xs">
                       {repo.language && (
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#e34c26]" /> {repo.language}
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#0d1117] rounded border border-[#30363d]">
+                          <LanguageIcon language={repo.language} className="w-3 h-3" />
+                          <span className="text-[#8b949e]">{repo.language}</span>
                         </span>
                       )}
                       <span className="flex items-center gap-1"><Star className="w-4 h-4" /> {repo.stargazers_count}</span>

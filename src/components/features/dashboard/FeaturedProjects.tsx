@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Code2, ArrowUpRight, ExternalLink, Star, Plus } from 'lucide-react';
 import { Repository } from '@/store/useStore';
+import { LanguageIcon } from '@/components/ui/LanguageIcon';
 
 interface FeaturedProjectsProps {
   selectedRepos: Repository[];
@@ -53,9 +54,9 @@ export function FeaturedProjects({ selectedRepos }: FeaturedProjectsProps) {
                 </p>
                 <div className="flex items-center gap-4 text-xs text-zinc-500 mt-auto">
                   {repo.language && (
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                      {repo.language}
+                    <span className="flex items-center gap-2 px-2.5 py-1 bg-white/5 rounded-full border border-white/10 shadow-sm backdrop-blur-sm group-hover:bg-white/10 transition-all">
+                      <LanguageIcon language={repo.language} className="w-4 h-4" />
+                      <span className="text-zinc-300 font-medium">{repo.language}</span>
                     </span>
                   )}
                   <span className="flex items-center gap-1">
