@@ -3,7 +3,7 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
 import { Github, Mail, MapPin, ExternalLink, Star } from 'lucide-react';
-import { LanguageIcon } from '@/components/ui/LanguageIcon';
+import { StackIcon } from '@/components/ui/StackIcon';
 
 export function MinimalTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills } = useStore();
@@ -71,7 +71,7 @@ export function MinimalTemplate() {
               <div className="flex items-center gap-4 text-sm font-medium text-zinc-500">
                 {repo.language && (
                   <span className="flex items-center gap-1.5 px-2 py-1 bg-zinc-100/50 rounded-lg">
-                    <LanguageIcon language={repo.language} className="w-3.5 h-3.5" />
+                    <StackIcon name={repo.language} className="w-3.5 h-3.5" />
                     {repo.language}
                   </span>
                 )}

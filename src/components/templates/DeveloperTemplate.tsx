@@ -3,7 +3,7 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
 import { Github, MapPin, Star, Code2 } from 'lucide-react';
-import { LanguageIcon } from '@/components/ui/LanguageIcon';
+import { StackIcon } from '@/components/ui/StackIcon';
 
 export function DeveloperTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills } = useStore();
@@ -51,7 +51,7 @@ export function DeveloperTemplate() {
                     <div className="flex items-center gap-4 text-xs">
                       {repo.language && (
                         <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#0d1117] rounded border border-[#30363d]">
-                          <LanguageIcon language={repo.language} className="w-3 h-3" />
+                          <StackIcon name={repo.language} className="w-3 h-3" />
                           <span className="text-[#8b949e]">{repo.language}</span>
                         </span>
                       )}
@@ -68,7 +68,8 @@ export function DeveloperTemplate() {
               <h2 className="text-xl font-bold text-white mb-6">Tech Stack</h2>
               <div className="flex flex-wrap gap-2">
                 {skills.map(skill => (
-                  <span key={skill} className="px-3 py-1 border border-[#30363d] rounded-md text-sm bg-[#21262d] text-[#c9d1d9]">
+                  <span key={skill} className="flex items-center gap-2 px-3 py-1 border border-[#30363d] rounded-md text-sm bg-[#21262d] text-[#c9d1d9]">
+                    <StackIcon name={skill} className="w-3.5 h-3.5" />
                     {skill}
                   </span>
                 ))}

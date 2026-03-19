@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Check, Star, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LanguageIcon } from '@/components/ui/LanguageIcon';
+import { StackIcon } from '@/components/ui/StackIcon';
 
 interface RepoCardProps {
   key?: React.Key;
@@ -46,7 +46,7 @@ export function RepoCard({ repo, isSelected, onToggle, index }: RepoCardProps) {
       <div className="flex items-center gap-4 text-xs text-zinc-500">
         {repo.language && (
           <span className="flex items-center gap-2 px-2.5 py-1 bg-white/5 rounded-full border border-white/10 group-hover:bg-white/10 transition-all font-medium text-xs tracking-tight shadow-sm">
-            <LanguageIcon language={repo.language} className="w-4 h-4" />
+            <StackIcon name={repo.language} className="w-4 h-4" />
             <span className="text-zinc-200">{repo.language}</span>
           </span>
         )}

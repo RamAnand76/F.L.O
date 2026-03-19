@@ -4,7 +4,7 @@ import React from 'react';
 import { useStore } from '@/store/useStore';
 import { Github, Mail, MapPin, ExternalLink, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LanguageIcon } from '@/components/ui/LanguageIcon';
+import { StackIcon } from '@/components/ui/StackIcon';
 
 export function CreativeTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills } = useStore();
@@ -86,7 +86,7 @@ export function CreativeTemplate() {
                     "flex items-center gap-1.5 px-3 py-1 rounded-full",
                     i % 3 === 2 ? "bg-white/10" : "bg-black/5"
                   )}>
-                    <LanguageIcon language={repo.language} className="w-4 h-4" />
+                    <StackIcon name={repo.language} className="w-4 h-4" />
                     {repo.language}
                   </span>
                 )}

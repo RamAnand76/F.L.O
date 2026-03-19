@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
+import { StackIcon } from '@/components/ui/StackIcon';
 
 interface SkillBadgeProps {
   key?: React.Key;
