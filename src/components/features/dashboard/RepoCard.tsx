@@ -50,8 +50,11 @@ export function RepoCard({ repo, isSelected, onToggle, index }: RepoCardProps) {
             <span className="text-zinc-200">{repo.language}</span>
           </span>
         )}
-        <span className="flex items-center gap-1">
-          <Star className="w-3.5 h-3.5" />
+        <span className={cn(
+          "flex items-center gap-1",
+          repo.stargazers_count > 0 && "text-amber-400 font-medium"
+        )}>
+          <Star className={cn("w-3.5 h-3.5", repo.stargazers_count > 0 && "fill-amber-400")} />
           {repo.stargazers_count}
         </span>
         <a 

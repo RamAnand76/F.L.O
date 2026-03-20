@@ -90,7 +90,10 @@ export function CreativeTemplate() {
                     {repo.language}
                   </span>
                 )}
-                <span className="flex items-center gap-1"><Star className="w-4 h-4" /> {repo.stargazers_count}</span>
+                <span className={`flex items-center gap-1.5 ${repo.stargazers_count > 0 ? 'text-amber-500 font-bold' : ''}`}>
+                  <Star className={`w-4 h-4 ${repo.stargazers_count > 0 ? 'fill-amber-500 shrink-0' : ''}`} /> 
+                  {repo.stargazers_count}
+                </span>
               </div>
             </a>
           ))}

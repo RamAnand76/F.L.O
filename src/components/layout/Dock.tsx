@@ -13,7 +13,6 @@ const navItems = [
   { path: '/folio-control', label: 'Folio Control', icon: SlidersHorizontal },
   { path: '/templates', label: 'Templates', icon: LayoutTemplate },
   { path: '/preview', label: 'Preview & Editor', icon: MonitorPlay },
-  { path: '/profile', label: 'Profile', icon: User },
 ];
 
 export function Dock() {
@@ -81,15 +80,6 @@ export function Dock() {
           );
         })}
 
-        <div className="w-px h-8 bg-white/10 mx-2" />
-
-        <button
-          onClick={disconnect}
-          className="relative group flex items-center justify-center w-12 h-12 rounded-full text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-          title="Disconnect"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
       </motion.div>
     </div>
   );

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
+import { useWindowSize } from '@/hooks/useWindowSize';
 import { 
   Code, LayoutTemplate, Palette, Github, X, Sparkles,
   ChevronLeft, ChevronRight
@@ -48,6 +49,8 @@ export default function PreviewEditorPage() {
   const setSelectedTemplate = useStore((state) => state.setSelectedTemplate);
   const customData = useStore((state) => state.customData);
   const updateCustomData = useStore((state) => state.updateCustomData);
+  const { width } = useWindowSize();
+  const isMobile = width < 768;
 
   const templates = [
     { id: 'minimal', actualId: 'minimal', name: 'Interstellar', desc: 'Clean, typography-focused design.', icon: LayoutTemplate, color: 'text-zinc-300', bg: 'bg-zinc-100/10' },
@@ -68,7 +71,7 @@ export default function PreviewEditorPage() {
 
   const editorContent = (
     <div className={cn(
-      "h-[calc(100vh-10rem)] w-full flex rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#1e1e1e] font-sans relative",
+      "h-[calc(100vh-6rem)] md:h-[calc(100vh-10rem)] w-full flex flex-col md:flex-row rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#1e1e1e] font-sans relative",
       isFullscreen && "fixed inset-0 w-screen h-screen z-[500] rounded-none border-none"
     )}>
       
@@ -91,15 +94,24 @@ export default function PreviewEditorPage() {
       {/* Collapse Toggle Button */}
       {!isFullscreen && (
         <motion.button
-          animate={{ left: isEditorCollapsed ? 0 : 320 }}
+          initial={false}
+          animate={{ 
+            left: isMobile ? '50%' : isEditorCollapsed ? 0 : 320,
+            top: isMobile ? (isEditorCollapsed ? -1 : 'auto') : '50%',
+            bottom: isMobile && !isEditorCollapsed ? -1 : 'auto',
+            rotate: isMobile ? 90 : 0,
+            y: isMobile ? 0 : '-50%',
+            x: isMobile ? '-50%' : '-50%'
+          }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           onClick={() => setIsEditorCollapsed(!isEditorCollapsed)}
           className={cn(
-            "absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-50 w-6 h-12 bg-[#2a2a2a] border border-white/10 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-300 shadow-xl",
-            isEditorCollapsed && "translate-x-0 rounded-l-none"
+            "absolute z-50 w-6 h-12 bg-[#2a2a2a] border border-white/10 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-300 shadow-xl",
+            isEditorCollapsed && !isMobile && "translate-x-0 rounded-l-none",
+            isMobile && "h-6 w-12"
           )}
         >
-          {isEditorCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isEditorCollapsed ? (isMobile ? <ChevronRight className="w-4 h-4 rotate-90" /> : <ChevronRight className="w-4 h-4" />) : (isMobile ? <ChevronLeft className="w-4 h-4 rotate-90" /> : <ChevronLeft className="w-4 h-4" />)}
         </motion.button>
       )}
 

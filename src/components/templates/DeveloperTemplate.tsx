@@ -55,7 +55,10 @@ export function DeveloperTemplate() {
                           <span className="text-[#8b949e]">{repo.language}</span>
                         </span>
                       )}
-                      <span className="flex items-center gap-1"><Star className="w-4 h-4" /> {repo.stargazers_count}</span>
+                      <span className={`flex items-center gap-1 ${repo.stargazers_count > 0 ? 'text-amber-400 font-bold' : ''}`}>
+                        <Star className={`w-4 h-4 ${repo.stargazers_count > 0 ? 'fill-amber-400' : ''}`} /> 
+                        {repo.stargazers_count}
+                      </span>
                     </div>
                   </div>
                 ))}

@@ -52,12 +52,12 @@ export function PreviewFrame({
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 hover:text-white transition-colors">
-            <ExternalLink className="w-3 h-3" /> Open
+          <button className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium text-zinc-400 hover:text-white transition-colors">
+            <ExternalLink className="w-3 h-3" /> <span className="hidden sm:inline">Open</span>
           </button>
           <button 
             onClick={onExport}
-            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20"
+            className="px-2 sm:px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] sm:text-[11px] font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20"
           >
             Publish
           </button>

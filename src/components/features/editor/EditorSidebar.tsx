@@ -8,6 +8,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { useToast } from '@/components/ui/Toast';
+import { useWindowSize } from '@/hooks/useWindowSize';
 
 interface EditorSidebarProps {
   activeTab: 'editor' | 'templates';
@@ -41,14 +42,22 @@ export function EditorSidebar({
   setChatInput
 }: EditorSidebarProps) {
   const { toast } = useToast();
+  const { width } = useWindowSize();
+  const isMobile = width < 768;
+
   return (
     <motion.div 
+      className={cn(
+        "shrink-0 flex flex-col bg-[#1e1e1e] border-white/5 overflow-hidden transition-all duration-300",
+        isMobile ? "border-b" : "border-r"
+      )}
+      initial={false}
       animate={{ 
-        width: (isCollapsed || isFullscreen) ? 0 : 320,
+        width: isMobile ? '100%' : (isCollapsed || isFullscreen) ? 0 : 320,
+        height: isMobile ? (isCollapsed || isFullscreen) ? 0 : '60vh' : '100%',
         opacity: (isCollapsed || isFullscreen) ? 0 : 1
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="shrink-0 flex flex-col bg-[#1e1e1e] border-r border-white/5 overflow-hidden"
     >
       {/* Top Tabs */}
       <div className="flex p-2 gap-1 bg-[#1e1e1e] border-b border-white/5">
