@@ -60,36 +60,32 @@ export function EditorSidebar({
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {/* Top Tabs */}
-      <div className="flex p-2 gap-1 bg-[#1e1e1e] border-b border-white/5">
-        <button
-          onClick={() => setActiveTab('editor')}
-          className={cn(
-            "flex-1 py-1.5 text-xs font-medium rounded-md transition-all duration-200", 
-            activeTab === 'editor' ? "bg-[#2d2d2d] text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
-          )}
-        >
-          Editor
-        </button>
-        <button
-          onClick={() => setActiveTab('templates')}
-          className={cn(
-            "flex-1 py-1.5 text-xs font-medium rounded-md transition-all duration-200", 
-            activeTab === 'templates' ? "bg-[#2d2d2d] text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
-          )}
-        >
-          Templates
-        </button>
-        {isMobile && (
-          <button
-            onClick={() => setActiveTab('preview')}
-            className={cn(
-              "flex-1 py-1.5 text-xs font-medium rounded-md transition-all duration-200", 
-              activeTab === 'preview' ? "bg-[#2d2d2d] text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
-            )}
-          >
-            Preview
-          </button>
-        )}
+      <div className="flex p-1 bg-[#141414] border-b border-white/5 w-full">
+        <div className="flex p-0.5 bg-black/40 border border-white/5 rounded-full overflow-hidden w-full relative">
+          {[
+            { id: 'editor', label: 'Editor' },
+            { id: 'templates', label: 'Templates' },
+            ...(isMobile ? [{ id: 'preview', label: 'Preview' }] : [])
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "relative flex-1 py-1.5 text-[10px] font-bold rounded-full transition-all duration-300", 
+                activeTab === tab.id ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+              )}
+            >
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="sidebarActiveTab"
+                  className="absolute inset-0 bg-[#333] rounded-full shadow-inner"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">

@@ -115,10 +115,32 @@ export default function PreviewEditorPage() {
         <div className="flex-1 flex flex-col bg-[#0a0a0a] min-w-0 relative">
           {/* Mobile Preview Tab Switcher (Only if in preview tab) */}
           {isMobile && (
-             <div className="flex p-2 gap-1 bg-[#1e1e1e] border-b border-white/5 shrink-0">
-               <button onClick={() => setActiveTab('editor')} className="flex-1 py-1.5 text-xs text-zinc-400 font-medium rounded-md hover:bg-white/5 transition-all">Editor</button>
-               <button onClick={() => setActiveTab('templates')} className="flex-1 py-1.5 text-xs text-zinc-400 font-medium rounded-md hover:bg-white/5 transition-all">Templates</button>
-               <button className="flex-1 py-1.5 text-xs text-white font-medium rounded-md bg-[#2d2d2d] shadow-sm">Preview</button>
+             <div className="flex p-1 bg-[#141414] border-b border-white/5 w-full">
+               <div className="flex p-0.5 bg-black/40 border border-white/5 rounded-full overflow-hidden w-full relative">
+                 {[
+                   { id: 'editor', label: 'Editor' },
+                   { id: 'templates', label: 'Templates' },
+                   { id: 'preview', label: 'Preview' }
+                 ].map((tab) => (
+                   <button
+                     key={tab.id}
+                     onClick={() => setActiveTab(tab.id as any)}
+                     className={cn(
+                       "relative flex-1 py-1.5 text-[10px] font-bold rounded-full transition-all duration-300", 
+                       activeTab === tab.id ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                     )}
+                   >
+                     {activeTab === tab.id && (
+                       <motion.div
+                         layoutId="sidebarActiveTab"
+                         className="absolute inset-0 bg-[#333] rounded-full shadow-inner"
+                         transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                       />
+                     )}
+                     <span className="relative z-10">{tab.label}</span>
+                   </button>
+                 ))}
+               </div>
              </div>
           )}
 
