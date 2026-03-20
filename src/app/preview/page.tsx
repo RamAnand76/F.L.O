@@ -19,9 +19,11 @@ import { EditorSidebar } from '@/components/features/editor/EditorSidebar';
 import { BrowserChrome } from '@/components/features/editor/BrowserChrome';
 import { PreviewFrame } from '@/components/features/editor/PreviewFrame';
 
+export type EditorTab = 'editor' | 'templates' | 'preview';
+
 export default function PreviewEditorPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'editor' | 'templates'>('editor');
+  const [activeTab, setActiveTab] = useState<EditorTab>('editor');
   const [deviceMode, setDeviceMode] = useState<'desktop' | 'mobile'>('desktop');
   const [chatInput, setChatInput] = useState('');
   const [templateSearch, setTemplateSearch] = useState('');
@@ -75,61 +77,65 @@ export default function PreviewEditorPage() {
       isFullscreen && "fixed inset-0 w-screen h-screen z-[500] rounded-none border-none"
     )}>
       
-      <EditorSidebar 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isCollapsed={isEditorCollapsed}
-        isFullscreen={isFullscreen}
-        templateSearch={templateSearch}
-        setTemplateSearch={setTemplateSearch}
-        templates={[...templates]}
-        activeTemplateId={activeTemplateId}
-        onTemplateSelect={handleTemplateSelect}
-        customData={customData}
-        updateCustomData={updateCustomData}
-        chatInput={chatInput}
-        setChatInput={setChatInput}
-      />
+      {(!isMobile || activeTab !== 'preview') && (
+        <EditorSidebar 
+          activeTab={activeTab as any}
+          setActiveTab={setActiveTab as any}
+          isCollapsed={isEditorCollapsed}
+          isFullscreen={isFullscreen}
+          templateSearch={templateSearch}
+          setTemplateSearch={setTemplateSearch}
+          templates={[...templates]}
+          activeTemplateId={activeTemplateId}
+          onTemplateSelect={handleTemplateSelect}
+          customData={customData}
+          updateCustomData={updateCustomData}
+          chatInput={chatInput}
+          setChatInput={setChatInput}
+        />
+      )}
 
-      {/* Collapse Toggle Button */}
-      {!isFullscreen && (
+      {/* Collapse Toggle Button (Desktop Only) */}
+      {!isFullscreen && !isMobile && (
         <motion.button
-          initial={false}
-          animate={{ 
-            left: isMobile ? '50%' : isEditorCollapsed ? 0 : 320,
-            top: isMobile ? (isEditorCollapsed ? -1 : 'auto') : '50%',
-            bottom: isMobile && !isEditorCollapsed ? -1 : 'auto',
-            rotate: isMobile ? 90 : 0,
-            y: isMobile ? 0 : '-50%',
-            x: isMobile ? '-50%' : '-50%'
-          }}
+          animate={{ left: isEditorCollapsed ? 0 : 320 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           onClick={() => setIsEditorCollapsed(!isEditorCollapsed)}
           className={cn(
-            "absolute z-50 w-6 h-12 bg-[#2a2a2a] border border-white/10 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-300 shadow-xl",
-            isEditorCollapsed && !isMobile && "translate-x-0 rounded-l-none",
-            isMobile && "h-6 w-12"
+            "absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-50 w-6 h-12 bg-[#2a2a2a] border border-white/10 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-300 shadow-xl",
+            isEditorCollapsed && "translate-x-0 rounded-l-none"
           )}
         >
-          {isEditorCollapsed ? (isMobile ? <ChevronRight className="w-4 h-4 rotate-90" /> : <ChevronRight className="w-4 h-4" />) : (isMobile ? <ChevronLeft className="w-4 h-4 rotate-90" /> : <ChevronLeft className="w-4 h-4" />)}
+          {isEditorCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </motion.button>
       )}
 
       {/* Right Main Area (Preview Container) */}
-      <div className="flex-1 flex flex-col bg-[#0a0a0a] min-w-0 relative">
-        <BrowserChrome 
-          isFullscreen={isFullscreen}
-          setIsFullscreen={setIsFullscreen}
-        />
-        
-        <PreviewFrame 
-          deviceMode={deviceMode}
-          setDeviceMode={setDeviceMode}
-          selectedTemplate={selectedTemplate}
-          customData={customData}
-          onExport={() => setShowExportModal(true)}
-        />
-      </div>
+      {(!isMobile || activeTab === 'preview') && (
+        <div className="flex-1 flex flex-col bg-[#0a0a0a] min-w-0 relative">
+          {/* Mobile Preview Tab Switcher (Only if in preview tab) */}
+          {isMobile && (
+             <div className="flex p-2 gap-1 bg-[#1e1e1e] border-b border-white/5 shrink-0">
+               <button onClick={() => setActiveTab('editor')} className="flex-1 py-1.5 text-xs text-zinc-400 font-medium rounded-md hover:bg-white/5 transition-all">Editor</button>
+               <button onClick={() => setActiveTab('templates')} className="flex-1 py-1.5 text-xs text-zinc-400 font-medium rounded-md hover:bg-white/5 transition-all">Templates</button>
+               <button className="flex-1 py-1.5 text-xs text-white font-medium rounded-md bg-[#2d2d2d] shadow-sm">Preview</button>
+             </div>
+          )}
+
+          <BrowserChrome 
+            isFullscreen={isFullscreen}
+            setIsFullscreen={setIsFullscreen}
+          />
+          
+          <PreviewFrame 
+            deviceMode={deviceMode}
+            setDeviceMode={setDeviceMode}
+            selectedTemplate={selectedTemplate}
+            customData={customData}
+            onExport={() => setShowExportModal(true)}
+          />
+        </div>
+      )}
 
       {/* Modals & Overlays */}
       <AnimatePresence>

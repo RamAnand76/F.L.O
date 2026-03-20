@@ -11,8 +11,8 @@ import { useToast } from '@/components/ui/Toast';
 import { useWindowSize } from '@/hooks/useWindowSize';
 
 interface EditorSidebarProps {
-  activeTab: 'editor' | 'templates';
-  setActiveTab: (tab: 'editor' | 'templates') => void;
+  activeTab: 'editor' | 'templates' | 'preview';
+  setActiveTab: (tab: 'editor' | 'templates' | 'preview') => void;
   isCollapsed: boolean;
   isFullscreen: boolean;
   templateSearch: string;
@@ -54,7 +54,7 @@ export function EditorSidebar({
       initial={false}
       animate={{ 
         width: isMobile ? '100%' : (isCollapsed || isFullscreen) ? 0 : 320,
-        height: isMobile ? (isCollapsed || isFullscreen) ? 0 : '60vh' : '100%',
+        height: isMobile ? (isCollapsed || isFullscreen) ? 0 : '100%' : '100%',
         opacity: (isCollapsed || isFullscreen) ? 0 : 1
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -79,6 +79,17 @@ export function EditorSidebar({
         >
           Templates
         </button>
+        {isMobile && (
+          <button
+            onClick={() => setActiveTab('preview')}
+            className={cn(
+              "flex-1 py-1.5 text-xs font-medium rounded-md transition-all duration-200", 
+              activeTab === 'preview' ? "bg-[#2d2d2d] text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+            )}
+          >
+            Preview
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
