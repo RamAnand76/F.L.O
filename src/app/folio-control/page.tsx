@@ -134,14 +134,40 @@ export default function FolioControlPage() {
         </motion.p>
       </header>
 
-      {/* Modern Pill Tab Switcher */}
-      <div className="flex p-1 bg-zinc-900/80 border border-white/5 rounded-full backdrop-blur-xl mb-12 w-fit max-w-full overflow-x-auto no-scrollbar mx-auto">
+      {/* Mobile: 2-row 3-col icon grid (no scroll) */}
+      <div className="grid grid-cols-3 gap-2 mb-10 md:hidden">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             className={cn(
-              "relative group px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[11px] md:text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap",
+              "relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[10px] font-bold transition-all duration-300 border",
+              activeTab === tab.id
+                ? "bg-zinc-800 text-white border-white/10 shadow-lg"
+                : "bg-zinc-900/40 text-zinc-500 border-white/5 hover:text-zinc-300 hover:bg-zinc-800/60"
+            )}
+          >
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="folioActiveTabMobile"
+                className="absolute inset-0 bg-zinc-800 rounded-2xl"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+              />
+            )}
+            <tab.icon className="w-4 h-4 relative z-10" />
+            <span className="relative z-10 leading-none">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop: horizontal pill strip */}
+      <div className="hidden md:flex p-1 bg-zinc-900/80 border border-white/5 rounded-full backdrop-blur-xl mb-12 w-fit mx-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={cn(
+              "relative group px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap",
               activeTab === tab.id ? "text-white" : "text-zinc-500 hover:text-zinc-300"
             )}
           >
@@ -152,7 +178,7 @@ export default function FolioControlPage() {
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
-            <tab.icon className={cn("w-3.5 h-3.5 md:w-4 md:h-4 relative z-10 transition-colors", activeTab === tab.id ? "text-white" : "text-zinc-500 group-hover:text-zinc-300")} /> 
+            <tab.icon className={cn("w-4 h-4 relative z-10 transition-colors", activeTab === tab.id ? "text-white" : "text-zinc-500 group-hover:text-zinc-300")} />
             <span className="relative z-10">{tab.label}</span>
           </button>
         ))}
