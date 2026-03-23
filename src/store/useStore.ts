@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { githubService } from '@/services/github.service';
-import { profileService } from '@/services/profile.service';
+import { profileService, Education, Experience } from '@/services/profile.service';
 import { portfolioService } from '@/services/portfolio.service';
 import { apiClient } from '@/lib/api-client';
 
@@ -40,6 +40,8 @@ interface AppState {
   repos: Repository[];
   selectedRepoIds: number[];
   skills: string[];
+  education: Education[];
+  experiences: Experience[];
   selectedTemplate: 'minimal' | 'developer' | 'creative';
   customData: {
     name: string;
@@ -72,6 +74,18 @@ interface AppState {
   disconnect: () => void;
   fetchInitialData: () => Promise<void>;
   fetchMoreRepos: (page: number) => Promise<void>;
+  
+  // Professional Profile actions
+  fetchProfile: () => Promise<void>;
+  syncGithubProfile: () => Promise<void>;
+  importResume: (file: File) => Promise<void>;
+  addEducation: (data: Omit<Education, 'id'>) => Promise<void>;
+  updateEducation: (id: string, data: Partial<Education>) => Promise<void>;
+  deleteEducation: (id: string) => Promise<void>;
+  addExperience: (data: Omit<Experience, 'id'>) => Promise<void>;
+  updateExperience: (id: string, data: Partial<Experience>) => Promise<void>;
+  deleteExperience: (id: string) => Promise<void>;
+  
   hasFetchedInitialData: boolean;
 }
 
@@ -87,6 +101,8 @@ export const useStore = create<AppState>()(
       repoPagination: null,
       selectedRepoIds: [],
       skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
+      education: [],
+      experiences: [],
       selectedTemplate: 'minimal',
       customData: {
         name: '',
@@ -271,6 +287,102 @@ export const useStore = create<AppState>()(
           });
         } catch (error) {
           console.error('Failed to fetch more repos:', error);
+        }
+      },
+
+      fetchProfile: async () => {
+        try {
+          const profile = await profileService.getProfile();
+          set({ 
+            education: profile.education || [], 
+            experiences: profile.experience || [] 
+          });
+        } catch (error) {
+          console.error('Failed to fetch profile:', error);
+        }
+      },
+
+      syncGithubProfile: async () => {
+        try {
+          await profileService.syncGithub();
+          await get().fetchProfile();
+        } catch (error) {
+          console.error('Failed to sync github profile:', error);
+          throw error;
+        }
+      },
+
+      importResume: async (file: File) => {
+        try {
+          await profileService.importResume(file);
+          await get().fetchProfile();
+        } catch (error) {
+          console.error('Failed to import resume:', error);
+          throw error;
+        }
+      },
+
+      addEducation: async (data) => {
+        try {
+          await profileService.addEducation(data);
+          await get().fetchProfile();
+        } catch (error) {
+          console.error('Failed to add education:', error);
+          throw error;
+        }
+      },
+
+      updateEducation: async (id, data) => {
+        try {
+          await profileService.updateEducation(id, data);
+          await get().fetchProfile();
+        } catch (error) {
+          console.error('Failed to update education:', error);
+          throw error;
+        }
+      },
+
+      deleteEducation: async (id) => {
+        try {
+          await profileService.deleteEducation(id);
+          set((state) => ({
+            education: state.education.filter(e => e.id !== id)
+          }));
+        } catch (error) {
+          console.error('Failed to delete education:', error);
+          throw error;
+        }
+      },
+
+      addExperience: async (data) => {
+        try {
+          await profileService.addExperience(data);
+          await get().fetchProfile();
+        } catch (error) {
+          console.error('Failed to add experience:', error);
+          throw error;
+        }
+      },
+
+      updateExperience: async (id, data) => {
+        try {
+          await profileService.updateExperience(id, data);
+          await get().fetchProfile();
+        } catch (error) {
+          console.error('Failed to update experience:', error);
+          throw error;
+        }
+      },
+
+      deleteExperience: async (id) => {
+        try {
+          await profileService.deleteExperience(id);
+          set((state) => ({
+            experiences: state.experiences.filter(e => e.id !== id)
+          }));
+        } catch (error) {
+          console.error('Failed to delete experience:', error);
+          throw error;
         }
       },
 
