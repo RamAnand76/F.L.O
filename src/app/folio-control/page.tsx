@@ -7,7 +7,7 @@ import {
   Plus, Filter, ArrowUpDown, AlertCircle, LayoutGrid, Award, 
   GraduationCap, MessageSquare, FolderOpen, Trash2, 
   Image as ImageIcon, FileText, Upload, Quote, Briefcase, Pencil,
-  Github, FileUp, Loader2, Sparkles, CheckCircle2
+  Github, FileUp, Loader2, Sparkles, CheckCircle2, X
 } from 'lucide-react';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { cn } from '@/lib/utils';
@@ -224,8 +224,8 @@ export default function FolioControlPage() {
           )}
 
           {activeTab === 'skills' && (
-            <div className="space-y-8 max-w-2xl">
-              <h2 className="text-xl md:text-2xl font-medium tracking-tight">Skills & Tech Stack</h2>
+            <div className="space-y-8 max-w-2xl mx-auto">
+              <h2 className="text-xl md:text-2xl font-medium tracking-tight text-center">Skills & Tech Stack</h2>
               <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 space-y-8">
                 <form onSubmit={handleAddSkill} className="relative">
                   <input type="text" value={newSkill} onChange={e => setNewSkill(e.target.value)} placeholder="Add a skill (e.g. React)" className="w-full bg-zinc-950/50 border border-white/10 rounded-xl pl-4 pr-12 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
@@ -239,77 +239,167 @@ export default function FolioControlPage() {
           )}
 
           {activeTab === 'professional' && (
-            <div className="space-y-20 max-w-5xl mx-auto">
-              {/* Experience Subsection */}
-              <section className="space-y-8">
-                <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-500/10 rounded-lg"><Briefcase className="w-5 h-5 text-indigo-400" /></div>
-                    <h2 className="text-xl md:text-2xl text-white font-medium">Work Experience</h2>
+            <div className="space-y-32 max-w-6xl mx-auto py-12">
+              {/* Experience Section */}
+              <section className="space-y-16">
+                <header className="flex items-center justify-between border-b border-white/5 pb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
+                      <Briefcase className="w-6 h-6 text-indigo-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Work Experience</h2>
+                      <p className="text-xs text-zinc-500">Your professional journey and contributions.</p>
+                    </div>
                   </div>
-                  <button onClick={() => { setEditingExp(null); setShowExpModal(true); }} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-lg border border-white/5 transition-all flex items-center gap-2">
-                    <Plus className="w-4 h-4" /> Add Experience
+                  <button onClick={() => { setEditingExp(null); setShowExpModal(true); }} className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center gap-2 group shadow-xl">
+                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add Experience
                   </button>
-                </div>
+                </header>
 
-                <div className="columns-1 md:columns-2 gap-6 space-y-6">
-                  {experiences.map((exp) => (
-                    <div key={exp.id} className="break-inside-avoid p-6 bg-zinc-900/30 border border-white/5 rounded-3xl group relative hover:border-white/10 transition-all">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-bold">{exp.company[0]}</div>
-                          <div>
-                            <h4 className="font-bold text-white leading-tight">{exp.company}</h4>
-                            <p className="text-xs text-zinc-500">{exp.position}</p>
+                <div className="space-y-16 relative">
+                  {/* Vertical Line Connector */}
+                  <div className="absolute left-[3.1rem] top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-white/5 to-transparent hidden md:block" />
+
+                  {experiences.map((exp, index) => {
+                    const colors = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+                    const color = colors[index % colors.length];
+
+                    return (
+                      <motion.div 
+                        key={exp.id} 
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        className="relative group flex flex-col md:flex-row gap-6 md:gap-0 items-start md:items-center"
+                      >
+                        {/* 01. Number and Label */}
+                        <div className="w-24 shrink-0 md:pr-4">
+                          <span className="block text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-1">XP</span>
+                          <span className="text-5xl font-black tracking-tighter text-zinc-800 group-hover:text-zinc-200 transition-colors duration-500">
+                            {(index + 1).toString().padStart(2, '0')}
+                          </span>
+                        </div>
+
+                        {/* 02. Company and Actions */}
+                        <div className="w-full md:w-64 md:px-8 space-y-3 shrink-0">
+                          <h3 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-indigo-400 transition-colors">
+                            {exp.company}
+                          </h3>
+                          <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setEditingExp(exp); setShowExpModal(true); }} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-all"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => deleteExperience(exp.id)} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => { setEditingExp(exp); setShowExpModal(true); }} className="p-1.5 text-zinc-500 hover:text-white"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-zinc-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+
+                        {/* 03. Connector & Point */}
+                        <div className="hidden md:flex flex-1 items-center px-4">
+                          <div className="flex-1 h-px bg-gradient-to-r from-white/5 via-white/10 to-transparent" style={{ backgroundColor: `${color}20` }} />
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0 mr-12 transition-all duration-500 group-hover:scale-125" style={{ backgroundColor: color, boxShadow: `0 0 20px ${color}60` }} />
                         </div>
-                      </div>
-                      <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                        {exp.startDate && new Date(exp.startDate).getFullYear()} - {exp.isCurrent ? 'Present' : (exp.endDate && new Date(exp.endDate).getFullYear())}
-                      </p>
-                      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-3">{exp.description}</p>
-                    </div>
-                  ))}
-                  {experiences.length === 0 && <div className="p-8 border-2 border-dashed border-white/5 rounded-3xl text-center text-zinc-500 text-sm">No experience entries found. Sync from GitHub or add manually.</div>}
+
+                        {/* 04. Details and List */}
+                        <div className="flex-[1.5] space-y-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-3">
+                              <div className="md:hidden w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                              <h4 className="text-base font-bold text-zinc-200 tracking-tight">{exp.position}</h4>
+                            </div>
+                            <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                              <span>{exp.startDate && new Date(exp.startDate).getFullYear()}</span>
+                              <span className="w-4 h-px bg-zinc-800" />
+                              <span className={cn(exp.isCurrent ? "text-indigo-400" : "")}>
+                                {exp.isCurrent ? 'PRESENT' : (exp.endDate && new Date(exp.endDate).getFullYear())}
+                              </span>
+                            </p>
+                          </div>
+                          <p className="text-sm text-zinc-500 leading-relaxed max-w-lg group-hover:text-zinc-400 transition-colors">
+                            {exp.description}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                  {experiences.length === 0 && <div className="p-12 border border-dashed border-white/5 rounded-[2.5rem] text-center text-zinc-600 font-medium">No experience data found. Try syncing from GitHub or uploading a resume.</div>}
                 </div>
               </section>
 
-              {/* Education Subsection */}
-              <section className="space-y-8">
-                <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-500/10 rounded-lg"><GraduationCap className="w-5 h-5 text-purple-400" /></div>
-                    <h2 className="text-xl md:text-2xl text-white font-medium">Education</h2>
-                  </div>
-                  <button onClick={() => { setEditingEdu(null); setShowEduModal(true); }} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-lg border border-white/5 transition-all flex items-center gap-2">
-                    <Plus className="w-4 h-4" /> Add Education
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {education.map((edu) => (
-                    <div key={edu.id} className="p-6 bg-zinc-900/30 border border-white/5 rounded-3xl group relative hover:border-white/10 transition-all">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h4 className="font-bold text-white leading-tight">{edu.school}</h4>
-                          <p className="text-xs text-purple-400 font-medium">{edu.degree} {edu.fieldOfStudy && `in ${edu.fieldOfStudy}`}</p>
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => { setEditingEdu(edu); setShowEduModal(true); }} className="p-1.5 text-zinc-500 hover:text-white"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => deleteEducation(edu.id)} className="p-1.5 text-zinc-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </div>
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
-                        {edu.startDate && new Date(edu.startDate).getFullYear()} - {edu.endDate && new Date(edu.endDate).getFullYear()}
-                      </p>
-                      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 italic">{edu.description}</p>
+              {/* Education Section */}
+              <section className="space-y-16">
+                <header className="flex items-center justify-between border-b border-white/5 pb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-lg shadow-purple-500/5">
+                      <GraduationCap className="w-6 h-6 text-purple-400" />
                     </div>
-                  ))}
-                  {education.length === 0 && <div className="p-8 border-2 border-dashed border-white/5 rounded-3xl text-center text-zinc-500 text-sm">No education entries found.</div>}
+                    <div>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Education</h2>
+                      <p className="text-xs text-zinc-500">Academic foundation and certifications.</p>
+                    </div>
+                  </div>
+                  <button onClick={() => { setEditingEdu(null); setShowEduModal(true); }} className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center gap-2 group shadow-xl">
+                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add Education
+                  </button>
+                </header>
+
+                <div className="space-y-16 relative">
+                  <div className="absolute left-[3.1rem] top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-white/5 to-transparent hidden md:block" />
+
+                  {education.map((edu, index) => {
+                    const colors = ['#ec4899', '#a855f7', '#6366f1', '#06b6d4', '#10b981'];
+                    const color = colors[index % colors.length];
+
+                    return (
+                      <motion.div 
+                        key={edu.id} 
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        className="relative group flex flex-col md:flex-row gap-6 md:gap-0 items-start md:items-center"
+                      >
+                        <div className="w-24 shrink-0 md:pr-4">
+                          <span className="block text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-1">EDU</span>
+                          <span className="text-5xl font-black tracking-tighter text-zinc-800 group-hover:text-zinc-200 transition-colors duration-500">
+                            {(index + 1).toString().padStart(2, '0')}
+                          </span>
+                        </div>
+
+                        <div className="w-full md:w-64 md:px-8 space-y-3 shrink-0">
+                          <h3 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-purple-400 transition-colors">
+                            {edu.school}
+                          </h3>
+                          <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setEditingEdu(edu); setShowEduModal(true); }} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-all"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => deleteEducation(edu.id)} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </div>
+
+                        <div className="hidden md:flex flex-1 items-center px-4">
+                          <div className="flex-1 h-px bg-gradient-to-r from-white/5 via-white/10 to-transparent" style={{ backgroundColor: `${color}20` }} />
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0 mr-12 transition-all duration-500 group-hover:scale-125" style={{ backgroundColor: color, boxShadow: `0 0 20px ${color}60` }} />
+                        </div>
+
+                        <div className="flex-[1.5] space-y-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-3">
+                              <div className="md:hidden w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                              <h4 className="text-base font-bold text-zinc-200 tracking-tight">
+                                {edu.degree} {edu.fieldOfStudy && <span className="text-zinc-500 font-normal">in {edu.fieldOfStudy}</span>}
+                              </h4>
+                            </div>
+                            <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                              <span>{edu.startDate && new Date(edu.startDate).getFullYear()}</span>
+                              <span className="w-4 h-px bg-zinc-800" />
+                              <span>{edu.endDate && new Date(edu.endDate).getFullYear()}</span>
+                            </p>
+                          </div>
+                          <p className="text-sm text-zinc-500 leading-relaxed max-w-lg group-hover:text-zinc-400 transition-colors">
+                            {edu.description}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                  {education.length === 0 && <div className="p-12 border border-dashed border-white/5 rounded-[2.5rem] text-center text-zinc-600 font-medium">No education entries found.</div>}
                 </div>
               </section>
             </div>
@@ -402,14 +492,22 @@ export default function FolioControlPage() {
             />
             
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               className="relative w-full max-w-sm bg-gradient-to-b from-zinc-900 to-black border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(79,70,229,0.3)]"
             >
               {/* Animated Background Element */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
               
+              {/* Close Button */}
+              <button 
+                onClick={() => setShowSuccessModal(false)}
+                className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all group z-[20]"
+              >
+                <X className="w-4 h-4 text-zinc-500 group-hover:text-white" />
+              </button>
+
               <div className="relative p-10 flex flex-col items-center text-center space-y-8">
                 {/* Success Icon Wrapper */}
                 <div className="relative">
