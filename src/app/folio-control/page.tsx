@@ -56,6 +56,10 @@ export default function FolioControlPage() {
   const [assets, setAssets] = useState([
     { id: '1', name: 'Portfolio_v1.pdf', type: 'pdf', url: '#' },
   ]);
+  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successSource, setSuccessSource] = useState<'github' | 'resume'>('github');
+  const [importedCounts, setImportedCounts] = useState({ edu: 0, exp: 0 });
 
   useEffect(() => {
     fetchProfile().finally(() => setIsLoading(false));
@@ -63,8 +67,16 @@ export default function FolioControlPage() {
 
   const handleSyncGithub = async () => {
     setIsSyncing(true);
+    const prevEdu = education.length;
+    const prevExp = experiences.length;
     try {
       await syncGithubProfile();
+      setSuccessSource('github');
+      setImportedCounts({ 
+        edu: Math.max(0, useStore.getState().education.length - prevEdu), 
+        exp: Math.max(0, useStore.getState().experiences.length - prevExp) 
+      });
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {
@@ -76,12 +88,22 @@ export default function FolioControlPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setIsImporting(true);
+    const prevEdu = education.length;
+    const prevExp = experiences.length;
     try {
       await importResume(file);
+      setSuccessSource('resume');
+      setImportedCounts({ 
+        edu: Math.max(0, useStore.getState().education.length - prevEdu), 
+        exp: Math.max(0, useStore.getState().experiences.length - prevExp) 
+      });
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Import failed:', error);
     } finally {
       setIsImporting(false);
+      // Reset input
+      e.target.value = '';
     }
   };
 
@@ -366,6 +388,83 @@ export default function FolioControlPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Premium Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-gradient-to-b from-zinc-900 to-black border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(79,70,229,0.3)]"
+            >
+              {/* Animated Background Element */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+              
+              <div className="relative p-10 flex flex-col items-center text-center space-y-8">
+                {/* Success Icon Wrapper */}
+                <div className="relative">
+                  <motion.div 
+                    initial={{ scale: 0 }} 
+                    animate={{ scale: 1 }} 
+                    transition={{ type: "spring", damping: 12, delay: 0.2 }}
+                    className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-500/20 rotate-12"
+                  >
+                    <CheckCircle2 className="w-12 h-12 text-white -rotate-12" />
+                  </motion.div>
+                  
+                  {/* Decorative Sparkles */}
+                  <motion.div 
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      opacity: [0.5, 1, 0.5]
+                    }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="absolute -top-2 -right-2 p-2 bg-zinc-800 rounded-full border border-white/10"
+                  >
+                    <Sparkles className="w-4 h-4 text-yellow-400" />
+                  </motion.div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-bold text-white tracking-tight">Sync Complete!</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed px-4">
+                    Successfully extracted {successSource === 'github' ? 'GitHub README' : 'resume'} data using F.L.O AI.
+                  </p>
+                </div>
+
+                {/* Summary Badges */}
+                <div className="flex gap-4 w-full justify-center">
+                  <div className="flex flex-col items-center gap-1.5 min-w-[80px] p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <span className="text-xl font-bold text-indigo-400">{importedCounts.edu}</span>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Education</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 min-w-[80px] p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <span className="text-xl font-bold text-purple-400">{importedCounts.exp}</span>
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Experience</span>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setShowSuccessModal(false)}
+                  className="w-full py-4 bg-white text-black text-sm font-bold rounded-2xl hover:bg-zinc-200 transition-all shadow-lg active:scale-[0.98]"
+                >
+                  Awesome
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

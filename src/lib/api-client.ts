@@ -52,7 +52,7 @@ class ApiClient {
       console.warn(`[ApiClient] No access token found for request to ${endpoint}`);
     }
 
-    if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
+    if (!(options.body instanceof FormData) && options.body && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
 
