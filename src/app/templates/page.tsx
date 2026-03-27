@@ -116,45 +116,45 @@ export default function TemplatesPage() {
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative rounded-[2.5rem] overflow-hidden min-h-[460px] flex flex-col justify-end p-10 md:p-14 border border-white/10 shadow-2xl group"
+            className="relative rounded-[2rem] overflow-hidden min-h-[345px] flex flex-col justify-end p-8 md:p-10 border border-white/10 shadow-2xl group"
           >
             <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 transition-transform duration-1000 group-hover:scale-105", focusedTemplate.color)} />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 mix-blend-overlay" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/40 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+            <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 mix-blend-overlay" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/40 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
 
             <div className="relative z-10 w-full max-w-3xl">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-white border border-white/20 flex items-center gap-1.5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-white border border-white/20 flex items-center gap-1.5">
                   <Flame className="w-3 h-3 text-orange-400" fill="currentColor" /> Trending
                 </span>
                 {focusedTemplate.tags.slice(0, 2).map(tag => (
-                  <span key={tag} className="px-3 py-1 rounded-full bg-black/30 backdrop-blur-md text-xs font-medium text-zinc-300 border border-white/5">
+                  <span key={tag} className="px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-md text-xs font-medium text-zinc-300 border border-white/5">
                     {tag}
                   </span>
                 ))}
               </div>
               
-              <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight text-white drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl font-bold mb-3 tracking-tight text-white drop-shadow-lg">
                 {focusedTemplate.name}
               </h1>
               
-              <p className="text-zinc-300 text-lg md:text-xl mb-8 leading-relaxed drop-shadow max-w-2xl">
+              <p className="text-zinc-300 text-lg md:text-xl mb-6 leading-relaxed drop-shadow max-w-2xl">
                 {focusedTemplate.desc}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <button 
                   onClick={() => setPreviewId(focusedTemplate.id)} 
-                  className="bg-white text-black px-8 py-4 rounded-full font-bold flex items-center gap-2 hover:bg-zinc-200 hover:scale-105 transition-all shadow-xl"
+                  className="bg-white text-black px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-zinc-200 hover:scale-105 transition-all shadow-xl"
                 >
-                  <Play className="w-5 h-5 fill-current" /> Live Preview
+                  <Play className="w-4 h-4 fill-current" /> Live Preview
                 </button>
                 <button 
                   onClick={() => handleUseTemplate(focusedTemplate.id)} 
-                  className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-8 py-4 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 hover:scale-105 transition-all shadow-xl"
+                  className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 hover:scale-105 transition-all shadow-xl"
                 >
-                  <Download className="w-5 h-5" /> Use Template
+                  <Download className="w-4 h-4" /> Use Template
                 </button>
               </div>
             </div>
@@ -162,31 +162,31 @@ export default function TemplatesPage() {
         </AnimatePresence>
 
         {/* Bottom Grid */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mt-2">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">
               {searchQuery || activeTab !== 'All Templates' ? `Results for "${searchQuery || activeTab}"` : 'You might like'}
             </h3>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {filteredTemplates.filter(t => t.id !== focusedId).map(t => (
               <motion.div 
                 key={`grid-${t.id}`} 
                 onClick={() => setFocusedId(t.id)} 
                 className="group cursor-pointer"
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className={cn("w-full aspect-[4/3] rounded-[1.5rem] mb-4 relative overflow-hidden bg-gradient-to-br shadow-lg border border-white/5", t.color)}>
+                <div className={cn("w-full aspect-[4/3] rounded-[1.25rem] mb-3 relative overflow-hidden bg-gradient-to-br shadow-lg border border-white/5", t.color)}>
                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-                         <Play className="w-5 h-5 text-white fill-current ml-1" />
+                      <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
+                         <Play className="w-4 h-4 text-white fill-current ml-0.5" />
                       </div>
                    </div>
                 </div>
-                <h4 className="font-semibold text-base text-white mb-1 group-hover:text-indigo-400 transition-colors">{t.name}</h4>
+                <h4 className="font-semibold text-base text-white mb-0.5 group-hover:text-indigo-400 transition-colors">{t.name}</h4>
                 <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{t.desc}</p>
               </motion.div>
             ))}
