@@ -54,7 +54,12 @@ export default function FolioControlPage() {
   const [editingExp, setEditingExp] = useState<Experience | null>(null);
 
   const [testimonials, setTestimonials] = useState([
-    { id: '1', name: 'Sarah Chen', role: 'Product Designer', content: 'Outstanding work on the design system. Fast, efficient, and great eye for detail.', avatar: 'S' },
+    { id: '1', name: 'Ethan Levison', role: 'Compliance Analyst', content: 'This platform streamlined our entire workflow, making decentralized transactions seamless and efficient.', avatar: 'https://i.pravatar.cc/150?u=1' },
+    { id: '2', name: 'Mara Winslow', role: 'DeFi Strategist', content: 'We\'ve significantly reduced manual oversight, thanks to the automated compliance monitoring.', avatar: 'https://i.pravatar.cc/150?u=2' },
+    { id: '3', name: 'Damian Reddington', role: 'DeFi Strategist', content: 'The security features have given us peace of mind, knowing our assets are always protected.', avatar: 'https://i.pravatar.cc/150?u=3' },
+    { id: '4', name: 'Lukas Brierley', role: 'Smart Contract Developer', content: 'Integrating our business with this platform has unlocked new possibilities in the decentralized space.', avatar: 'https://i.pravatar.cc/150?u=4' },
+    { id: '5', name: 'Elara Whitfield', role: 'Web3 Community Manager', content: 'The intuitive interface has made navigating Web3 technology accessible to our entire team.', avatar: 'https://i.pravatar.cc/150?u=5', isFeatured: true },
+    { id: '6', name: 'Tessa Galloway', role: 'NFT Marketplace Curator', content: 'With the platform\'s real-time updates, we can now manage our crypto assets with unmatched precision.', avatar: 'https://i.pravatar.cc/150?u=6' },
   ]);
   const [assets, setAssets] = useState([
     { id: '1', name: 'document.docx', type: 'doc', url: '#' },
@@ -170,7 +175,7 @@ export default function FolioControlPage() {
           <button
             onClick={handleSyncGithub}
             disabled={isSyncing}
-            className="px-5 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-5 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Github className="w-4 h-4" />}
             Sync from GitHub
@@ -191,7 +196,7 @@ export default function FolioControlPage() {
       <div className="grid grid-cols-3 gap-2 mb-10 md:hidden">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn(
-            "relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[10px] font-bold transition-all duration-300 border",
+            "relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[10px] font-bold transition-all duration-300 border cursor-pointer",
             activeTab === tab.id ? "bg-zinc-800 text-white border-white/10 shadow-lg" : "bg-zinc-900/40 text-zinc-500 border-white/5 hover:text-zinc-300 hover:bg-zinc-800/60"
           )}>
             {activeTab === tab.id && <motion.div layoutId="folioActiveTabMobile" className="absolute inset-0 bg-zinc-800 rounded-2xl" transition={{ type: "spring", bounce: 0.2, duration: 0.5 }} />}
@@ -205,7 +210,7 @@ export default function FolioControlPage() {
       <div className="hidden md:flex p-1 bg-zinc-900/80 border border-white/5 rounded-full backdrop-blur-xl mb-12 w-fit mx-auto">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn(
-            "relative group px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap text-zinc-500 hover:text-zinc-300",
+            "relative group px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap text-zinc-500 hover:text-zinc-300 cursor-pointer",
             activeTab === tab.id && "text-white"
           )}>
             {activeTab === tab.id && <motion.div layoutId="folioActiveTab" className="absolute inset-0 bg-zinc-800 rounded-full" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />}
@@ -438,24 +443,52 @@ export default function FolioControlPage() {
           )}
 
           {activeTab === 'testimonials' && (
-            <div className="space-y-12 max-w-6xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl md:text-2xl font-medium tracking-tight">Testimonials</h2>
-                <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl"><Plus className="w-4 h-4" /> Add Testimonial</button>
+            <div className="space-y-12 max-w-6xl mx-auto py-8">
+              <div className="flex flex-col items-center justify-center mb-12 text-center relative">
+                {/* Background Glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-yellow-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+                <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-white mb-6">Your Testimonials</h2>
+                <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer relative z-10"><Plus className="w-4 h-4" /> Add Testimonial</button>
               </div>
+
               <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-                {testimonials.map(t => (
-                  <div key={t.id} className="break-inside-avoid p-8 bg-[#1a1a1a]/40 border border-white/5 rounded-3xl relative group">
-                    <Quote className="absolute -right-4 -top-4 w-24 h-24 text-white/5" />
-                    <p className="text-sm text-zinc-300 leading-relaxed mb-8 relative z-10 font-medium">“{t.content}”</p>
-                    <div className="flex items-center justify-between relative z-10">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white">{t.avatar}</div>
-                        <div><p className="text-sm font-bold text-white">{t.name}</p><p className="text-xs text-zinc-500">{t.role}</p></div>
+                {testimonials.map(t => {
+                  const isFeatured = (t as any).isFeatured;
+                  return (
+                    <div
+                      key={t.id}
+                      className={cn(
+                        "break-inside-avoid relative flex flex-col rounded-[1.5rem] transition-all duration-300 group",
+                        isFeatured
+                          ? "bg-[#181a20] border border-[#0088ff] shadow-[0_0_40px_-5px_rgba(0,136,255,0.25)] z-10 lg:scale-[1.02]"
+                          : "bg-[#13141b] border border-white/5 hover:border-white/10"
+                      )}
+                    >
+                      <div className="p-8 flex flex-col h-full">
+                        <p className={cn(
+                          "leading-[1.7] font-light mb-8",
+                          isFeatured ? "text-[15px] sm:text-[17px] text-white font-normal" : "text-[14px] sm:text-[15px] text-zinc-300"
+                        )}>
+                          "{t.content}"
+                        </p>
+                        <div className="flex items-center gap-4 mt-auto">
+                          <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                          <div className="flex flex-col leading-tight">
+                            <span className={cn("font-medium", isFeatured ? "text-[15px] text-white" : "text-[14px] text-zinc-300")}>{t.name}</span>
+                            <span className={cn("text-[12px] mt-0.5", isFeatured ? "text-zinc-400" : "text-zinc-500")}>{t.role}</span>
+                          </div>
+                        </div>
                       </div>
+
+                      {isFeatured && (
+                        <div className="w-full bg-[#0088ff] text-white text-center py-3.5 text-sm font-semibold rounded-b-[1.4rem] cursor-pointer hover:bg-[#0077ee] transition-colors -mt-1 relative z-10">
+                          View Full Case Study
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -467,7 +500,7 @@ export default function FolioControlPage() {
                 <div className="flex items-center gap-3">
                   <Dropdown value="newest" onChange={() => { }} options={[{ label: 'Newest First', value: 'newest' }]} className="w-40 hidden md:block" />
                   <Dropdown value="grid" onChange={() => { }} options={[{ label: 'Grid View', value: 'grid' }]} className="w-36 hidden md:block" />
-                  <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-xl flex items-center gap-2 shadow-xl hover:bg-zinc-200 transition-colors">
+                  <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-xl flex items-center gap-2 shadow-xl hover:bg-zinc-200 transition-colors cursor-pointer">
                     <Upload className="w-4 h-4" /> Upload
                   </button>
                 </div>
