@@ -3,11 +3,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
-import { 
-  Plus, Filter, ArrowUpDown, AlertCircle, LayoutGrid, Award, 
-  GraduationCap, MessageSquare, FolderOpen, Trash2, 
+import {
+  Plus, Filter, ArrowUpDown, AlertCircle, LayoutGrid, Award,
+  GraduationCap, MessageSquare, FolderOpen, Trash2,
   Image as ImageIcon, FileText, Upload, Quote, Briefcase, Pencil,
-  Github, FileUp, Loader2, Sparkles, CheckCircle2, X
+  Github, FileUp, Loader2, Sparkles, CheckCircle2, X,
+  MoreHorizontal, Music, Play, FileCode, FileArchive, Code2
 } from 'lucide-react';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { cn } from '@/lib/utils';
@@ -24,17 +25,17 @@ import { ExperienceForm } from '@/components/features/folio/ExperienceForm';
 export type FolioTab = 'repos' | 'skills' | 'professional' | 'testimonials' | 'assets';
 
 export default function FolioControlPage() {
-  const { 
+  const {
     repos, selectedRepoIds, toggleRepoSelection, skills, setSkills,
     education, experiences, fetchProfile, syncGithubProfile, importResume,
     addEducation, updateEducation, deleteEducation,
     addExperience, updateExperience, deleteExperience,
     fetchMoreRepos, repoPagination
   } = useStore();
-  
+
   const { width } = useWindowSize();
   const [activeTab, setActiveTab] = useState<FolioTab>('repos');
-  
+
   // Local UI state
   const [newSkill, setNewSkill] = useState('');
   const [sortBy, setSortBy] = useState<'stars' | 'name' | 'updated-desc' | 'updated-asc'>('stars');
@@ -51,14 +52,25 @@ export default function FolioControlPage() {
 
   const [showExpModal, setShowExpModal] = useState(false);
   const [editingExp, setEditingExp] = useState<Experience | null>(null);
-  
+
   const [testimonials, setTestimonials] = useState([
     { id: '1', name: 'Sarah Chen', role: 'Product Designer', content: 'Outstanding work on the design system. Fast, efficient, and great eye for detail.', avatar: 'S' },
   ]);
   const [assets, setAssets] = useState([
-    { id: '1', name: 'Portfolio_v1.pdf', type: 'pdf', url: '#' },
+    { id: '1', name: 'document.docx', type: 'doc', url: '#' },
+    { id: '2', name: 'video_player_installer_set...', type: 'video', url: '#' },
+    { id: '3', name: 'cheat_codez.zip', type: 'archive', url: '#' },
+    { id: '4', name: 'REACT COMPONENT.tsx', type: 'code', url: '#' },
+    { id: '5', name: 'anime_waifus.png', type: 'image', url: '#' },
+    { id: '6', name: '2028/18/77_secret.txt', type: 'doc', url: '#' },
+    { id: '7', name: 'blackmail_image.jpg', type: 'image', url: '#' },
+    { id: '8', name: 'favorite_music.mp3', type: 'audio', url: '#' },
+    { id: '9', name: 'customer_data.txt', type: 'doc', url: '#' },
+    { id: '10', name: 'recording.wav', type: 'audio', url: '#' },
+    { id: '11', name: 'document.txt', type: 'doc', url: '#' },
+    { id: '12', name: '2028/11/10.txt', type: 'doc', url: '#' },
   ]);
-  
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successSource, setSuccessSource] = useState<'github' | 'resume'>('github');
   const [importedCounts, setImportedCounts] = useState({ edu: 0, exp: 0 });
@@ -74,9 +86,9 @@ export default function FolioControlPage() {
     try {
       await syncGithubProfile();
       setSuccessSource('github');
-      setImportedCounts({ 
-        edu: Math.max(0, useStore.getState().education.length - prevEdu), 
-        exp: Math.max(0, useStore.getState().experiences.length - prevExp) 
+      setImportedCounts({
+        edu: Math.max(0, useStore.getState().education.length - prevEdu),
+        exp: Math.max(0, useStore.getState().experiences.length - prevExp)
       });
       setShowSuccessModal(true);
     } catch (error) {
@@ -95,9 +107,9 @@ export default function FolioControlPage() {
     try {
       await importResume(file);
       setSuccessSource('resume');
-      setImportedCounts({ 
-        edu: Math.max(0, useStore.getState().education.length - prevEdu), 
-        exp: Math.max(0, useStore.getState().experiences.length - prevExp) 
+      setImportedCounts({
+        edu: Math.max(0, useStore.getState().education.length - prevEdu),
+        exp: Math.max(0, useStore.getState().experiences.length - prevExp)
       });
       setShowSuccessModal(true);
     } catch (error) {
@@ -155,7 +167,7 @@ export default function FolioControlPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <button 
+          <button
             onClick={handleSyncGithub}
             disabled={isSyncing}
             className="px-5 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50"
@@ -163,13 +175,13 @@ export default function FolioControlPage() {
             {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Github className="w-4 h-4" />}
             Sync from GitHub
           </button>
-          
+
           <label className={cn(
             "px-5 py-2.5 bg-indigo-600 rounded-xl text-xs font-bold text-white hover:bg-indigo-500 transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/20",
             isImporting && "opacity-50 pointer-events-none"
           )}>
             {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-            {isImporting ? 'Processing...' : 'Upload Resume'}
+            {isImporting ? 'Processing...' : 'Import from Resume'}
             <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} />
           </label>
         </div>
@@ -179,9 +191,9 @@ export default function FolioControlPage() {
       <div className="grid grid-cols-3 gap-2 mb-10 md:hidden">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn(
-              "relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[10px] font-bold transition-all duration-300 border",
-              activeTab === tab.id ? "bg-zinc-800 text-white border-white/10 shadow-lg" : "bg-zinc-900/40 text-zinc-500 border-white/5 hover:text-zinc-300 hover:bg-zinc-800/60"
-            )}>
+            "relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[10px] font-bold transition-all duration-300 border",
+            activeTab === tab.id ? "bg-zinc-800 text-white border-white/10 shadow-lg" : "bg-zinc-900/40 text-zinc-500 border-white/5 hover:text-zinc-300 hover:bg-zinc-800/60"
+          )}>
             {activeTab === tab.id && <motion.div layoutId="folioActiveTabMobile" className="absolute inset-0 bg-zinc-800 rounded-2xl" transition={{ type: "spring", bounce: 0.2, duration: 0.5 }} />}
             <tab.icon className="w-4 h-4 relative z-10" />
             <span className="relative z-10 leading-none">{tab.label}</span>
@@ -193,9 +205,9 @@ export default function FolioControlPage() {
       <div className="hidden md:flex p-1 bg-zinc-900/80 border border-white/5 rounded-full backdrop-blur-xl mb-12 w-fit mx-auto">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn(
-              "relative group px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap text-zinc-500 hover:text-zinc-300",
-              activeTab === tab.id && "text-white"
-            )}>
+            "relative group px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap text-zinc-500 hover:text-zinc-300",
+            activeTab === tab.id && "text-white"
+          )}>
             {activeTab === tab.id && <motion.div layoutId="folioActiveTab" className="absolute inset-0 bg-zinc-800 rounded-full" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />}
             <tab.icon className={cn("w-4 h-4 relative z-10 transition-colors", activeTab === tab.id ? "text-white" : "text-zinc-500 group-hover:text-zinc-300")} />
             <span className="relative z-10">{tab.label}</span>
@@ -213,7 +225,7 @@ export default function FolioControlPage() {
                   {selectedRepoIds.length} Selected
                 </span>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <Dropdown value={sortBy} onChange={(val) => setSortBy(val as any)} options={[{ label: 'Sort by Stars', value: 'stars' }, { label: 'Sort by Name', value: 'name' }]} icon={<ArrowUpDown className="w-4 h-4" />} className="w-full sm:w-64" />
                 <Dropdown value={filterLang} onChange={setFilterLang} options={languages.map(l => ({ label: l, value: l }))} icon={<Filter className="w-4 h-4" />} className="w-full sm:w-48" />
@@ -286,8 +298,8 @@ export default function FolioControlPage() {
                     const color = colors[index % colors.length];
 
                     return (
-                      <motion.div 
-                        key={exp.id} 
+                      <motion.div
+                        key={exp.id}
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -369,8 +381,8 @@ export default function FolioControlPage() {
                     const color = colors[index % colors.length];
 
                     return (
-                      <motion.div 
-                        key={edu.id} 
+                      <motion.div
+                        key={edu.id}
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -449,13 +461,35 @@ export default function FolioControlPage() {
           )}
 
           {activeTab === 'assets' && (
-            <div className="space-y-8 max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-6"><h2 className="text-xl md:text-2xl font-medium tracking-tight">Assets</h2><button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl"><Upload className="w-4 h-4" /> Upload Asset</button></div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-8 max-w-6xl mx-auto py-4">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl md:text-2xl font-medium tracking-tight">Assets</h2>
+                <div className="flex items-center gap-3">
+                  <Dropdown value="newest" onChange={() => { }} options={[{ label: 'Newest First', value: 'newest' }]} className="w-40 hidden md:block" />
+                  <Dropdown value="grid" onChange={() => { }} options={[{ label: 'Grid View', value: 'grid' }]} className="w-36 hidden md:block" />
+                  <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-xl flex items-center gap-2 shadow-xl hover:bg-zinc-200 transition-colors">
+                    <Upload className="w-4 h-4" /> Upload
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
                 {assets.map(asset => (
-                  <div key={asset.id} className="aspect-square bg-[#1a1a1a]/40 border border-white/5 rounded-2xl flex flex-col items-center justify-center p-4">
-                    <div className="p-4 bg-white/5 rounded-2xl mb-3">{asset.type === 'image' ? <ImageIcon className="w-6 h-6 text-indigo-400" /> : <FileText className="w-6 h-6 text-emerald-400" />}</div>
-                    <p className="text-[10px] text-white text-center font-bold line-clamp-1">{asset.name}</p>
+                  <div key={asset.id} className="group relative bg-[#18181b] border border-white/5 rounded-[1.5rem] p-3 hover:border-indigo-500/50 hover:bg-indigo-500/5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.15)] transition-all cursor-pointer flex flex-col h-full">
+                    <div className="w-full aspect-[4/3] bg-zinc-900/60 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-indigo-500/10 transition-colors">
+                      {asset.type === 'image' && <ImageIcon className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
+                      {asset.type === 'video' && <Play className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors fill-zinc-500 group-hover:fill-indigo-400/20" />}
+                      {asset.type === 'audio' && <Music className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
+                      {asset.type === 'code' && <Code2 className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
+                      {asset.type === 'archive' && <FileArchive className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
+                      {asset.type === 'doc' && <FileText className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
+                    </div>
+                    <div className="flex items-center justify-between px-2 pb-1 mt-auto">
+                      <p className="text-xs font-medium text-zinc-400 truncate w-[85%] group-hover:text-indigo-300 transition-colors">{asset.name}</p>
+                      <button className="text-zinc-500 hover:text-white transition-colors p-1.5 -mr-1.5 bg-white/0 hover:bg-white/5 rounded-lg">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -466,9 +500,9 @@ export default function FolioControlPage() {
 
       {/* Modals */}
       <Modal isOpen={showEduModal} onClose={() => setShowEduModal(false)} title={editingEdu ? 'Edit Education' : 'Add Education'}>
-        <EducationForm 
+        <EducationForm
           initialData={editingEdu || undefined}
-          onSubmit={async (data) => { 
+          onSubmit={async (data) => {
             if (editingEdu) await updateEducation(editingEdu.id, data);
             else await addEducation(data);
             setShowEduModal(false);
@@ -478,7 +512,7 @@ export default function FolioControlPage() {
       </Modal>
 
       <Modal isOpen={showExpModal} onClose={() => setShowExpModal(false)} title={editingExp ? 'Edit Experience' : 'Add Experience'}>
-        <ExperienceForm 
+        <ExperienceForm
           initialData={editingExp || undefined}
           onSubmit={async (data) => {
             if (editingExp) await updateExperience(editingExp.id, data);
@@ -503,14 +537,14 @@ export default function FolioControlPage() {
       <AnimatePresence>
         {showSuccessModal && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowSuccessModal(false)}
               className="absolute inset-0 bg-black/90 backdrop-blur-md"
             />
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -519,9 +553,9 @@ export default function FolioControlPage() {
             >
               {/* Animated Background Element */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
-              
+
               {/* Close Button */}
-              <button 
+              <button
                 onClick={() => setShowSuccessModal(false)}
                 className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all group z-[20]"
               >
@@ -531,18 +565,18 @@ export default function FolioControlPage() {
               <div className="relative p-10 flex flex-col items-center text-center space-y-8">
                 {/* Success Icon Wrapper */}
                 <div className="relative">
-                  <motion.div 
-                    initial={{ scale: 0 }} 
-                    animate={{ scale: 1 }} 
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
                     transition={{ type: "spring", damping: 12, delay: 0.2 }}
                     className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-500/20 rotate-12"
                   >
                     <CheckCircle2 className="w-12 h-12 text-white -rotate-12" />
                   </motion.div>
-                  
+
                   {/* Decorative Sparkles */}
-                  <motion.div 
-                    animate={{ 
+                  <motion.div
+                    animate={{
                       scale: [1, 1.2, 1],
                       opacity: [0.5, 1, 0.5]
                     }}
@@ -572,7 +606,7 @@ export default function FolioControlPage() {
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={() => setShowSuccessModal(false)}
                   className="w-full py-4 bg-white text-black text-sm font-bold rounded-2xl hover:bg-zinc-200 transition-all shadow-lg active:scale-[0.98]"
                 >
