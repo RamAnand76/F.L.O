@@ -251,6 +251,9 @@ export const useStore = create<AppState>()(
             isAuthenticated: true,
             hasFetchedInitialData: true,
           });
+
+          // Also fetch full profile (education/experience)
+          await get().fetchProfile();
         } catch (error) {
           console.error('Failed to fetch initial data:', error);
         }
@@ -387,14 +390,15 @@ export const useStore = create<AppState>()(
       },
 
       disconnect: () => {
-        // Run async but catch errors so they don't bubble up as unhandled promise rejections
         githubService.disconnect().catch(err => console.warn('Backend disconnect failed or aborted:', err));
-        
         apiClient.clearToken();
         set({ 
           githubUser: null, 
           repos: [], 
           selectedRepoIds: [], 
+          skills: [], 
+          education: [], 
+          experiences: [],
           customData: { 
             name: '', 
             bio: '', 
@@ -407,12 +411,24 @@ export const useStore = create<AppState>()(
           }, 
           isAuthenticated: false,
           hasFetchedInitialData: false,
+          repoPagination: null
         });
       },
     }),
     {
-      name: 'flo-storage-v2',
-      partialize: (state) => ({ ...state, hasFetchedInitialData: false })
+      name: 'flo-storage-v5', // Changed version to clear current stale data
+      partialize: (state) => ({ 
+        isAuthenticated: state.isAuthenticated,
+        githubUser: state.githubUser,
+        repos: state.repos,
+        selectedRepoIds: state.selectedRepoIds,
+        skills: state.skills,
+        education: state.education,
+        experiences: state.experiences,
+        selectedTemplate: state.selectedTemplate,
+        customData: state.customData,
+        repoPagination: state.repoPagination
+      })
     }
   )
 );
