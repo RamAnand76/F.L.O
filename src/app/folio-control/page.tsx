@@ -28,7 +28,8 @@ export default function FolioControlPage() {
     repos, selectedRepoIds, toggleRepoSelection, skills, setSkills,
     education, experiences, fetchProfile, syncGithubProfile, importResume,
     addEducation, updateEducation, deleteEducation,
-    addExperience, updateExperience, deleteExperience
+    addExperience, updateExperience, deleteExperience,
+    fetchMoreRepos, repoPagination
   } = useStore();
   
   const { width } = useWindowSize();
@@ -43,6 +44,7 @@ export default function FolioControlPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [showEduModal, setShowEduModal] = useState(false);
   const [editingEdu, setEditingEdu] = useState<Education | null>(null);
@@ -220,6 +222,24 @@ export default function FolioControlPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredAndSortedRepos.map((repo, i) => <RepoCard key={repo.id} repo={repo} isSelected={selectedRepoIds.includes(repo.id)} onToggle={() => toggleRepoSelection(repo.id)} index={i} />)}
               </div>
+
+              {/* Load More */}
+              {repoPagination && repoPagination.currentPage < repoPagination.totalPages && (
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={async () => {
+                      setIsLoadingMore(true);
+                      await fetchMoreRepos((repoPagination.currentPage ?? 1) + 1);
+                      setIsLoadingMore(false);
+                    }}
+                    disabled={isLoadingMore}
+                    className="px-8 py-3 bg-zinc-900 border border-white/10 text-sm font-bold text-white rounded-xl hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isLoadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    {isLoadingMore ? 'Loading...' : `Load More (${repos.length} / ${repoPagination.totalItems})`}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
