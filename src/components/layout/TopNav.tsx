@@ -10,7 +10,7 @@ export function TopNav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
-  const disconnect = useStore((state) => state.disconnect);
+  const logout = useStore((state) => state.logout);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -79,7 +79,7 @@ export function TopNav() {
             <button 
               onClick={() => { 
                 setIsOpen(false); 
-                disconnect(); 
+                logout(); 
                 router.push('/auth'); 
               }}
               className="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center justify-between group"

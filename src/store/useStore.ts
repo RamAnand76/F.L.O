@@ -72,6 +72,7 @@ interface AppState {
   enhanceWithAI: (field: string, prompt: string) => Promise<void>;
   saveProfile: () => Promise<void>;
   disconnect: () => void;
+  logout: () => void;
   fetchInitialData: () => Promise<void>;
   fetchMoreRepos: (page: number) => Promise<void>;
   
@@ -198,64 +199,80 @@ export const useStore = create<AppState>()(
         try {
           // GET /portfolio returns the most complete state now including custom fields
           const portfolio = await portfolioService.getSettings();
-          const githubProfile = await githubService.getProfile(1, 10);
           if (!portfolio) throw new Error('Portfolio settings not found');
-          if (!githubProfile) throw new Error('GitHub profile not found');
 
-          // Backend GET /github/profile returns { user: {...}, repos: [...], pagination: {...} }
-          const { user, repos: ghRepos, pagination } = githubProfile;
+          let ghUserToSave = null;
+          let ghReposToSave: any[] = [];
+          let ghPagination = null;
+
+          try {
+            const githubProfile = await githubService.getProfile(1, 10);
+            if (githubProfile) {
+              const { user, repos: ghRepos, pagination } = githubProfile;
+              ghUserToSave = {
+                 login: user.login,
+                 id: user.id,
+                 name: user.name,
+                 bio: user.bio,
+                 avatar_url: user.avatar_url,
+                 html_url: user.html_url,
+                 company: user.company,
+                 blog: user.blog,
+                 location: user.location,
+                 email: user.email,
+                 public_repos: user.public_repos,
+                 followers: user.followers,
+                 following: user.following,
+              };
+              ghReposToSave = (ghRepos || []).map((r: any) => ({
+                id: r.id,
+                name: r.name,
+                full_name: r.full_name,
+                html_url: r.html_url,
+                description: r.description,
+                language: r.language,
+                stargazers_count: r.stargazers_count || 0,
+                homepage: r.homepage,
+                updated_at: r.updated_at || new Date().toISOString(),
+              }));
+              ghPagination = pagination || null;
+            }
+          } catch (ghErr: any) {
+            // Usually a 404 if GitHub is not connected yet. We swallow the error to avoid the Next.js Dev Overlay
+            console.warn('[Store] GitHub profile not found or not connected yet. Proceeding with basic portfolio data.');
+          }
 
           set({
             customData: {
-              name: portfolio.customName || portfolio.name || user.name || user.login || '',
-              bio: portfolio.customBio || portfolio.bio || user.bio || '',
-              email: portfolio.customEmail || portfolio.email || user.email || '',
-              location: portfolio.customLocation || portfolio.location || user.location || '',
-              website: portfolio.customWebsite || portfolio.website || user.blog || '',
-              github: portfolio.customGithub || portfolio.github || user.html_url || '',
-              twitter: portfolio.customTwitter || portfolio.twitter || user.twitter_username || '',
+              name: portfolio.customName || portfolio.name || ghUserToSave?.name || ghUserToSave?.login || '',
+              bio: portfolio.customBio || portfolio.bio || ghUserToSave?.bio || '',
+              email: portfolio.customEmail || portfolio.email || ghUserToSave?.email || '',
+              location: portfolio.customLocation || portfolio.location || ghUserToSave?.location || '',
+              website: portfolio.customWebsite || portfolio.website || ghUserToSave?.blog || '',
+              github: portfolio.customGithub || portfolio.github || ghUserToSave?.html_url || '',
+              twitter: portfolio.customTwitter || portfolio.twitter || ghUserToSave?.twitter_username || '',
               linkedin: portfolio.customLinkedin || portfolio.linkedin || '',
             },
             selectedRepoIds: (portfolio.selectedRepoIds && portfolio.selectedRepoIds.length > 0) 
               ? portfolio.selectedRepoIds 
-              : (ghRepos || []).slice(0, 6).map((r: any) => r.id),
+              : ghReposToSave.slice(0, 6).map((r: any) => r.id),
             skills: portfolio.skills || [],
             selectedTemplate: portfolio.selectedTemplate || 'minimal',
-            githubUser: {
-               login: user.login,
-               id: user.id,
-               name: user.name,
-               bio: user.bio,
-               avatar_url: user.avatar_url,
-               html_url: user.html_url,
-               company: user.company,
-               blog: user.blog,
-               location: user.location,
-               email: user.email,
-               public_repos: user.public_repos,
-               followers: user.followers,
-               following: user.following,
-            },
-            repos: (ghRepos || []).map((r: any) => ({
-              id: r.id,
-              name: r.name,
-              full_name: r.full_name,
-              html_url: r.html_url,
-              description: r.description,
-              language: r.language,
-              stargazers_count: r.stargazers_count || 0,
-              homepage: r.homepage,
-              updated_at: r.updated_at || new Date().toISOString(),
-            })),
-            repoPagination: pagination || null,
+            githubUser: ghUserToSave,
+            repos: ghReposToSave,
+            repoPagination: ghPagination,
             isAuthenticated: true,
             hasFetchedInitialData: true,
           });
 
           // Also fetch full profile (education/experience)
-          await get().fetchProfile();
-        } catch (error) {
-          console.error('Failed to fetch initial data:', error);
+          try {
+            await get().fetchProfile();
+          } catch (profErr) {
+            console.warn('[Store] Failed to fetch professional profile:', profErr);
+          }
+        } catch (error: any) {
+          console.warn('[Store] Failed to fetch initial data:', error.message || error);
         }
       },
 
@@ -389,8 +406,7 @@ export const useStore = create<AppState>()(
         }
       },
 
-      disconnect: () => {
-        githubService.disconnect().catch(err => console.warn('Backend disconnect failed or aborted:', err));
+      logout: () => {
         apiClient.clearToken();
         set({ 
           githubUser: null, 
@@ -413,6 +429,11 @@ export const useStore = create<AppState>()(
           hasFetchedInitialData: false,
           repoPagination: null
         });
+      },
+
+      disconnect: () => {
+        githubService.disconnect().catch(err => console.warn('Backend disconnect failed or aborted:', err));
+        get().logout();
       },
     }),
     {
