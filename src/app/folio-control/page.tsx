@@ -436,7 +436,14 @@ export default function FolioControlPage() {
                 <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer relative z-10"><Plus className="w-4 h-4" /> Add Testimonial</button>
               </div>
 
-              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+              <div className={testimonials.length > 0 ? "columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6" : ""}>
+                {testimonials.length === 0 && (
+                  <div className="p-16 border border-dashed border-white/5 rounded-[2.5rem] text-center flex flex-col items-center justify-center min-h-[300px]">
+                    <Sparkles className="w-8 h-8 text-zinc-700 mb-4" />
+                    <p className="text-zinc-400 font-medium text-lg mb-2">No voices heard yet.</p>
+                    <p className="text-zinc-600 text-sm max-w-sm">Use the Add Testimonial button above to let your network speak for you and build your credibility.</p>
+                  </div>
+                )}
                 {testimonials.map(t => {
                   const isFeatured = (t as any).isFeatured;
                   return (
@@ -509,7 +516,16 @@ export default function FolioControlPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+              <div className={assets.length > 0 ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5" : ""}>
+                {assets.length === 0 && (
+                  <div className="p-16 border border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center text-center min-h-[300px]">
+                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-5">
+                      <FolderOpen className="w-8 h-8 text-zinc-500" />
+                    </div>
+                    <p className="text-zinc-300 font-medium mb-2 text-lg">Your vault is empty</p>
+                    <p className="text-zinc-500 text-sm max-w-sm">Upload images, videos, audio, or documents to store them securely. They'll be organized right here.</p>
+                  </div>
+                )}
                 {assets.map(asset => (
                   <div key={asset.id} className="group relative bg-[#18181b] border border-white/5 rounded-[1.5rem] p-3 hover:border-indigo-500/50 hover:bg-indigo-500/5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.15)] transition-all cursor-pointer flex flex-col h-full">
                     <div className="w-full aspect-[4/3] bg-zinc-900/60 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-indigo-500/10 transition-colors">
