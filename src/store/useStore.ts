@@ -4,6 +4,8 @@ import { persist } from 'zustand/middleware';
 import { githubService } from '@/services/github.service';
 import { profileService, Education, Experience } from '@/services/profile.service';
 import { portfolioService } from '@/services/portfolio.service';
+import { testimonialsService, Testimonial } from '@/services/testimonials.service';
+import { assetsService, Asset } from '@/services/assets.service';
 import { apiClient } from '@/lib/api-client';
 
 export interface GithubUser {
@@ -20,6 +22,7 @@ export interface GithubUser {
   public_repos: number;
   followers: number;
   following: number;
+  twitter_username?: string | null;
 }
 
 export interface Repository {
@@ -42,6 +45,8 @@ interface AppState {
   skills: string[];
   education: Education[];
   experiences: Experience[];
+  testimonials: Testimonial[];
+  assets: Asset[];
   selectedTemplate: 'minimal' | 'developer' | 'creative';
   customData: {
     name: string;
@@ -87,6 +92,17 @@ interface AppState {
   updateExperience: (id: string, data: Partial<Experience>) => Promise<void>;
   deleteExperience: (id: string) => Promise<void>;
   
+  // Testimonials actions
+  fetchTestimonials: () => Promise<void>;
+  addTestimonial: (data: Omit<Testimonial, 'id'>) => Promise<void>;
+  updateTestimonial: (id: string, data: Partial<Testimonial>) => Promise<void>;
+  deleteTestimonial: (id: string) => Promise<void>;
+
+  // Assets actions
+  fetchAssets: (type?: string, sortBy?: string) => Promise<void>;
+  uploadAsset: (file: File) => Promise<void>;
+  deleteAsset: (id: string) => Promise<void>;
+  
   hasFetchedInitialData: boolean;
 }
 
@@ -104,6 +120,8 @@ export const useStore = create<AppState>()(
       skills: ['React', 'TypeScript', 'Node.js', 'Tailwind CSS'],
       education: [],
       experiences: [],
+      testimonials: [],
+      assets: [],
       selectedTemplate: 'minimal',
       customData: {
         name: '',
@@ -223,6 +241,7 @@ export const useStore = create<AppState>()(
                  public_repos: user.public_repos,
                  followers: user.followers,
                  following: user.following,
+                 twitter_username: user.twitter_username,
               };
               ghReposToSave = (ghRepos || []).map((r: any) => ({
                 id: r.id,
@@ -406,6 +425,74 @@ export const useStore = create<AppState>()(
         }
       },
 
+      fetchTestimonials: async () => {
+        try {
+          const testimonials = await testimonialsService.getAll();
+          set({ testimonials });
+        } catch (error) {
+          console.error('Failed to fetch testimonials:', error);
+        }
+      },
+
+      addTestimonial: async (data) => {
+        try {
+          await testimonialsService.create(data);
+          await get().fetchTestimonials();
+        } catch (error) {
+          console.error('Failed to add testimonial:', error);
+          throw error;
+        }
+      },
+
+      updateTestimonial: async (id, data) => {
+        try {
+          await testimonialsService.update(id, data);
+          await get().fetchTestimonials();
+        } catch (error) {
+          console.error('Failed to update testimonial:', error);
+          throw error;
+        }
+      },
+
+      deleteTestimonial: async (id) => {
+        try {
+          await testimonialsService.delete(id);
+          set((state) => ({ testimonials: state.testimonials.filter(t => t.id !== id) }));
+        } catch (error) {
+          console.error('Failed to delete testimonial:', error);
+          throw error;
+        }
+      },
+
+      fetchAssets: async (type?, sortBy?) => {
+        try {
+          const assets = await assetsService.getAll(type, sortBy);
+          set({ assets });
+        } catch (error) {
+          console.error('Failed to fetch assets:', error);
+        }
+      },
+
+      uploadAsset: async (file) => {
+        try {
+          await assetsService.upload(file);
+          await get().fetchAssets();
+        } catch (error) {
+          console.error('Failed to upload asset:', error);
+          throw error;
+        }
+      },
+
+      deleteAsset: async (id) => {
+        try {
+          await assetsService.delete(id);
+          set((state) => ({ assets: state.assets.filter(a => a.id !== id) }));
+        } catch (error) {
+          console.error('Failed to delete asset:', error);
+          throw error;
+        }
+      },
+
       logout: () => {
         apiClient.clearToken();
         set({ 
@@ -415,6 +502,8 @@ export const useStore = create<AppState>()(
           skills: [], 
           education: [], 
           experiences: [],
+          testimonials: [],
+          assets: [],
           customData: { 
             name: '', 
             bio: '', 
@@ -446,6 +535,8 @@ export const useStore = create<AppState>()(
         skills: state.skills,
         education: state.education,
         experiences: state.experiences,
+        testimonials: state.testimonials,
+        assets: state.assets,
         selectedTemplate: state.selectedTemplate,
         customData: state.customData,
         repoPagination: state.repoPagination

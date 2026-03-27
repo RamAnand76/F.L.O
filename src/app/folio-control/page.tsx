@@ -30,7 +30,9 @@ export default function FolioControlPage() {
     education, experiences, fetchProfile, syncGithubProfile, importResume,
     addEducation, updateEducation, deleteEducation,
     addExperience, updateExperience, deleteExperience,
-    fetchMoreRepos, repoPagination
+    fetchMoreRepos, repoPagination,
+    testimonials, fetchTestimonials, addTestimonial, deleteTestimonial,
+    assets, fetchAssets, uploadAsset, deleteAsset
   } = useStore();
 
   const { width } = useWindowSize();
@@ -53,36 +55,18 @@ export default function FolioControlPage() {
   const [showExpModal, setShowExpModal] = useState(false);
   const [editingExp, setEditingExp] = useState<Experience | null>(null);
 
-  const [testimonials, setTestimonials] = useState([
-    { id: '1', name: 'Ethan Levison', role: 'Compliance Analyst', content: 'This platform streamlined our entire workflow, making decentralized transactions seamless and efficient.', avatar: 'https://i.pravatar.cc/150?u=1' },
-    { id: '2', name: 'Mara Winslow', role: 'DeFi Strategist', content: 'We\'ve significantly reduced manual oversight, thanks to the automated compliance monitoring.', avatar: 'https://i.pravatar.cc/150?u=2' },
-    { id: '3', name: 'Damian Reddington', role: 'DeFi Strategist', content: 'The security features have given us peace of mind, knowing our assets are always protected.', avatar: 'https://i.pravatar.cc/150?u=3' },
-    { id: '4', name: 'Lukas Brierley', role: 'Smart Contract Developer', content: 'Integrating our business with this platform has unlocked new possibilities in the decentralized space.', avatar: 'https://i.pravatar.cc/150?u=4' },
-    { id: '5', name: 'Elara Whitfield', role: 'Web3 Community Manager', content: 'The intuitive interface has made navigating Web3 technology accessible to our entire team.', avatar: 'https://i.pravatar.cc/150?u=5', isFeatured: true },
-    { id: '6', name: 'Tessa Galloway', role: 'NFT Marketplace Curator', content: 'With the platform\'s real-time updates, we can now manage our crypto assets with unmatched precision.', avatar: 'https://i.pravatar.cc/150?u=6' },
-  ]);
-  const [assets, setAssets] = useState([
-    { id: '1', name: 'document.docx', type: 'doc', url: '#' },
-    { id: '2', name: 'video_player_installer_set...', type: 'video', url: '#' },
-    { id: '3', name: 'cheat_codez.zip', type: 'archive', url: '#' },
-    { id: '4', name: 'REACT COMPONENT.tsx', type: 'code', url: '#' },
-    { id: '5', name: 'anime_waifus.png', type: 'image', url: '#' },
-    { id: '6', name: '2028/18/77_secret.txt', type: 'doc', url: '#' },
-    { id: '7', name: 'blackmail_image.jpg', type: 'image', url: '#' },
-    { id: '8', name: 'favorite_music.mp3', type: 'audio', url: '#' },
-    { id: '9', name: 'customer_data.txt', type: 'doc', url: '#' },
-    { id: '10', name: 'recording.wav', type: 'audio', url: '#' },
-    { id: '11', name: 'document.txt', type: 'doc', url: '#' },
-    { id: '12', name: '2028/11/10.txt', type: 'doc', url: '#' },
-  ]);
-
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isUploadingAsset, setIsUploadingAsset] = useState(false);
   const [successSource, setSuccessSource] = useState<'github' | 'resume'>('github');
   const [importedCounts, setImportedCounts] = useState({ edu: 0, exp: 0 });
 
   useEffect(() => {
-    fetchProfile().finally(() => setIsLoading(false));
-  }, [fetchProfile]);
+    Promise.allSettled([
+      fetchProfile(),
+      fetchTestimonials(),
+      fetchAssets()
+    ]).finally(() => setIsLoading(false));
+  }, [fetchProfile, fetchTestimonials, fetchAssets]);
 
   const handleSyncGithub = async () => {
     setIsSyncing(true);
@@ -500,9 +484,28 @@ export default function FolioControlPage() {
                 <div className="flex items-center gap-3">
                   <Dropdown value="newest" onChange={() => { }} options={[{ label: 'Newest First', value: 'newest' }]} className="w-40 hidden md:block" />
                   <Dropdown value="grid" onChange={() => { }} options={[{ label: 'Grid View', value: 'grid' }]} className="w-36 hidden md:block" />
-                  <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-xl flex items-center gap-2 shadow-xl hover:bg-zinc-200 transition-colors cursor-pointer">
-                    <Upload className="w-4 h-4" /> Upload
-                  </button>
+                  <label className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-xl flex items-center gap-2 shadow-xl hover:bg-zinc-200 transition-colors cursor-pointer relative overflow-hidden">
+                    {isUploadingAsset ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {isUploadingAsset ? 'Uploading...' : 'Upload'}
+                    <input 
+                      type="file" 
+                      className="absolute inset-0 opacity-0 cursor-pointer" 
+                      disabled={isUploadingAsset}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setIsUploadingAsset(true);
+                        try {
+                          await uploadAsset(file);
+                        } catch (err) {
+                          console.error("Asset upload failed", err);
+                        } finally {
+                          setIsUploadingAsset(false);
+                          e.target.value = '';
+                        }
+                      }} 
+                    />
+                  </label>
                 </div>
               </div>
 
@@ -519,8 +522,12 @@ export default function FolioControlPage() {
                     </div>
                     <div className="flex items-center justify-between px-2 pb-1 mt-auto">
                       <p className="text-xs font-medium text-zinc-400 truncate w-[85%] group-hover:text-indigo-300 transition-colors">{asset.name}</p>
-                      <button className="text-zinc-500 hover:text-white transition-colors p-1.5 -mr-1.5 bg-white/0 hover:bg-white/5 rounded-lg">
-                        <MoreHorizontal className="w-4 h-4" />
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); deleteAsset(asset.id); }}
+                        className="text-zinc-500 hover:text-red-400 transition-colors p-1.5 -mr-1.5 bg-white/0 hover:bg-red-500/10 rounded-lg group/btn"
+                        title="Delete Asset"
+                      >
+                        <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                       </button>
                     </div>
                   </div>
