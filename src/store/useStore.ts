@@ -337,7 +337,7 @@ export const useStore = create<AppState>()(
             experiences: profile.experience || [] 
           });
         } catch (error) {
-          console.error('Failed to fetch profile:', error);
+          console.warn('Failed to fetch profile:', error instanceof Error ? error.message : String(error));
         }
       },
 
@@ -430,7 +430,7 @@ export const useStore = create<AppState>()(
           const testimonials = await testimonialsService.getAll();
           set({ testimonials });
         } catch (error) {
-          console.error('Failed to fetch testimonials:', error);
+          console.warn('Failed to fetch testimonials:', error instanceof Error ? error.message : String(error));
         }
       },
 
@@ -469,7 +469,7 @@ export const useStore = create<AppState>()(
           const assets = await assetsService.getAll(type, sortBy);
           set({ assets });
         } catch (error) {
-          console.error('Failed to fetch assets:', error);
+          console.warn('Failed to fetch assets:', error instanceof Error ? error.message : String(error));
         }
       },
 
