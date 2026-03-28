@@ -68,7 +68,7 @@ export default function PublicProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-white">
       {/* Small floating "Owner" indicator if we are the owner viewing our live site */}
       {githubUser?.login === username && (
         <div className="fixed top-6 right-6 z-[100] flex items-center gap-3 px-4 py-2 bg-zinc-900/80 border border-white/10 rounded-full backdrop-blur-md shadow-2xl">

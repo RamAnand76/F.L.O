@@ -155,6 +155,7 @@ export default function PreviewEditorPage() {
             selectedTemplate={selectedTemplate}
             customData={customData}
             onExport={() => setShowExportModal(true)}
+            githubUser={useStore.getState().githubUser}
           />
         </div>
       )}
