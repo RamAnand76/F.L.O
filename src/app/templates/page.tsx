@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { useRouter } from 'next/navigation';
-import { Search, ChevronDown, Play, Download, MoreHorizontal, X, Check, Flame, Clock } from 'lucide-react';
+import { Search, ChevronDown, Play, Download, MoreHorizontal, X, Check, Flame, Clock, CheckCircle2, ExternalLink, Upload, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TEMPLATES } from '@/lib/templates';
 
@@ -14,7 +14,7 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Templates');
   
-  const setSelectedTemplate = useStore(s => s.setSelectedTemplate);
+  const { setSelectedTemplate, isPublished, publishPortfolio, githubUser } = useStore();
   const router = useRouter();
 
   const focusedTemplate = TEMPLATES.find(t => t.id === focusedId) || TEMPLATES[0];
@@ -215,20 +215,48 @@ export default function TemplatesPage() {
                     Previewing: <span className="text-indigo-400 font-bold">{TEMPLATES.find(t => t.id === previewId)?.name}</span>
                   </h2>
                 </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => handleUseTemplate(previewId)}
-                    className="bg-white hover:bg-zinc-200 text-black px-6 py-2.5 rounded-full text-sm font-bold transition-colors flex items-center gap-2 shadow-lg"
-                  >
-                    <Check className="w-4 h-4" /> Use This Template
-                  </button>
-                  <button
-                    onClick={() => setPreviewId(null)}
-                    className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors border border-white/10"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={async () => {
+                        const newStatus = !isPublished;
+                        await publishPortfolio(newStatus);
+                      }}
+                      className={cn(
+                        "px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 shadow-lg",
+                        isPublished 
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20" 
+                          : "bg-white text-black hover:bg-zinc-200"
+                      )}
+                    >
+                      {isPublished ? <CheckCircle2 className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+                      {isPublished ? 'Published' : 'Publish to Live'}
+                    </button>
+                    
+                    {isPublished && (
+                      <a
+                        href={`/${githubUser?.login || 'profile'}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-colors flex items-center gap-2 shadow-lg"
+                      >
+                        <ExternalLink className="w-4 h-4" /> View Live
+                      </a>
+                    )}
+
+                    <button
+                      onClick={() => handleUseTemplate(previewId)}
+                      className="bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-colors flex items-center gap-2 border border-white/10"
+                    >
+                      <Check className="w-4 h-4" /> Set as Default
+                    </button>
+                    
+                    <button
+                      onClick={() => setPreviewId(null)}
+                      className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors border border-white/10"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
               </div>
 
               <div className="flex-1 overflow-y-auto relative bg-zinc-950">

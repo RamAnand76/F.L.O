@@ -60,6 +60,7 @@ interface AppState {
     linkedin: string;
     role?: string;
   };
+  isPublished: boolean;
   repoPagination: {
     totalItems: number;
     totalPages: number;
@@ -103,6 +104,8 @@ interface AppState {
   uploadAsset: (file: File) => Promise<void>;
   deleteAsset: (id: string) => Promise<void>;
   
+  publishPortfolio: (published: boolean) => Promise<void>;
+  
   hasFetchedInitialData: boolean;
 }
 
@@ -122,6 +125,7 @@ export const useStore = create<AppState>()(
       experiences: [],
       testimonials: [],
       assets: [],
+      isPublished: false,
       selectedTemplate: 'minimal',
       customData: {
         name: '',
@@ -277,6 +281,7 @@ export const useStore = create<AppState>()(
               : ghReposToSave.slice(0, 6).map((r: any) => r.id),
             skills: portfolio.skills || [],
             selectedTemplate: portfolio.selectedTemplate || 'minimal',
+            isPublished: portfolio.isPublished || false,
             githubUser: ghUserToSave,
             repos: ghReposToSave,
             repoPagination: ghPagination,
@@ -492,6 +497,16 @@ export const useStore = create<AppState>()(
           throw error;
         }
       },
+      
+      publishPortfolio: async (published) => {
+        try {
+          await portfolioService.publish(published);
+          set({ isPublished: published });
+        } catch (error) {
+          console.error('Failed to publish portfolio:', error);
+          throw error;
+        }
+      },
 
       logout: () => {
         apiClient.clearToken();
@@ -530,16 +545,11 @@ export const useStore = create<AppState>()(
       partialize: (state) => ({ 
         isAuthenticated: state.isAuthenticated,
         githubUser: state.githubUser,
-        repos: state.repos,
         selectedRepoIds: state.selectedRepoIds,
         skills: state.skills,
-        education: state.education,
-        experiences: state.experiences,
-        testimonials: state.testimonials,
-        assets: state.assets,
         selectedTemplate: state.selectedTemplate,
+        isPublished: state.isPublished,
         customData: state.customData,
-        repoPagination: state.repoPagination
       })
     }
   )

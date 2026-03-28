@@ -9,7 +9,7 @@ import {
   GraduationCap, MessageSquare, FolderOpen, Trash2,
   Image as ImageIcon, FileText, Upload, Quote, Briefcase, Pencil,
   Github, FileUp, Loader2, Sparkles, CheckCircle2, X,
-  MoreHorizontal, Music, Play, FileCode, FileArchive, Code2
+  MoreHorizontal, Music, Play, FileCode, FileArchive, Code2, User
 } from 'lucide-react';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,9 @@ import { Modal } from '@/components/ui/Modal';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { EducationForm } from '@/components/features/folio/EducationForm';
 import { ExperienceForm } from '@/components/features/folio/ExperienceForm';
+import { TestimonialForm } from '@/components/features/folio/TestimonialForm';
+import { ProfileEditForm } from '@/components/features/folio/ProfileEditForm';
+import { Testimonial } from '@/services/testimonials.service';
 
 export type FolioTab = 'repos' | 'skills' | 'professional' | 'testimonials' | 'assets';
 
@@ -32,8 +35,9 @@ export default function FolioControlPage() {
     addEducation, updateEducation, deleteEducation,
     addExperience, updateExperience, deleteExperience,
     fetchMoreRepos, repoPagination,
-    testimonials, fetchTestimonials, addTestimonial, deleteTestimonial,
-    assets, fetchAssets, uploadAsset, deleteAsset
+    testimonials, fetchTestimonials, addTestimonial, updateTestimonial, deleteTestimonial,
+    assets, fetchAssets, uploadAsset, deleteAsset,
+    customData, updateCustomData, saveProfile, isPublished
   } = useStore();
 
   const { width } = useWindowSize();
@@ -61,10 +65,16 @@ export default function FolioControlPage() {
   const [showExpModal, setShowExpModal] = useState(false);
   const [editingExp, setEditingExp] = useState<Experience | null>(null);
 
+  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUploadingAsset, setIsUploadingAsset] = useState(false);
   const [successSource, setSuccessSource] = useState<'github' | 'resume'>('github');
   const [importedCounts, setImportedCounts] = useState({ edu: 0, exp: 0 });
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   useEffect(() => {
     Promise.allSettled([
@@ -156,12 +166,27 @@ export default function FolioControlPage() {
           <motion.h1 className="text-3xl md:text-4xl font-semibold tracking-tighter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             Folio Control
           </motion.h1>
-          <motion.p className="text-zinc-400 text-base md:text-lg" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            Curate the content that appears on your portfolio.
-          </motion.p>
+          <div className="flex items-center gap-2">
+            <motion.p className="text-zinc-400 text-base md:text-lg" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              Curate the content that appears on your portfolio.
+            </motion.p>
+            {isPublished && (
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Live</span>
+              </motion.div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setShowProfileModal(true)}
+            className="px-5 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-all flex items-center gap-2"
+          >
+            <User className="w-4 h-4 text-indigo-400" />
+            Edit Profile
+          </button>
           <button
             onClick={handleSyncGithub}
             disabled={isSyncing}
@@ -439,7 +464,12 @@ export default function FolioControlPage() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-yellow-500/5 blur-[120px] rounded-full pointer-events-none" />
 
                 <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-white mb-6">Your Testimonials</h2>
-                <button className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer relative z-10"><Plus className="w-4 h-4" /> Add Testimonial</button>
+                <button 
+                  onClick={() => { setEditingTestimonial(null); setShowTestimonialModal(true); }}
+                  className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer relative z-10"
+                >
+                  <Plus className="w-4 h-4" /> Add Testimonial
+                </button>
               </div>
 
               <div className={testimonials.length > 0 ? "columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6" : ""}>
@@ -474,6 +504,10 @@ export default function FolioControlPage() {
                           <div className="flex flex-col leading-tight">
                             <span className={cn("font-medium", isFeatured ? "text-[15px] text-white" : "text-[14px] text-zinc-300")}>{t.name}</span>
                             <span className={cn("text-[12px] mt-0.5", isFeatured ? "text-zinc-400" : "text-zinc-500")}>{t.role}</span>
+                          </div>
+                          <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={(e) => { e.stopPropagation(); setEditingTestimonial(t); setShowTestimonialModal(true); }} className="p-1.5 hover:bg-white/10 rounded-md text-zinc-500 hover:text-white"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); deleteTestimonial(t.id); }} className="p-1.5 hover:bg-red-500/10 rounded-md text-zinc-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
                       </div>
@@ -581,7 +615,38 @@ export default function FolioControlPage() {
             else await addExperience(data);
             setShowExpModal(false);
           }}
-          onCancel={() => setShowExpModal(true)}
+          onCancel={() => setShowExpModal(false)}
+        />
+      </Modal>
+
+      <Modal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} title="Edit Public Profile">
+        <ProfileEditForm
+          onSubmit={async (data) => {
+            setIsSavingProfile(true);
+            try {
+              updateCustomData(data);
+              await saveProfile();
+              setShowProfileModal(false);
+            } catch (err) {
+              console.error('Failed to save profile:', err);
+            } finally {
+              setIsSavingProfile(false);
+            }
+          }}
+          onCancel={() => setShowProfileModal(false)}
+          isSubmitting={isSavingProfile}
+        />
+      </Modal>
+
+      <Modal isOpen={showTestimonialModal} onClose={() => setShowTestimonialModal(false)} title={editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}>
+        <TestimonialForm 
+          initialData={editingTestimonial || undefined}
+          onSubmit={async (data) => {
+            if (editingTestimonial) await updateTestimonial(editingTestimonial.id, data);
+            else await addTestimonial(data);
+            setShowTestimonialModal(false);
+          }}
+          onCancel={() => setShowTestimonialModal(false)}
         />
       </Modal>
 

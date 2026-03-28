@@ -17,4 +17,8 @@ export const portfolioService = {
   async updateTemplate(selectedTemplate: string) {
     return apiClient.put<any>('/portfolio/template', { selectedTemplate });
   },
+  
+  async publish(isPublished: boolean) {
+    return apiClient.put<any>('/portfolio/publish', { isPublished });
+  },
 };
