@@ -95,8 +95,10 @@ interface AppState {
   
   // Testimonials actions
   fetchTestimonials: () => Promise<void>;
+  fetchPublicTestimonials: (username: string) => Promise<void>;
   addTestimonial: (data: Omit<Testimonial, 'id'>) => Promise<void>;
   updateTestimonial: (id: string, data: Partial<Testimonial>) => Promise<void>;
+  approveTestimonial: (id: string) => Promise<void>;
   deleteTestimonial: (id: string) => Promise<void>;
 
   // Assets actions
@@ -439,6 +441,15 @@ export const useStore = create<AppState>()(
         }
       },
 
+      fetchPublicTestimonials: async (username: string) => {
+        try {
+          const testimonials = await testimonialsService.getPublic(username);
+          set({ testimonials });
+        } catch (error) {
+          console.warn('Failed to fetch public testimonials:', error instanceof Error ? error.message : String(error));
+        }
+      },
+
       addTestimonial: async (data) => {
         try {
           await testimonialsService.create(data);
@@ -455,6 +466,16 @@ export const useStore = create<AppState>()(
           await get().fetchTestimonials();
         } catch (error) {
           console.error('Failed to update testimonial:', error);
+          throw error;
+        }
+      },
+
+      approveTestimonial: async (id) => {
+        try {
+          await testimonialsService.approve(id);
+          await get().fetchTestimonials();
+        } catch (error) {
+          console.error('Failed to approve testimonial:', error);
           throw error;
         }
       },

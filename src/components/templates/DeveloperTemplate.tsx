@@ -15,6 +15,7 @@ import { motion } from 'motion/react';
 export function DeveloperTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills, experiences, education, testimonials, assets } = useStore();
   const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
+  const approvedTestimonials = testimonials.filter(t => t.isApproved);
 
   return (
     <div className="min-h-full bg-[#0d1117] text-[#c9d1d9] font-mono p-4 md:p-8 lg:p-12 selection:bg-[#58a6ff]/30 selection:text-white">
@@ -154,7 +155,7 @@ export function DeveloperTemplate() {
             )}
             
             {/* Testimonials Stream */}
-            {testimonials.length > 0 && (
+            {approvedTestimonials.length > 0 && (
               <section>
                  <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-3 border-b border-[#30363d] pb-4">
                   <div className="w-8 h-8 bg-[#d29922] rounded-lg flex items-center justify-center text-black">
@@ -163,7 +164,7 @@ export function DeveloperTemplate() {
                   shared/shoutouts.io
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {testimonials.map(t => (
+                  {approvedTestimonials.map(t => (
                     <div key={t.id} className="p-8 border border-[#30363d] rounded-2xl bg-[#0d1117] relative group/quote">
                        <Quote className="absolute top-6 right-6 w-12 h-12 text-[#30363d] opacity-10 group-hover/quote:opacity-20 transition-opacity" />
                        <p className="text-[#8b949e] italic mb-10 text-lg leading-relaxed relative z-10 font-sans">

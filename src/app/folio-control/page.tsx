@@ -9,7 +9,7 @@ import {
   GraduationCap, MessageSquare, FolderOpen, Trash2,
   Image as ImageIcon, FileText, Upload, Quote, Briefcase, Pencil,
   Github, FileUp, Loader2, Sparkles, CheckCircle2, X,
-  MoreHorizontal, Music, Play, FileCode, FileArchive, Code2, User
+  MoreHorizontal, Music, Play, FileCode, FileArchive, Code2, User, Link
 } from 'lucide-react';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { cn } from '@/lib/utils';
@@ -35,8 +35,9 @@ export default function FolioControlPage() {
     addEducation, updateEducation, deleteEducation,
     addExperience, updateExperience, deleteExperience,
     fetchMoreRepos, repoPagination,
-    testimonials, fetchTestimonials, addTestimonial, updateTestimonial, deleteTestimonial,
+    testimonials, fetchTestimonials, addTestimonial, updateTestimonial, approveTestimonial, deleteTestimonial,
     assets, fetchAssets, uploadAsset, deleteAsset,
+    githubUser,
     customData, updateCustomData, saveProfile, isPublished
   } = useStore();
 
@@ -463,13 +464,36 @@ export default function FolioControlPage() {
                 {/* Background Glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-yellow-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-                <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-white mb-6">Your Testimonials</h2>
-                <button 
-                  onClick={() => { setEditingTestimonial(null); setShowTestimonialModal(true); }}
-                  className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer relative z-10"
-                >
-                  <Plus className="w-4 h-4" /> Add Testimonial
-                </button>
+                <div className="flex gap-3 relative z-10">
+                  <button 
+                    onClick={() => { setEditingTestimonial(null); setShowTestimonialModal(true); }}
+                    className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" /> Add Testimonial
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const url = `${window.location.origin}/review/${githubUser?.login}`;
+                      navigator.clipboard.writeText(url);
+                      alert('Review link copied to clipboard!');
+                    }}
+                    className="px-5 py-2.5 bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-full flex items-center gap-2 hover:bg-zinc-800 transition-all cursor-pointer"
+                  >
+                    <Link className="w-4 h-4" /> Copy Review Link
+                  </button>
+                </div>
+              </div>
+
+              {/* Stats / Inbox Summary */}
+              <div className="flex items-center gap-6 mb-8 px-4 py-3 bg-zinc-900/30 border border-white/5 rounded-2xl w-fit mx-auto md:mx-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                  <span className="text-xs font-bold text-zinc-400">Published: {testimonials.filter(t => t.isApproved).length}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={cn("w-2 h-2 rounded-full", testimonials.filter(t => !t.isApproved).length > 0 ? "bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "bg-zinc-700")} />
+                  <span className="text-xs font-bold text-zinc-400">Pending: {testimonials.filter(t => !t.isApproved).length}</span>
+                </div>
               </div>
 
               <div className={testimonials.length > 0 ? "columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6" : ""}>
@@ -506,13 +530,22 @@ export default function FolioControlPage() {
                             <span className={cn("text-[12px] mt-0.5", isFeatured ? "text-zinc-400" : "text-zinc-500")}>{t.role}</span>
                           </div>
                           <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                            {!t.isApproved && (
+                              <button onClick={(e) => { e.stopPropagation(); approveTestimonial(t.id); }} className="p-1.5 bg-white/10 hover:bg-green-500/20 rounded-md text-zinc-500 hover:text-green-400" title="Approve Review"><CheckCircle2 className="w-3.5 h-3.5" /></button>
+                            )}
                             <button onClick={(e) => { e.stopPropagation(); setEditingTestimonial(t); setShowTestimonialModal(true); }} className="p-1.5 hover:bg-white/10 rounded-md text-zinc-500 hover:text-white"><Pencil className="w-3.5 h-3.5" /></button>
                             <button onClick={(e) => { e.stopPropagation(); deleteTestimonial(t.id); }} className="p-1.5 hover:bg-red-500/10 rounded-md text-zinc-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
                       </div>
 
-                      {isFeatured && (
+                      {!t.isApproved && (
+                        <div className="absolute top-4 right-4 bg-amber-500/20 border border-amber-500/30 text-amber-500 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md backdrop-blur-md">
+                          Pending Approval
+                        </div>
+                      )}
+
+                      {isFeatured && t.isApproved && (
                         <div className="w-full bg-[#0088ff] text-white text-center py-3.5 text-sm font-semibold rounded-b-[1.4rem] cursor-pointer hover:bg-[#0077ee] transition-colors -mt-1 relative z-10">
                           View Full Case Study
                         </div>
@@ -638,11 +671,14 @@ export default function FolioControlPage() {
         />
       </Modal>
 
-      <Modal isOpen={showTestimonialModal} onClose={() => setShowTestimonialModal(false)} title={editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}>
+      <Modal isOpen={showTestimonialModal} onClose={() => setShowTestimonialModal(false)} title={editingTestimonial ? (editingTestimonial.isApproved ? 'Edit Testimonial' : 'Review Testimonial') : 'Add New Testimonial'}>
         <TestimonialForm 
           initialData={editingTestimonial || undefined}
           onSubmit={async (data) => {
-            if (editingTestimonial) await updateTestimonial(editingTestimonial.id, data);
+            if (editingTestimonial) {
+               // If it was already approved, update normally. If not, auto-approve upon edit/save
+               await updateTestimonial(editingTestimonial.id, { ...data, isApproved: true });
+            }
             else await addTestimonial(data);
             setShowTestimonialModal(false);
           }}

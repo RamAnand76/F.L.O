@@ -9,7 +9,7 @@ import { Loader2, Globe, Lock } from 'lucide-react';
 export default function PublicProfilePage() {
   const { username } = useParams();
   const router = useRouter();
-  const { fetchInitialData, githubUser, selectedTemplate, isPublished, isAuthenticated } = useStore();
+  const { fetchInitialData, githubUser, customData, selectedTemplate, isPublished, isAuthenticated } = useStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,10 +17,26 @@ export default function PublicProfilePage() {
       // In a real production app, we would fetch the user's data by username from a public API.
       // For this local demo, we use the store which simulates the fetched public data.
       await fetchInitialData();
+      if (typeof username === 'string') {
+        await useStore.getState().fetchPublicTestimonials(username);
+      }
       setLoading(false);
     };
     loadData();
   }, [fetchInitialData]);
+
+  // Dynamically update document title based on profile name
+  useEffect(() => {
+    if (!loading && customData.name) {
+      document.title = `${customData.name} - Portfolio`;
+    }
+    // Cleanup if unmounting
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.title = "F.L.O - Folio Intelligence";
+      }
+    };
+  }, [loading, customData.name]);
 
   const TemplateComponent = useMemo(() => {
     return TEMPLATES.find(t => t.id === selectedTemplate)?.component;

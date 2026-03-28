@@ -14,6 +14,7 @@ import { motion } from 'motion/react';
 export function CreativeTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills, experiences, education, testimonials, assets } = useStore();
   const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
+  const approvedTestimonials = testimonials.filter(t => t.isApproved);
 
   return (
     <div className="min-h-full bg-[#fdfdfc] text-[#1a1a1a] font-sans p-4 md:p-8 lg:p-12 selection:bg-[#FF6B6B] selection:text-white">
@@ -185,11 +186,11 @@ export function CreativeTemplate() {
         )}
 
         {/* Testimonials Masonry */}
-        {testimonials.length > 0 && (
+        {approvedTestimonials.length > 0 && (
           <div className="md:col-span-12 py-12">
             <h2 className="text-5xl font-black tracking-tight mb-12 text-center">Global Feedback</h2>
             <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-              {testimonials.map((t, i) => (
+              {approvedTestimonials.map((t, i) => (
                 <motion.div 
                   key={t.id} 
                   initial={{ opacity: 0, scale: 0.9 }}

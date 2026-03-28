@@ -14,6 +14,7 @@ import { motion } from 'motion/react';
 export function MinimalTemplate() {
   const { githubUser, customData, repos, selectedRepoIds, skills, education, experiences, testimonials, assets } = useStore();
   const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
+  const approvedTestimonials = testimonials.filter(t => t.isApproved);
 
   return (
     <div className="min-h-full bg-white text-zinc-900 font-sans p-8 md:p-32 selection:bg-black selection:text-white max-w-7xl mx-auto border-x border-zinc-100/50 shadow-2xl relative">
@@ -137,13 +138,13 @@ export function MinimalTemplate() {
         </section>
       )}
 
-      {testimonials.length > 0 && (
+      {approvedTestimonials.length > 0 && (
         <section className="mb-32 relative z-10">
           <div className="lg:w-1/4 mb-16">
              <h2 className="text-xs font-black uppercase tracking-[0.4em] text-zinc-300">Citations</h2>
           </div>
           <div className="columns-1 md:columns-2 gap-12 space-y-12">
-            {testimonials.map(t => (
+            {approvedTestimonials.map(t => (
               <div key={t.id} className="break-inside-avoid p-12 bg-zinc-950 text-white rounded-[3rem] shadow-2xl transition-transform hover:-rotate-1">
                 <Quote className="w-10 h-10 text-white opacity-10 mb-8" />
                 <p className="text-zinc-400 text-2xl font-light mb-12 leading-relaxed italic">"{t.content}"</p>
