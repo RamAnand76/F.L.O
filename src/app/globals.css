@@ -16,6 +16,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global cursor rule */
+button,
+[role="button"],
+a,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  cursor: pointer;
+}
+
 /* Custom scrollbar for webkit */
 ::-webkit-scrollbar {
   width: 8px;

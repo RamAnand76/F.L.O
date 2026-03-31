@@ -8,6 +8,7 @@ import { Dock } from '@/components/layout/Dock';
 import { useStore } from '@/store/useStore';
 import { apiClient } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
+import { NotificationSystem } from '@/components/ui/Notification';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -74,6 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {children}
           </motion.div>
         </AnimatePresence>
+        <NotificationSystem />
       </div>
     );
   }
@@ -104,6 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {!isAuthPage && githubUser && <Dock />}
+      <NotificationSystem />
     </div>
   );
 }

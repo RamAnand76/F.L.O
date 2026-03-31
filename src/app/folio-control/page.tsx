@@ -38,7 +38,8 @@ export default function FolioControlPage() {
     testimonials, fetchTestimonials, addTestimonial, updateTestimonial, approveTestimonial, deleteTestimonial,
     assets, fetchAssets, uploadAsset, deleteAsset,
     githubUser,
-    customData, updateCustomData, saveProfile, isPublished
+    customData, updateCustomData, saveProfile, isPublished,
+    addNotification
   } = useStore();
 
   const { width } = useWindowSize();
@@ -97,8 +98,10 @@ export default function FolioControlPage() {
         exp: Math.max(0, useStore.getState().experiences.length - prevExp)
       });
       setShowSuccessModal(true);
+      addNotification('GitHub profile synced successfully!', 'success');
     } catch (error) {
       console.error('Sync failed:', error);
+      addNotification('Failed to sync from GitHub.', 'error');
     } finally {
       setIsSyncing(false);
     }
@@ -118,8 +121,10 @@ export default function FolioControlPage() {
         exp: Math.max(0, useStore.getState().experiences.length - prevExp)
       });
       setShowSuccessModal(true);
+      addNotification('Resume imported successfully!', 'success');
     } catch (error) {
       console.error('Import failed:', error);
+      addNotification('Failed to import resume. Please try again.', 'error');
     } finally {
       setIsImporting(false);
       // Reset input
@@ -131,6 +136,7 @@ export default function FolioControlPage() {
     e.preventDefault();
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
       setSkills([...skills, newSkill.trim()]);
+      addNotification(`Skill "${newSkill.trim()}" added.`, 'success');
       setNewSkill('');
     }
   };
@@ -341,7 +347,10 @@ export default function FolioControlPage() {
                           </h3>
                           <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => { setEditingExp(exp); setShowExpModal(true); }} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-all"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => deleteExperience(exp.id)} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={async () => {
+                                await deleteExperience(exp.id);
+                                addNotification('Experience removed.');
+                              }} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
 
@@ -422,7 +431,10 @@ export default function FolioControlPage() {
                           </h3>
                           <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => { setEditingEdu(edu); setShowEduModal(true); }} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-all"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => deleteEducation(edu.id)} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={async () => {
+                                await deleteEducation(edu.id);
+                                addNotification('Education entry removed.');
+                              }} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
 
@@ -471,14 +483,14 @@ export default function FolioControlPage() {
                   >
                     <Plus className="w-4 h-4" /> Add Testimonial
                   </button>
-                  <button 
-                    onClick={() => {
-                      const url = `${window.location.origin}/review/${githubUser?.login}`;
-                      navigator.clipboard.writeText(url);
-                      alert('Review link copied to clipboard!');
-                    }}
-                    className="px-5 py-2.5 bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-full flex items-center gap-2 hover:bg-zinc-800 transition-all cursor-pointer"
-                  >
+                    <button 
+                      onClick={() => {
+                        const url = `${window.location.origin}/review/${githubUser?.login}`;
+                        navigator.clipboard.writeText(url);
+                        addNotification('Review link copied to clipboard!', 'success');
+                      }}
+                      className="px-5 py-2.5 bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-full flex items-center gap-2 hover:bg-zinc-800 transition-all cursor-pointer"
+                    >
                     <Link className="w-4 h-4" /> Copy Review Link
                   </button>
                 </div>
@@ -531,10 +543,18 @@ export default function FolioControlPage() {
                           </div>
                           <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                             {!t.isApproved && (
-                              <button onClick={(e) => { e.stopPropagation(); approveTestimonial(t.id); }} className="p-1.5 bg-white/10 hover:bg-green-500/20 rounded-md text-zinc-500 hover:text-green-400" title="Approve Review"><CheckCircle2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={async (e) => { 
+                                  e.stopPropagation(); 
+                                  await approveTestimonial(t.id); 
+                                  addNotification('Testimonial approved.', 'success');
+                                }} className="p-1.5 bg-white/10 hover:bg-green-500/20 rounded-md text-zinc-500 hover:text-green-400" title="Approve Review"><CheckCircle2 className="w-3.5 h-3.5" /></button>
                             )}
                             <button onClick={(e) => { e.stopPropagation(); setEditingTestimonial(t); setShowTestimonialModal(true); }} className="p-1.5 hover:bg-white/10 rounded-md text-zinc-500 hover:text-white"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={(e) => { e.stopPropagation(); deleteTestimonial(t.id); }} className="p-1.5 hover:bg-red-500/10 rounded-md text-zinc-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={async (e) => { 
+                                e.stopPropagation(); 
+                                await deleteTestimonial(t.id); 
+                                addNotification('Testimonial deleted.');
+                              }} className="p-1.5 hover:bg-red-500/10 rounded-md text-zinc-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
                       </div>
@@ -577,8 +597,10 @@ export default function FolioControlPage() {
                         setIsUploadingAsset(true);
                         try {
                           await uploadAsset(file);
+                          addNotification(`${file.name} uploaded successfully.`, 'success');
                         } catch (err) {
                           console.error("Asset upload failed", err);
+                          addNotification('Failed to upload asset.', 'error');
                         } finally {
                           setIsUploadingAsset(false);
                           e.target.value = '';
@@ -612,7 +634,11 @@ export default function FolioControlPage() {
                     <div className="flex items-center justify-between px-2 pb-1 mt-auto">
                       <p className="text-xs font-medium text-zinc-400 truncate w-[85%] group-hover:text-indigo-300 transition-colors">{asset.name}</p>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); deleteAsset(asset.id); }}
+                        onClick={async (e) => { 
+                          e.stopPropagation(); 
+                          await deleteAsset(asset.id); 
+                          addNotification('Asset deleted.');
+                        }}
                         className="text-zinc-500 hover:text-red-400 transition-colors p-1.5 -mr-1.5 bg-white/0 hover:bg-red-500/10 rounded-lg group/btn"
                         title="Delete Asset"
                       >
@@ -632,8 +658,13 @@ export default function FolioControlPage() {
         <EducationForm
           initialData={editingEdu || undefined}
           onSubmit={async (data) => {
-            if (editingEdu) await updateEducation(editingEdu.id, data);
-            else await addEducation(data);
+            if (editingEdu) {
+              await updateEducation(editingEdu.id, data);
+              addNotification('Education updated.', 'success');
+            } else {
+              await addEducation(data);
+              addNotification('Education added.', 'success');
+            }
             setShowEduModal(false);
           }}
           onCancel={() => setShowEduModal(false)}
@@ -644,8 +675,13 @@ export default function FolioControlPage() {
         <ExperienceForm
           initialData={editingExp || undefined}
           onSubmit={async (data) => {
-            if (editingExp) await updateExperience(editingExp.id, data);
-            else await addExperience(data);
+            if (editingExp) {
+              await updateExperience(editingExp.id, data);
+              addNotification('Experience updated.', 'success');
+            } else {
+              await addExperience(data);
+              addNotification('Experience added.', 'success');
+            }
             setShowExpModal(false);
           }}
           onCancel={() => setShowExpModal(false)}
@@ -659,9 +695,11 @@ export default function FolioControlPage() {
             try {
               updateCustomData(data);
               await saveProfile();
+              addNotification('Profile saved successfully.', 'success');
               setShowProfileModal(false);
             } catch (err) {
               console.error('Failed to save profile:', err);
+              addNotification('Failed to save profile.', 'error');
             } finally {
               setIsSavingProfile(false);
             }
@@ -678,8 +716,12 @@ export default function FolioControlPage() {
             if (editingTestimonial) {
                // If it was already approved, update normally. If not, auto-approve upon edit/save
                await updateTestimonial(editingTestimonial.id, { ...data, isApproved: true });
+               addNotification('Testimonial updated and approved.', 'success');
             }
-            else await addTestimonial(data);
+            else {
+              await addTestimonial(data);
+              addNotification('Testimonial added.', 'success');
+            }
             setShowTestimonialModal(false);
           }}
           onCancel={() => setShowTestimonialModal(false)}
@@ -691,7 +733,11 @@ export default function FolioControlPage() {
           <p className="text-zinc-400">Are you sure you want to remove <span className="text-white font-bold">{skillToDelete}</span>?</p>
           <div className="flex gap-3">
             <button onClick={() => setSkillToDelete(null)} className="flex-1 py-3 bg-zinc-900 rounded-xl font-bold">Cancel</button>
-            <button onClick={() => { setSkills(skills.filter(s => s !== skillToDelete)); setSkillToDelete(null); }} className="flex-1 py-3 bg-red-600 rounded-xl font-bold">Remove</button>
+            <button onClick={() => { 
+                setSkills(skills.filter(s => s !== skillToDelete)); 
+                addNotification(`Skill "${skillToDelete}" removed.`);
+                setSkillToDelete(null); 
+              }} className="flex-1 py-3 bg-red-600 rounded-xl font-bold">Remove</button>
           </div>
         </div>
       </Modal>

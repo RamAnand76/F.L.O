@@ -60,6 +60,9 @@ interface AppState {
     linkedin: string;
     role?: string;
   };
+  notifications: Array<{ id: string; message: string; type: 'success' | 'error' | 'info' }>;
+  addNotification: (message: string, type?: 'success' | 'error' | 'info') => void;
+  removeNotification: (id: string) => void;
   isPublished: boolean;
   repoPagination: {
     totalItems: number;
@@ -139,6 +142,17 @@ export const useStore = create<AppState>()(
         twitter: '',
         linkedin: '',
       },
+      notifications: [],
+      addNotification: (message, type = 'info') => {
+        const id = Math.random().toString(36).substring(2, 9);
+        set((state) => ({
+          notifications: [...state.notifications, { id, message, type }]
+        }));
+        setTimeout(() => get().removeNotification(id), 5000);
+      },
+      removeNotification: (id) => set((state) => ({
+        notifications: state.notifications.filter(n => n.id !== id)
+      })),
       setIsAuthenticated: (val) => set({ isAuthenticated: val }),
       setGithubUser: (user) => set((state) => ({ 
         githubUser: user,

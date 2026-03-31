@@ -1,6 +1,10 @@
 import { MinimalTemplate } from '@/components/templates/MinimalTemplate';
 import { DeveloperTemplate } from '@/components/templates/DeveloperTemplate';
 import { CreativeTemplate } from '@/components/templates/CreativeTemplate';
+import { DominicTemplate } from '@/components/templates/DominicTemplate';
+import { VanshikaTemplate } from '@/components/templates/VanshikaTemplate';
+import { FoliobloxTemplate } from '@/components/templates/FoliobloxTemplate';
+import { FuturisticTemplate } from '@/components/templates/FuturisticTemplate';
 
 export const TEMPLATES = [
   { 
@@ -51,6 +55,46 @@ export const TEMPLATES = [
     desc: 'Raw, unpolished, and highly structural. For the bold designers who want to move fast and break things.', 
     component: CreativeTemplate, 
     color: 'from-yellow-500 via-orange-600 to-red-700',
+    textColor: 'text-white'
+  },
+  { 
+    id: 'dominic', 
+    name: 'Top Gun', 
+    category: 'Premium • High-End', 
+    tags: ['Orange', 'Bento', 'Typography'],
+    desc: 'High-end, bold typography with a dark high-end look. Perfect for elite brand designers and visionary architects.', 
+    component: DominicTemplate, 
+    color: 'from-[#FF6B2C] via-black to-black',
+    textColor: 'text-white'
+  },
+  { 
+    id: 'vanshika', 
+    name: 'Tenet', 
+    category: 'Minimal • Modern', 
+    tags: ['Dark', 'Rounded', 'Services'],
+    desc: 'Minimalist dark-themed design with rounded corners and a premium modern aesthetic. Optimized for service-oriented portfolios.', 
+    component: VanshikaTemplate, 
+    color: 'from-zinc-900 via-black to-zinc-800',
+    textColor: 'text-white'
+  },
+  { 
+    id: 'folioblox', 
+    name: 'Folioblox', 
+    category: 'Vibrant • Contrast', 
+    tags: ['Gradient', 'Blocky', 'Bold'],
+    desc: 'Vibrant orange/red gradient with high-contrast bold design. Built for high impact and creative storytelling.', 
+    component: FoliobloxTemplate, 
+    color: 'from-[#FF4500] via-[#D81B1B] to-[#7B0000]',
+    textColor: 'text-white'
+  },
+  { 
+    id: 'futuristic', 
+    name: 'Interstellar', 
+    category: 'Abstract • Sci-Fi', 
+    tags: ['Glass', 'Floating Orbs', 'Futuristic'],
+    desc: 'Abstract visionary design with floating glass elements, glowing orbs, and a high-tech vibe. Build the next era.', 
+    component: FuturisticTemplate, 
+    color: 'from-indigo-900 via-[#FF3E83] to-black',
     textColor: 'text-white'
   }
 ] as const;
