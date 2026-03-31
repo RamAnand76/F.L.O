@@ -14,7 +14,7 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Templates');
   
-  const { setSelectedTemplate, isPublished, publishPortfolio, githubUser } = useStore();
+  const { setSelectedTemplate, isPublished, publishPortfolio, githubUser, addNotification } = useStore();
   const router = useRouter();
 
   const focusedTemplate = TEMPLATES.find(t => t.id === focusedId) || TEMPLATES[0];
@@ -30,9 +30,9 @@ export default function TemplatesPage() {
   });
 
   const handleUseTemplate = (id: string) => {
-    const actualId = ['creative', 'developer', 'minimal'].includes(id) ? id : 'minimal';
-    setSelectedTemplate(actualId as any);
+    setSelectedTemplate(id as any);
     setPreviewId(null);
+    addNotification(`Template "${TEMPLATES.find(t => t.id === id)?.name}" selected!`, 'success');
     router.push('/preview');
   };
 
@@ -116,12 +116,18 @@ export default function TemplatesPage() {
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative rounded-[2rem] overflow-hidden min-h-[345px] flex flex-col justify-end p-8 md:p-10 border border-white/10 shadow-2xl group"
+            className="relative rounded-[2rem] overflow-hidden min-h-[450px] flex flex-col justify-end p-8 md:p-10 border border-white/10 shadow-2xl group"
           >
-            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 transition-transform duration-1000 group-hover:scale-105", focusedTemplate.color)} />
-            <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 mix-blend-overlay" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/40 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+            {/* Live Thumbnail Background */}
+            <div className="absolute inset-0 bg-zinc-900 overflow-hidden">
+               <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-all duration-700 blur-[1px] group-hover:blur-0 transform scale-[1.05]">
+                  <div className="w-[1440px] h-[900px] origin-top-left transform scale-[0.8] md:scale-[1]">
+                     <focusedTemplate.component />
+                  </div>
+               </div>
+               <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10" />
+               <div className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-zinc-950/80 via-transparent to-transparent z-10 hidden md:block" />
+            </div>
 
             <div className="relative z-10 w-full max-w-3xl">
               <div className="flex items-center gap-2 mb-4">
@@ -178,11 +184,14 @@ export default function TemplatesPage() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className={cn("w-full aspect-[4/3] rounded-[1.25rem] mb-3 relative overflow-hidden bg-gradient-to-br shadow-lg border border-white/5", t.color)}>
-                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
-                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                      <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-                         <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                <div className={cn("w-full aspect-[16/10] rounded-[1.25rem] mb-3 relative overflow-hidden bg-zinc-950 border border-white/5 shadow-2xl group-hover:border-white/20 transition-all", t.color)}>
+                   <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%]" style={{ transform: 'scale(0.25)' }}>
+                      <t.component />
+                   </div>
+                   <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10" />
+                   <div className="absolute inset-0 flex items-center justify-center z-20">
+                      <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl transform scale-90 group-hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                         <Play className="w-5 h-5 text-white fill-current ml-1" />
                       </div>
                    </div>
                 </div>

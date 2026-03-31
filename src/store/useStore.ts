@@ -47,7 +47,7 @@ interface AppState {
   experiences: Experience[];
   testimonials: Testimonial[];
   assets: Asset[];
-  selectedTemplate: 'minimal' | 'developer' | 'creative';
+  selectedTemplate: 'minimal' | 'developer' | 'creative' | 'saas' | 'brutalist' | 'dominic' | 'vanshika' | 'folioblox' | 'futuristic';
   customData: {
     name: string;
     description?: string;
@@ -76,7 +76,7 @@ interface AppState {
   setRepos: (repos: Repository[]) => void;
   toggleRepoSelection: (id: number) => void;
   setSkills: (skills: string[]) => void;
-  setSelectedTemplate: (template: 'minimal' | 'developer' | 'creative') => void;
+  setSelectedTemplate: (template: 'minimal' | 'developer' | 'creative' | 'saas' | 'brutalist' | 'dominic' | 'vanshika' | 'folioblox' | 'futuristic') => void;
   updateCustomData: (data: Partial<AppState['customData']>) => void;
   enhanceWithAI: (field: string, prompt: string) => Promise<void>;
   saveProfile: () => Promise<void>;
