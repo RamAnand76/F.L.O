@@ -74,7 +74,7 @@ export default function PreviewEditorPage() {
 
   const editorContent = (
     <div className={cn(
-      "h-[calc(100vh-6rem)] md:h-[calc(100vh-10rem)] w-full flex flex-col md:flex-row rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#1e1e1e] font-sans relative",
+      "h-full w-full flex flex-col md:flex-row rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#1e1e1e] font-sans relative",
       isFullscreen && "fixed inset-0 w-screen h-screen z-[500] rounded-none border-none"
     )}>
       
@@ -273,7 +273,7 @@ export default function PreviewEditorPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full h-screen p-2 md:p-4 lg:p-6 bg-[#0a0a0a]">
       {editorContent}
     </div>
   );

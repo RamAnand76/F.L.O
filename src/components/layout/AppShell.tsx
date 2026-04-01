@@ -80,17 +80,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isFullWidthPage = isPublicPortfolio || ['preview', 'templates'].some(p => pathname?.includes(p));
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans overflow-x-hidden selection:bg-indigo-500/30">
       {/* Subtle background gradient */}
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-zinc-950 to-zinc-950" />
       
       <main className={cn(
-        "relative z-10 w-full mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-32 min-h-screen transition-all duration-500",
-        !isPublicPortfolio ? "max-w-7xl font-size-[80%]" : "max-w-none px-0 sm:px-0 lg:px-0 pt-0 pb-0"
+        "relative z-10 w-full mx-auto transition-all duration-500 min-h-screen",
+        !isFullWidthPage ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-32" : "max-w-none px-0 pt-0 pb-0"
       )}
-      style={!isPublicPortfolio ? { fontSize: '80%' } : {}}>
-        {!isPublicPortfolio && !isAuthPage && <TopNav />}
+      style={!isFullWidthPage ? { fontSize: '80%' } : {}}>
+        {!isFullWidthPage && !isAuthPage && <TopNav />}
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}

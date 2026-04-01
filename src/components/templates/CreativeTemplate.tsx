@@ -16,19 +16,19 @@ export function CreativeTemplate() {
   const { githubUser, customData, repos, selectedRepos, skills, experiences, education, approvedTestimonials, assets } = usePortfolioData();
 
   return (
-    <div className="min-h-full bg-[#fdfdfc] text-[#1a1a1a] font-sans p-4 md:p-8 lg:p-12 selection:bg-[#FF6B6B] selection:text-white">
+    <div className="min-h-full bg-[#fdfdfc] text-[#1a1a1a] font-sans p-6 sm:p-12 md:p-16 selection:bg-[#FF6B6B] selection:text-white">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
         
         {/* Floating Identity Bento */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:col-span-8 bg-[#FF6B6B] text-white rounded-[3rem] p-12 md:p-16 flex flex-col justify-between relative overflow-hidden shadow-2xl"
+          className="md:col-span-8 bg-[#FF6B6B] text-white rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-16 flex flex-col justify-between relative overflow-hidden shadow-2xl"
         >
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
           <div className="relative z-10">
             <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest mb-8">Creative Technologist</span>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter leading-[0.85] mb-10 overflow-hidden text-ellipsis">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl font-black tracking-tighter leading-[0.85] mb-10 overflow-hidden text-ellipsis">
               {customData.name.split(' ')[0]}<br/>{customData.name.split(' ')[1] || ''}
             </h1>
           </div>

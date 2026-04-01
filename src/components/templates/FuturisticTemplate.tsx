@@ -51,7 +51,7 @@ export function FuturisticTemplate() {
       <section className="max-w-[1400px] mx-auto px-8 pt-48 pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
          <div className="lg:col-span-12 flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="space-y-12 text-center md:text-left max-w-3xl">
-              <h1 className="text-[12vw] sm:text-8xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter leading-[0.8] uppercase whitespace-pre-wrap">
+              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] font-black tracking-tighter leading-[0.8] uppercase whitespace-pre-wrap">
                  LET'S<br/>BUILD<br/>TOGETHER
               </h1>
               <div className="space-y-6">
