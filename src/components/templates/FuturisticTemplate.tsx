@@ -1,12 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useStore } from '@/store/useStore';
 import { 
-  Github, Mail, MapPin, ExternalLink, Star, 
-  Briefcase, GraduationCap, Quote, FolderOpen, 
-  Linkedin, Twitter, Globe, ArrowRight, ArrowUpRight,
-  Play, Search, Menu
+  Github, Mail, MapPin, ExternalLink, Star, Briefcase, GraduationCap, Quote, FolderOpen, 
+  Linkedin, Twitter, Globe, ArrowRight, ArrowUpRight, Play, Search, Menu 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StackIcon } from '@/components/ui/StackIcon';

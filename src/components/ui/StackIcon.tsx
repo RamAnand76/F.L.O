@@ -1,19 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { Component } from 'react';
 import StackIconBase from 'tech-stack-icons';
+import { Code } from 'lucide-react';
 
 interface StackIconProps {
   name: string;
   className?: string;
 }
 
-/**
- * Mapping of common GitHub language names and tech names 
- * to tech-stack-icons library names for better accuracy.
- */
 const techMapping: Record<string, string> = {
-  // Languages
   'JavaScript': 'js',
   'TypeScript': 'typescript',
   'Python': 'python',
@@ -25,14 +21,12 @@ const techMapping: Record<string, string> = {
   'PHP': 'php',
   'Ruby': 'ruby',
   'Java': 'java',
-  'C++': 'cpp',
   'C#': 'csharp',
   'Swift': 'swift',
   'Kotlin': 'kotlin',
   'Shell': 'bash',
+  'Bash': 'bash',
   'PowerShell': 'powershell',
-  
-  // Frameworks & Tools
   'React': 'react',
   'Vue': 'vuejs',
   'Next.js': 'nextjs',
@@ -55,14 +49,12 @@ const techMapping: Record<string, string> = {
   'NestJS': 'nestjs',
   'Express.js': 'expressjs',
   'Express': 'expressjs',
-  'Zustand': 'zustand',
   'Redux': 'redux',
   'Vite': 'vitejs',
   'Django': 'django',
   'Flask': 'flask',
-  'NumPy': 'numpy',
-  'Pandas': 'pandas',
   'PyTorch': 'pytorch',
+  'TensorFlow': 'tensorflow',
   'Sentry': 'sentry',
   'Wordpress': 'wordpress',
   'Android': 'android',
@@ -70,52 +62,69 @@ const techMapping: Record<string, string> = {
   'Azure': 'azure',
   'Cloudflare': 'cloudflare',
   'OpenAI': 'openai',
-  'Gemini': 'google',
-  'Meta': 'metaai',
-  'Anthropic': 'anthropic',
-  'AssemblyAI': 'assemblyai',
-  'GitHub Copilot': 'copilotgithub',
-  'DeepMind': 'deepmind',
-  'DeepSeek': 'deepseek',
-  'ElevenLabs': 'elevenlabsai',
-  'Flux': 'fluxai',
-  'Gradio': 'gradio',
-  'Groq': 'groq',
+  'Framer Motion': 'framer',
+  'Framer': 'framer',
+  'GraphQL': 'graphql',
+  'AWS': 'aws',
+  'Git': 'git',
+  'GitHub': 'github',
+  'Linux': 'linux',
+  'Figma': 'figma',
   'Heroku': 'heroku',
-  'Hugging Face': 'huggingface',
-  'Kimi': 'kimi',
-  'LangChain': 'langchain',
-  'LlamaIndex': 'llamaindex',
-  'Mistral': 'mistral',
-  'Ollama': 'ollama',
   'Railway': 'railway',
   'Shadcn UI': 'shadcnui',
-  'TensorFlow': 'tensorflow',
-  'Bootstrap 4': 'bootstrap4',
-  'Bootstrap 5': 'bootstrap5',
 };
 
-/**
- * Wrapper for tech-stack-icons library.
- * Provides easy mapping from various names to library icon names.
- */
-export function StackIcon({ name, className = "w-4 h-4" }: StackIconProps) {
-  if (!name) return null;
-
-  // Cleanup name for more robustness (lowercase, remove spaces/dots/hyphens)
-  const normalizedSearch = name.trim().toLowerCase().replace(/[\s\.\-]/g, '');
-
-  // Check manual mapping first
-  const iconName = techMapping[name] || 
-                  techMapping[name.charAt(0).toUpperCase() + name.slice(1)] || 
-                  normalizedSearch;
-
+/** Fallback shown for any unknown or missing icon */
+function FallbackIcon({ className }: { className: string }) {
   return (
     <div className={className}>
-      <StackIconBase name={iconName as any} />
+      <Code className="w-full h-full opacity-50" />
     </div>
   );
 }
 
-// Keep LanguageIcon for backward compatibility or as a focused alias
+interface BoundaryState { hasError: boolean }
+interface BoundaryProps { children: React.ReactNode; fallback: React.ReactNode }
+
+/** Catches render errors thrown inside tech-stack-icons */
+class IconErrorBoundary extends Component<BoundaryProps, BoundaryState> {
+  constructor(props: BoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch() {
+    // Silently swallow — the fallback handles it
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+export function StackIcon({ name, className = 'w-4 h-4' }: StackIconProps) {
+  if (!name) return null;
+
+  const iconId = techMapping[name] ??
+                 techMapping[name.charAt(0).toUpperCase() + name.slice(1)];
+
+  const fallback = <FallbackIcon className={className} />;
+
+  if (!iconId) return fallback;
+
+  return (
+    <IconErrorBoundary fallback={fallback}>
+      <div className={className}>
+        <StackIconBase name={iconId as any} />
+      </div>
+    </IconErrorBoundary>
+  );
+}
+
 export const LanguageIcon = StackIcon;

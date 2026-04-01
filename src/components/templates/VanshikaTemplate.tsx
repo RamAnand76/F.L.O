@@ -1,17 +1,13 @@
 'use client';
 
 import React from 'react';
-import { useStore } from '@/store/useStore';
 import { 
-  Github, Mail, MapPin, ExternalLink, Star, 
-  Briefcase, GraduationCap, Quote, FolderOpen, 
-  Linkedin, Twitter, Globe, ArrowRight, ArrowUpRight, 
-  Download, FileText, Layout, Zap, Database, Code
+  Github, Mail, MapPin, ExternalLink, Star, Briefcase, GraduationCap, Quote, FolderOpen, 
+  Linkedin, Twitter, Globe, ArrowRight, ArrowUpRight, Download, FileText, Layout, Zap, Database, Code 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StackIcon } from '@/components/ui/StackIcon';
 import { motion } from 'motion/react';
-
 import { usePortfolioData } from '@/context/PortfolioDataContext';
 
 export function VanshikaTemplate() {
