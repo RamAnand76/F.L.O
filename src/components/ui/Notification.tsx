@@ -37,7 +37,13 @@ function NotificationItem({ n, onRemove }: { n: any, onRemove: (id: string) => v
     return () => clearInterval(timer);
   }, []);
 
-  const Icon = icons[n.type];
+  useEffect(() => {
+    if (progress === 0) {
+      onRemove(n.id);
+    }
+  }, [progress, n.id, onRemove]);
+
+  const Icon = icons[n.type as keyof typeof icons] || icons.info;
 
   return (
     <motion.div
@@ -48,13 +54,13 @@ function NotificationItem({ n, onRemove }: { n: any, onRemove: (id: string) => v
       transition={{ type: 'spring', damping: 25, stiffness: 400 }}
       className={cn(
         "pointer-events-auto min-w-[320px] max-w-md p-4 rounded-2xl border backdrop-blur-[20px] shadow-2xl flex items-start gap-4 relative overflow-hidden group",
-        styles[n.type]
+        styles[n.type as keyof typeof styles]
       )}
     >
       {/* Visual Progress Bar */}
       <div className="absolute bottom-0 left-0 h-[2px] w-full bg-white/5">
         <motion.div 
-          className={cn("h-full", progressStyles[n.type])}
+          className={cn("h-full", progressStyles[n.type as keyof typeof progressStyles])}
           style={{ width: `${progress}%` }}
         />
       </div>

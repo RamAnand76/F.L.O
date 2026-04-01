@@ -5,6 +5,16 @@
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
+@layer base {
+  button {
+    @apply cursor-pointer;
+  }
+  
+  body {
+    @apply bg-zinc-950 text-zinc-50;
+  }
+}
+
 html {
   font-size: 100%;
 }

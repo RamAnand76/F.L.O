@@ -73,7 +73,7 @@ export default function TemplatesPage() {
                 className="flex items-center gap-4 group cursor-pointer" 
                 onClick={() => setFocusedId(t.id)}
               >
-                <div className={cn("w-20 h-14 rounded-xl bg-gradient-to-br flex-shrink-0 relative overflow-hidden", t.color)}>
+                <div className={cn("w-20 h-14 rounded-xl bg-gradient-to-br flex-shrink-0 relative overflow-hidden", t.gradient)}>
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                     <Play className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 fill-current" />
                   </div>
@@ -187,7 +187,7 @@ export default function TemplatesPage() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className={cn("w-full aspect-[16/10] rounded-[1.25rem] mb-3 relative overflow-hidden bg-zinc-950 border border-white/5 shadow-2xl group-hover:border-white/20 transition-all", t.color)}>
+                <div className={cn("w-full aspect-[16/10] rounded-[1.25rem] mb-3 relative overflow-hidden bg-zinc-950 border border-white/5 shadow-2xl group-hover:border-white/20 transition-all", t.gradient ? `bg-gradient-to-br ${t.gradient}` : '')}>
                    <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%] text-left" style={{ transform: 'scale(0.25)' }}>
                       <PortfolioDataProvider isPlaceholder>
                          <t.component />

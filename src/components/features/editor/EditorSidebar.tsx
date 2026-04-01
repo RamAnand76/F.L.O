@@ -3,12 +3,13 @@ import { motion } from 'motion/react';
 import { 
   Code, LayoutTemplate, Palette, Search, Sparkles, 
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Type, Settings, Trash2, X, Send, Paperclip
+  Type, Settings, Trash2, X, Send, Paperclip, Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { useToast } from '@/components/ui/Toast';
 import { useWindowSize } from '@/hooks/useWindowSize';
+import { PortfolioDataProvider } from '@/context/PortfolioDataContext';
 
 interface EditorSidebarProps {
   activeTab: 'editor' | 'templates' | 'preview';
@@ -200,7 +201,7 @@ export function EditorSidebar({
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-4">
               {templates.map((t) => (
                 <button
                   key={t.id}
@@ -212,7 +213,7 @@ export function EditorSidebar({
                       : "bg-[#2a2a2a] border-white/5 hover:border-white/10 hover:bg-[#333]"
                   )}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-3">
                     <div className={cn("p-1.5 rounded-lg", t.bg)}>
                       <t.icon className={cn("w-4 h-4", t.color)} />
                     </div>
@@ -220,6 +221,22 @@ export function EditorSidebar({
                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
                     )}
                   </div>
+
+                  {/* High-Fidelity Thumbnail */}
+                  <div className={cn("w-full aspect-[16/9] rounded-xl mb-3 relative overflow-hidden bg-zinc-950 border border-white/5 shadow-2xl group-hover:border-white/20 transition-all", t.color)}>
+                    <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%] text-left" style={{ transform: 'scale(0.25)' }}>
+                        <PortfolioDataProvider isPlaceholder>
+                          <t.component />
+                        </PortfolioDataProvider>
+                    </div>
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10" />
+                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                      <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl transform scale-90 group-hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                         <Play className="w-4 h-4 text-white fill-current ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                  
                   <h4 className="text-xs font-bold text-white mb-1">{t.name}</h4>
                   <p className="text-[10px] text-zinc-500 leading-relaxed line-clamp-2">{t.desc}</p>
                 </button>

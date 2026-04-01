@@ -7,11 +7,11 @@ import { useStore } from '@/store/useStore';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { 
   Code, LayoutTemplate, Palette, Github, X, Sparkles,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TEMPLATES } from '@/lib/templates';
 import { deployService } from '@/services/deploy.service';
-import { Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 
 // Components
@@ -55,16 +55,10 @@ export default function PreviewEditorPage() {
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
-  const templates = [
-    { id: 'minimal', actualId: 'minimal', name: 'Interstellar', desc: 'Clean, typography-focused design.', icon: LayoutTemplate, color: 'text-zinc-300', bg: 'bg-zinc-100/10' },
-    { id: 'developer', actualId: 'developer', name: 'The Matrix', desc: 'Dark, monospace, code-centric vibe.', icon: Code, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { id: 'creative', actualId: 'creative', name: 'Spider-Verse', desc: 'Bold colors and bento-box layouts.', icon: Palette, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { id: 'saas', actualId: 'minimal', name: 'Manifest', desc: 'Optimized for conversions with a SaaS aesthetic.', icon: LayoutTemplate, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { id: 'brutalist', actualId: 'creative', name: 'The Flash', desc: 'Raw, unpolished, and highly structural.', icon: Palette, color: 'text-red-400', bg: 'bg-red-500/10' }
-  ] as const;
+  const templates = TEMPLATES;
 
   const [activeTemplateId, setActiveTemplateId] = useState<string>(
-    templates.find(t => t.actualId === selectedTemplate)?.id || 'minimal'
+    templates.find(t => t.id === selectedTemplate)?.id || 'minimal'
   );
 
   const handleTemplateSelect = (t: any) => {
