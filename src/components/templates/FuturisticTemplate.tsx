@@ -12,10 +12,10 @@ import { cn } from '@/lib/utils';
 import { StackIcon } from '@/components/ui/StackIcon';
 import { motion } from 'motion/react';
 
+import { usePortfolioData } from '@/context/PortfolioDataContext';
+
 export function FuturisticTemplate() {
-  const { githubUser, customData, repos, selectedRepoIds, skills, experiences, education, testimonials, assets } = useStore();
-  const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
-  const approvedTestimonials = testimonials.filter(t => t.isApproved);
+  const { githubUser, customData, repos, selectedRepos, skills, experiences, education, approvedTestimonials, assets } = usePortfolioData();
 
   const firstName = customData.name.split(' ')[0] || 'Build';
 

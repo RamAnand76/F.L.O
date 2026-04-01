@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { useRouter } from 'next/navigation';
-import { Search, ChevronDown, Play, Download, MoreHorizontal, X, Check, Flame, Clock, CheckCircle2, ExternalLink, Upload, Loader2 } from 'lucide-react';
+import { Search, ChevronDown, Play, Download, MoreHorizontal, X, Check, Flame, Clock, CheckCircle2, ExternalLink, Upload, Loader2, LayoutTemplate } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TEMPLATES } from '@/lib/templates';
+import { PortfolioDataProvider } from '@/context/PortfolioDataContext';
 
 export default function TemplatesPage() {
   const [focusedId, setFocusedId] = useState<string>(TEMPLATES[0].id);
@@ -119,10 +120,12 @@ export default function TemplatesPage() {
             className="relative rounded-[2rem] overflow-hidden min-h-[450px] flex flex-col justify-end p-8 md:p-10 border border-white/10 shadow-2xl group"
           >
             {/* Live Thumbnail Background */}
-            <div className="absolute inset-0 bg-zinc-900 overflow-hidden">
+            <div className="absolute inset-0 bg-zinc-900 overflow-hidden text-left">
                <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-all duration-700 blur-[1px] group-hover:blur-0 transform scale-[1.05]">
                   <div className="w-[1440px] h-[900px] origin-top-left transform scale-[0.8] md:scale-[1]">
-                     <focusedTemplate.component />
+                     <PortfolioDataProvider isPlaceholder>
+                        <focusedTemplate.component />
+                     </PortfolioDataProvider>
                   </div>
                </div>
                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10" />
@@ -185,8 +188,10 @@ export default function TemplatesPage() {
                 transition={{ duration: 0.2 }}
               >
                 <div className={cn("w-full aspect-[16/10] rounded-[1.25rem] mb-3 relative overflow-hidden bg-zinc-950 border border-white/5 shadow-2xl group-hover:border-white/20 transition-all", t.color)}>
-                   <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%]" style={{ transform: 'scale(0.25)' }}>
-                      <t.component />
+                   <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%] text-left" style={{ transform: 'scale(0.25)' }}>
+                      <PortfolioDataProvider isPlaceholder>
+                         <t.component />
+                      </PortfolioDataProvider>
                    </div>
                    <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10" />
                    <div className="absolute inset-0 flex items-center justify-center z-20">
@@ -268,8 +273,10 @@ export default function TemplatesPage() {
                   </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto relative bg-zinc-950">
-                <PreviewComponent />
+              <div className="flex-1 overflow-y-auto relative bg-zinc-950 text-left">
+                <PortfolioDataProvider isPlaceholder>
+                  <PreviewComponent />
+                </PortfolioDataProvider>
               </div>
             </motion.div>
           </motion.div>

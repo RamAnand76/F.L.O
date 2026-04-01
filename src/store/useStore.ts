@@ -37,7 +37,7 @@ export interface Repository {
   updated_at: string;
 }
 
-interface AppState {
+export interface AppState {
   isAuthenticated: boolean;
   githubUser: GithubUser | null;
   repos: Repository[];

@@ -11,10 +11,10 @@ import { cn } from '@/lib/utils';
 import { StackIcon } from '@/components/ui/StackIcon';
 import { motion } from 'motion/react';
 
+import { usePortfolioData } from '@/context/PortfolioDataContext';
+
 export function MinimalTemplate() {
-  const { githubUser, customData, repos, selectedRepoIds, skills, education, experiences, testimonials, assets } = useStore();
-  const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
-  const approvedTestimonials = testimonials.filter(t => t.isApproved);
+  const { githubUser, customData, repos, selectedRepos, skills, education, experiences, approvedTestimonials, assets } = usePortfolioData();
 
   return (
     <div className="min-h-full bg-white text-zinc-900 font-sans p-8 md:p-32 selection:bg-black selection:text-white max-w-7xl mx-auto border-x border-zinc-100/50 shadow-2xl relative">

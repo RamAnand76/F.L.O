@@ -12,10 +12,10 @@ import { cn } from '@/lib/utils';
 import { StackIcon } from '@/components/ui/StackIcon';
 import { motion } from 'motion/react';
 
+import { usePortfolioData } from '@/context/PortfolioDataContext';
+
 export function DeveloperTemplate() {
-  const { githubUser, customData, repos, selectedRepoIds, skills, experiences, education, testimonials, assets } = useStore();
-  const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
-  const approvedTestimonials = testimonials.filter(t => t.isApproved);
+  const { githubUser, customData, repos, selectedRepos, skills, experiences, education, approvedTestimonials, assets } = usePortfolioData();
 
   return (
     <div className="min-h-full bg-[#0d1117] text-[#c9d1d9] font-mono p-4 md:p-8 lg:p-12 selection:bg-[#58a6ff]/30 selection:text-white">

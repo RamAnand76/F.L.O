@@ -11,10 +11,10 @@ import { cn } from '@/lib/utils';
 import { StackIcon } from '@/components/ui/StackIcon';
 import { motion } from 'motion/react';
 
+import { usePortfolioData } from '@/context/PortfolioDataContext';
+
 export function CreativeTemplate() {
-  const { githubUser, customData, repos, selectedRepoIds, skills, experiences, education, testimonials, assets } = useStore();
-  const selectedRepos = repos.filter(r => selectedRepoIds.includes(r.id));
-  const approvedTestimonials = testimonials.filter(t => t.isApproved);
+  const { githubUser, customData, repos, selectedRepos, skills, experiences, education, approvedTestimonials, assets } = usePortfolioData();
 
   return (
     <div className="min-h-full bg-[#fdfdfc] text-[#1a1a1a] font-sans p-4 md:p-8 lg:p-12 selection:bg-[#FF6B6B] selection:text-white">
