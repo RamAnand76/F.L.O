@@ -2,6 +2,7 @@ import React from 'react';
 import { Monitor, Smartphone, RefreshCw, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TEMPLATES } from '@/lib/templates';
+import { PortfolioDataProvider } from '@/context/PortfolioDataContext';
 
 interface PreviewFrameProps {
   deviceMode: 'desktop' | 'mobile';
@@ -26,7 +27,7 @@ export function PreviewFrame({
     setIsMounted(true);
   }, []);
 
-  const PreviewComponent = TEMPLATES.find(t => t.actualId === selectedTemplate)?.component || TEMPLATES[0].component;
+  const PreviewComponent = TEMPLATES.find(t => t.id === selectedTemplate)?.component || TEMPLATES[0].component;
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#0a0a0a]">
@@ -87,9 +88,12 @@ export function PreviewFrame({
             "bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-out overflow-hidden relative w-full h-full",
             deviceMode === 'desktop' ? "rounded-none sm:rounded-xl" : "max-w-[375px] max-h-[812px] h-[85vh] rounded-[3rem] border-[8px] border-zinc-800"
           )}
+          style={{ transform: 'translate3d(0,0,0)' }} // This contains 'fixed' children
         >
           <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-white">
-            <PreviewComponent />
+            <PortfolioDataProvider>
+              <PreviewComponent />
+            </PortfolioDataProvider>
           </div>
         </div>
       </div>
