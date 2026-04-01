@@ -203,11 +203,11 @@ export function EditorSidebar({
 
             <div className="grid grid-cols-1 gap-4">
               {templates.map((t) => (
-                <button
+                <div
                   key={t.id}
                   onClick={() => onTemplateSelect(t)}
                   className={cn(
-                    "group relative flex flex-col p-3 rounded-xl border transition-all duration-300 text-left",
+                    "group relative flex flex-col p-3 rounded-xl border transition-all duration-300 text-left cursor-pointer",
                     activeTemplateId === t.id 
                       ? "bg-indigo-500/10 border-indigo-500/50 ring-1 ring-indigo-500/50" 
                       : "bg-[#2a2a2a] border-white/5 hover:border-white/10 hover:bg-[#333]"
@@ -224,7 +224,7 @@ export function EditorSidebar({
 
                   {/* High-Fidelity Thumbnail */}
                   <div className={cn("w-full aspect-[16/9] rounded-xl mb-3 relative overflow-hidden bg-zinc-950 border border-white/5 shadow-2xl group-hover:border-white/20 transition-all", t.color)}>
-                    <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%] text-left" style={{ transform: 'scale(0.25)' }}>
+                    <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 origin-top-left w-[400%] h-[400%] text-left pointer-events-none" style={{ transform: 'scale(0.25)' }}>
                         <PortfolioDataProvider isPlaceholder>
                           <t.component />
                         </PortfolioDataProvider>
@@ -239,7 +239,7 @@ export function EditorSidebar({
                   
                   <h4 className="text-xs font-bold text-white mb-1">{t.name}</h4>
                   <p className="text-[10px] text-zinc-500 leading-relaxed line-clamp-2">{t.desc}</p>
-                </button>
+                </div>
               ))}
             </div>
           </div>

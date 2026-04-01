@@ -63,7 +63,7 @@ export default function PreviewEditorPage() {
 
   const handleTemplateSelect = (t: any) => {
     setActiveTemplateId(t.id);
-    setSelectedTemplate(t.actualId as any);
+    setSelectedTemplate(t.id as any);
   };
 
   const editorContent = (
