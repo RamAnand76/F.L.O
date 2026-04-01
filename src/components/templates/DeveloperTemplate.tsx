@@ -36,10 +36,10 @@ export function DeveloperTemplate() {
                 <div className="px-3 py-1 bg-[#238636]/10 text-[#3fb950] border border-[#238636]/30 rounded-full text-[10px] font-black uppercase tracking-widest">System Active</div>
                 <div className="px-3 py-1 bg-[#30363d] text-[#8b949e] border border-[#30363d] rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"><Command className="w-3 h-3" /> Root Access</div>
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-none">
+              <h1 className="text-5xl md:text-6xl lg:text-8xl font-bold text-white mb-6 tracking-tight leading-none overflow-hidden text-ellipsis">
                 ~/{customData.name.toLowerCase().replace(/\s+/g, '-')}
               </h1>
-              <p className="text-[#8b949e] mb-10 text-xl leading-relaxed max-w-2xl font-medium italic opacity-80 group-hover:opacity-100 transition-opacity">
+              <p className="text-[#8b949e] mb-10 text-xl md:text-2xl leading-relaxed max-w-2xl font-medium italic opacity-80 group-hover:opacity-100 transition-opacity">
                 // {customData.bio}
               </p>
               

@@ -28,7 +28,7 @@ export function CreativeTemplate() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
           <div className="relative z-10">
             <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest mb-8">Creative Technologist</span>
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.85] mb-10">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter leading-[0.85] mb-10 overflow-hidden text-ellipsis">
               {customData.name.split(' ')[0]}<br/>{customData.name.split(' ')[1] || ''}
             </h1>
           </div>

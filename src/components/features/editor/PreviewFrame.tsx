@@ -1,9 +1,7 @@
 import React from 'react';
 import { Monitor, Smartphone, RefreshCw, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { MinimalTemplate } from '@/components/templates/MinimalTemplate';
-import { DeveloperTemplate } from '@/components/templates/DeveloperTemplate';
-import { CreativeTemplate } from '@/components/templates/CreativeTemplate';
+import { TEMPLATES } from '@/lib/templates';
 
 interface PreviewFrameProps {
   deviceMode: 'desktop' | 'mobile';
@@ -22,6 +20,14 @@ export function PreviewFrame({
   onExport,
   githubUser
 }: PreviewFrameProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const PreviewComponent = TEMPLATES.find(t => t.actualId === selectedTemplate)?.component || TEMPLATES[0].component;
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#0a0a0a]">
       {/* Preview Toolbar */}
@@ -55,7 +61,7 @@ export function PreviewFrame({
 
         <div className="flex items-center gap-3">
           <a 
-            href={`/${githubUser?.login || 'profile'}`}
+            href={`/${(isMounted && githubUser?.login) ? githubUser.login : 'profile'}`}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium text-zinc-400 hover:text-white transition-colors"
@@ -72,17 +78,18 @@ export function PreviewFrame({
       </div>
 
       {/* Actual Preview Area */}
-      <div className="flex-1 overflow-hidden p-4 lg:p-8 flex justify-center bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px]">
+      <div className={cn(
+        "flex-1 overflow-hidden flex justify-center bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] transition-all",
+        deviceMode === 'desktop' ? "p-0 sm:p-2 md:p-4" : "p-4 lg:p-8"
+      )}>
         <div 
           className={cn(
-            "bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-out overflow-hidden relative",
-            deviceMode === 'desktop' ? "w-full h-full rounded-xl" : "w-[375px] h-[667px] rounded-[3rem] border-[8px] border-zinc-800"
+            "bg-white shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 ease-out overflow-hidden relative w-full h-full",
+            deviceMode === 'desktop' ? "rounded-none sm:rounded-xl" : "max-w-[375px] max-h-[812px] h-[85vh] rounded-[3rem] border-[8px] border-zinc-800"
           )}
         >
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar bg-white">
-            {selectedTemplate === 'minimal' && <MinimalTemplate />}
-            {selectedTemplate === 'developer' && <DeveloperTemplate />}
-            {selectedTemplate === 'creative' && <CreativeTemplate />}
+          <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-white">
+            <PreviewComponent />
           </div>
         </div>
       </div>

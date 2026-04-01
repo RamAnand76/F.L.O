@@ -49,6 +49,7 @@ export default function PreviewEditorPage() {
 
   const selectedTemplate = useStore((state) => state.selectedTemplate);
   const setSelectedTemplate = useStore((state) => state.setSelectedTemplate);
+  const githubUser = useStore((state) => state.githubUser);
   const customData = useStore((state) => state.customData);
   const updateCustomData = useStore((state) => state.updateCustomData);
   const { width } = useWindowSize();
@@ -155,7 +156,7 @@ export default function PreviewEditorPage() {
             selectedTemplate={selectedTemplate}
             customData={customData}
             onExport={() => setShowExportModal(true)}
-            githubUser={useStore.getState().githubUser}
+            githubUser={githubUser}
           />
         </div>
       )}

@@ -22,7 +22,7 @@ export function MinimalTemplate() {
 
       <header className="mb-32 relative z-10 transition-all duration-700">
         <motion.p initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-sm font-bold tracking-[0.3em] uppercase text-zinc-400 mb-12">Foundational Profile</motion.p>
-        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl md:text-9xl font-bold tracking-tighter mb-10 leading-[0.85]">{customData.name}</motion.h1>
+        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl md:text-7xl lg:text-9xl font-bold tracking-tighter mb-10 leading-[0.85]">{customData.name}</motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-2xl md:text-3xl text-zinc-500 max-w-3xl leading-relaxed font-light">{customData.bio}</motion.p>
         
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex flex-wrap gap-8 mt-12 text-sm font-bold uppercase tracking-widest text-zinc-400">
@@ -146,7 +146,7 @@ export function MinimalTemplate() {
             {approvedTestimonials.map(t => (
               <div key={t.id} className="break-inside-avoid p-12 bg-zinc-950 text-white rounded-[3rem] shadow-2xl transition-transform hover:-rotate-1">
                 <Quote className="w-10 h-10 text-white opacity-10 mb-8" />
-                <p className="text-zinc-400 text-2xl font-light mb-12 leading-relaxed italic">"{t.content}"</p>
+                <p className="text-zinc-400 text-xl font-light mb-12 leading-relaxed italic">"{t.content}"</p>
                 <div className="flex items-center gap-6">
                   <img src={t.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${t.name}`} alt={t.name} className="w-12 h-12 rounded-full ring-2 ring-white/10" />
                   <div>
