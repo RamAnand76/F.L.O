@@ -1,12 +1,10 @@
-import { 
-  MinimalTemplate 
-} from '@/components/templates/MinimalTemplate';
-import { DeveloperTemplate } from '@/components/templates/DeveloperTemplate';
-import { CreativeTemplate } from '@/components/templates/CreativeTemplate';
-import { DominicTemplate } from '@/components/templates/DominicTemplate';
-import { VanshikaTemplate } from '@/components/templates/VanshikaTemplate';
-import { FoliobloxTemplate } from '@/components/templates/FoliobloxTemplate';
-import { FuturisticTemplate } from '@/components/templates/FuturisticTemplate';
+import { MinimalTemplate } from '@/components/templates/minimal/MinimalTemplate';
+import { DeveloperTemplate } from '@/components/templates/developer/DeveloperTemplate';
+import { CreativeTemplate } from '@/components/templates/creative/CreativeTemplate';
+import { DominicTemplate } from '@/components/templates/premium/DominicTemplate';
+import { VanshikaTemplate } from '@/components/templates/minimal/VanshikaTemplate';
+import { FoliobloxTemplate } from '@/components/templates/vibrant/FoliobloxTemplate';
+import { FuturisticTemplate } from '@/components/templates/abstract/FuturisticTemplate';
 import { LayoutTemplate, Code, Palette, Rocket, Zap, Crown, Shield } from 'lucide-react';
 
 export const TEMPLATES = [
