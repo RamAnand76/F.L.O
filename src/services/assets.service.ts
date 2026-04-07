@@ -25,10 +25,7 @@ export const assetsService = {
     // We cast to any because our apiClient wrappers default to JSON if not specified, 
     // but the internal apiClient logic inherently handles FormData correctly 
     // without overriding the Content-Type header.
-    return apiClient.request<Asset>('/assets/upload', {
-      method: 'POST',
-      body: formData as any,
-    });
+    return apiClient.post<Asset>('/assets/upload', formData);
   },
   
   async delete(id: string) {
