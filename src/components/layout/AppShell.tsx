@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isAuthPage = pathname === '/auth' || pathname === '/connect';
   
   // Public portfolio routes should be isolated from the dashboard shell
-  const isPublicPortfolio = pathname !== '/' && pathname?.split('/').length === 2 && !['auth', 'connect', 'folio-control', 'templates', 'preview', 'profile', 'settings'].includes(pathname.split('/')[1]);
+  const isPublicPortfolio = pathname !== '/' && pathname?.split('/').length === 2 && !['auth', 'connect', 'folio-control', 'templates', 'preview', 'profile', 'settings', 'inbox', 'seo', 'blog', 'review'].includes(pathname.split('/')[1]);
 
   if (isPublicPortfolio) {
     return (

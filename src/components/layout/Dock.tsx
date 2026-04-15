@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, SlidersHorizontal, MonitorPlay, User, LogOut, LayoutTemplate } from 'lucide-react';
+import { LayoutDashboard, SlidersHorizontal, MonitorPlay, LayoutTemplate, Inbox, TrendingUp, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 
@@ -13,6 +13,9 @@ const navItems = [
   { path: '/folio-control', label: 'Folio Control', icon: SlidersHorizontal },
   { path: '/templates', label: 'Templates', icon: LayoutTemplate },
   { path: '/preview', label: 'Preview & Editor', icon: MonitorPlay },
+  { path: '/inbox', label: 'Inbox', icon: Inbox },
+  { path: '/seo', label: 'SEO & OG', icon: TrendingUp },
+  { path: '/blog', label: 'Blog', icon: BookOpen },
 ];
 
 export function Dock() {

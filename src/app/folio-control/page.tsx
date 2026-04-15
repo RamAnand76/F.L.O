@@ -5,17 +5,16 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import {
-  Plus, Filter, ArrowUpDown, AlertCircle, LayoutGrid, Award,
+  Plus, Filter, ArrowUpDown, LayoutGrid, Award,
   GraduationCap, MessageSquare, FolderOpen, Trash2,
-  Image as ImageIcon, FileText, Upload, Quote, Briefcase, Pencil,
-  Github, FileUp, Loader2, Sparkles, CheckCircle2, X,
-  MoreHorizontal, Music, Play, FileCode, FileArchive, Code2, User, Link
+  Image as ImageIcon, FileText, Upload, Briefcase, Pencil,
+  Github, FileUp, Loader2, CheckCircle2, X,
+  Music, Play, FileCode, FileArchive, Code2, User, Link,
+  Star
 } from 'lucide-react';
-import { useWindowSize } from '@/hooks/useWindowSize';
 import { cn } from '@/lib/utils';
 import { Education, Experience } from '@/services/profile.service';
 
-// Extracted Components
 import { RepoCard } from '@/components/features/dashboard/RepoCard';
 import { SkillBadge } from '@/components/features/dashboard/SkillBadge';
 import { Modal } from '@/components/ui/Modal';
@@ -28,6 +27,143 @@ import { Testimonial } from '@/services/testimonials.service';
 
 export type FolioTab = 'repos' | 'skills' | 'professional' | 'testimonials' | 'assets';
 
+const ICON_FOR_TYPE: Record<string, React.ReactNode> = {
+  image: <ImageIcon className="w-8 h-8 text-zinc-600" />,
+  video: <Play className="w-8 h-8 text-zinc-600" />,
+  audio: <Music className="w-8 h-8 text-zinc-600" />,
+  code: <Code2 className="w-8 h-8 text-zinc-600" />,
+  archive: <FileArchive className="w-8 h-8 text-zinc-600" />,
+  doc: <FileText className="w-8 h-8 text-zinc-600" />,
+};
+
+// ─── Simple inline confirm dialog ────────────────────────────────────────────
+function ConfirmDialog({
+  title,
+  desc,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  desc: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[600] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.96, y: 8 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.96, y: 8 }}
+        className="bg-zinc-900 border border-white/8 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+      >
+        <h3 className="text-[15px] font-semibold text-white mb-1.5">{title}</h3>
+        <p className="text-[13px] text-zinc-500 leading-relaxed mb-6">{desc}</p>
+        <div className="flex gap-2.5 justify-end">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-[13px] font-medium text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 text-[13px] font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 rounded-lg transition-colors"
+          >
+            Remove
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Success Modal ────────────────────────────────────────────────────────────
+function SuccessModal({
+  source,
+  counts,
+  onClose,
+}: {
+  source: 'github' | 'resume';
+  counts: { edu: number; exp: number };
+  onClose: () => void;
+}) {
+  return createPortal(
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 12 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 12 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xs bg-zinc-900 border border-white/8 rounded-3xl overflow-hidden shadow-2xl"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-600 hover:text-white hover:bg-white/5 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="p-8 flex flex-col items-center text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', damping: 14, delay: 0.1 }}
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-5 shadow-lg shadow-indigo-500/20"
+          >
+            <CheckCircle2 className="w-8 h-8 text-white" />
+          </motion.div>
+
+          <h3 className="text-[18px] font-semibold text-white mb-1">
+            {source === 'github' ? 'GitHub synced' : 'Resume imported'}
+          </h3>
+          <p className="text-[13px] text-zinc-500 mb-6">Your profile has been updated.</p>
+
+          <div className="w-full bg-zinc-950/60 border border-white/5 rounded-2xl p-4 space-y-2 mb-6">
+            {[
+              { label: 'Education entries added', value: counts.edu },
+              { label: 'Experience entries added', value: counts.exp },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center justify-between text-[13px]">
+                <span className="text-zinc-500">{row.label}</span>
+                <span className="font-semibold text-white tabular-nums">{row.value}</span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full py-3 bg-white text-zinc-950 rounded-xl text-[14px] font-semibold hover:bg-zinc-100 transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>,
+    document.body
+  );
+}
+
+// ─── Tabs config ──────────────────────────────────────────────────────────────
+const TABS: { id: FolioTab; label: string; icon: React.ElementType }[] = [
+  { id: 'repos', label: 'Projects', icon: LayoutGrid },
+  { id: 'skills', label: 'Skills', icon: Award },
+  { id: 'professional', label: 'Professional', icon: Briefcase },
+  { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+  { id: 'assets', label: 'Assets', icon: FolderOpen },
+];
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function FolioControlPage() {
   const {
     repos, selectedRepoIds, toggleRepoSelection, skills, setSkills,
@@ -35,55 +171,40 @@ export default function FolioControlPage() {
     addEducation, updateEducation, deleteEducation,
     addExperience, updateExperience, deleteExperience,
     fetchMoreRepos, repoPagination,
-    testimonials, fetchTestimonials, addTestimonial, updateTestimonial, approveTestimonial, deleteTestimonial,
+    testimonials, fetchTestimonials, addTestimonial, updateTestimonial,
+    approveTestimonial, deleteTestimonial,
     assets, fetchAssets, uploadAsset, deleteAsset,
-    githubUser,
-    customData, updateCustomData, saveProfile, isPublished,
-    addNotification
+    githubUser, customData, updateCustomData, saveProfile, isPublished,
+    addNotification,
   } = useStore();
 
-  const { width } = useWindowSize();
   const [activeTab, setActiveTab] = useState<FolioTab>('repos');
-
-  // Local UI state
   const [newSkill, setNewSkill] = useState('');
-  const [sortBy, setSortBy] = useState<'stars' | 'name' | 'updated-desc' | 'updated-asc'>('stars');
+  const [sortBy, setSortBy] = useState<'stars' | 'name' | 'updated-desc'>('stars');
   const [filterLang, setFilterLang] = useState<string>('All');
   const [skillToDelete, setSkillToDelete] = useState<string | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isUploadingAsset, setIsUploadingAsset] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const [showEduModal, setShowEduModal] = useState(false);
   const [editingEdu, setEditingEdu] = useState<Education | null>(null);
-
   const [showExpModal, setShowExpModal] = useState(false);
   const [editingExp, setEditingExp] = useState<Experience | null>(null);
-
   const [showTestimonialModal, setShowTestimonialModal] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
-
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isUploadingAsset, setIsUploadingAsset] = useState(false);
   const [successSource, setSuccessSource] = useState<'github' | 'resume'>('github');
   const [importedCounts, setImportedCounts] = useState({ edu: 0, exp: 0 });
 
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-
   useEffect(() => {
-    Promise.allSettled([
-      fetchProfile(),
-      fetchTestimonials(),
-      fetchAssets()
-    ]).finally(() => setIsLoading(false));
+    setMounted(true);
+    Promise.allSettled([fetchProfile(), fetchTestimonials(), fetchAssets()]);
   }, [fetchProfile, fetchTestimonials, fetchAssets]);
 
   const handleSyncGithub = async () => {
@@ -95,13 +216,12 @@ export default function FolioControlPage() {
       setSuccessSource('github');
       setImportedCounts({
         edu: Math.max(0, useStore.getState().education.length - prevEdu),
-        exp: Math.max(0, useStore.getState().experiences.length - prevExp)
+        exp: Math.max(0, useStore.getState().experiences.length - prevExp),
       });
       setShowSuccessModal(true);
-      addNotification('GitHub profile synced successfully!', 'success');
-    } catch (error) {
-      console.error('Sync failed:', error);
-      addNotification('Failed to sync from GitHub.', 'error');
+      addNotification('GitHub synced.', 'success');
+    } catch {
+      addNotification('Sync failed.', 'error');
     } finally {
       setIsSyncing(false);
     }
@@ -118,153 +238,180 @@ export default function FolioControlPage() {
       setSuccessSource('resume');
       setImportedCounts({
         edu: Math.max(0, useStore.getState().education.length - prevEdu),
-        exp: Math.max(0, useStore.getState().experiences.length - prevExp)
+        exp: Math.max(0, useStore.getState().experiences.length - prevExp),
       });
       setShowSuccessModal(true);
-      addNotification('Resume imported successfully!', 'success');
-    } catch (error) {
-      console.error('Import failed:', error);
-      addNotification('Failed to import resume. Please try again.', 'error');
+      addNotification('Resume imported.', 'success');
+    } catch {
+      addNotification('Import failed.', 'error');
     } finally {
       setIsImporting(false);
-      // Reset input
       e.target.value = '';
     }
   };
 
   const handleAddSkill = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()]);
-      addNotification(`Skill "${newSkill.trim()}" added.`, 'success');
+    const s = newSkill.trim();
+    if (s && !skills.includes(s)) {
+      setSkills([...skills, s]);
       setNewSkill('');
     }
   };
 
   const languages = useMemo(() => {
-    const langs = new Set(repos.map(r => r.language).filter(Boolean));
+    const langs = new Set(repos.map((r) => r.language).filter(Boolean));
     return ['All', ...Array.from(langs)] as string[];
   }, [repos]);
 
-  const filteredAndSortedRepos = useMemo(() => {
+  const sortedRepos = useMemo(() => {
     let result = [...repos];
-    if (filterLang !== 'All') result = result.filter(r => r.language === filterLang);
+    if (filterLang !== 'All') result = result.filter((r) => r.language === filterLang);
     result.sort((a, b) => {
       if (sortBy === 'stars') return b.stargazers_count - a.stargazers_count;
       if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'updated-desc') return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-      return 0;
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
     });
     return result;
   }, [repos, sortBy, filterLang]);
 
-  const tabs = [
-    { id: 'repos', label: 'Projects', icon: LayoutGrid },
-    { id: 'skills', label: 'Skills', icon: Award },
-    { id: 'professional', label: 'Professional', icon: Briefcase },
-    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-    { id: 'assets', label: 'Assets', icon: FolderOpen }
-  ];
-
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8 md:space-y-12 mb-20">
-      <header className="border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <motion.h1 className="text-3xl md:text-4xl font-semibold tracking-tighter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            Folio Control
-          </motion.h1>
-          <div className="flex items-center gap-2">
-            <motion.p className="text-zinc-400 text-base md:text-lg" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              Curate the content that appears on your portfolio.
-            </motion.p>
+    <div className="space-y-8 pb-20">
+      {/* ── Page header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 pb-6 border-b border-white/5">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-semibold tracking-tight text-white">Folio Control</h1>
             {isPublished && (
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Live</span>
-              </motion.div>
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/15 rounded-full">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Live</span>
+              </span>
             )}
           </div>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Curate the content that appears on your public portfolio.
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setShowProfileModal(true)}
-            className="px-5 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-all flex items-center gap-2"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all"
           >
-            <User className="w-4 h-4 text-indigo-400" />
+            <User className="w-3.5 h-3.5" />
             Edit Profile
           </button>
+
           <button
             onClick={handleSyncGithub}
             disabled={isSyncing}
-            className="px-5 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all disabled:opacity-40"
           >
-            {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Github className="w-4 h-4" />}
-            Sync from GitHub
+            {isSyncing ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Github className="w-3.5 h-3.5" />
+            )}
+            {isSyncing ? 'Syncing...' : 'Sync GitHub'}
           </button>
 
-          <label className={cn(
-            "px-5 py-2.5 bg-indigo-600 rounded-xl text-xs font-bold text-white hover:bg-indigo-500 transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/20",
-            isImporting && "opacity-50 pointer-events-none"
-          )}>
-            {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-            {isImporting ? 'Processing...' : 'Import from Resume'}
+          <label
+            className={cn(
+              'flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[13px] font-medium transition-all cursor-pointer shadow-sm shadow-indigo-500/20',
+              isImporting && 'opacity-50 pointer-events-none'
+            )}
+          >
+            {isImporting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <FileUp className="w-3.5 h-3.5" />
+            )}
+            {isImporting ? 'Processing...' : 'Import Resume'}
             <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} />
           </label>
         </div>
-      </header>
-
-      {/* Mobile Grid Tabs */}
-      <div className="grid grid-cols-3 gap-2 mb-10 md:hidden">
-        {tabs.map((tab) => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn(
-            "relative flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[10px] font-bold transition-all duration-300 border cursor-pointer",
-            activeTab === tab.id ? "bg-zinc-800 text-white border-white/10 shadow-lg" : "bg-zinc-900/40 text-zinc-500 border-white/5 hover:text-zinc-300 hover:bg-zinc-800/60"
-          )}>
-            {activeTab === tab.id && <motion.div layoutId="folioActiveTabMobile" className="absolute inset-0 bg-zinc-800 rounded-2xl" transition={{ type: "spring", bounce: 0.2, duration: 0.5 }} />}
-            <tab.icon className="w-4 h-4 relative z-10" />
-            <span className="relative z-10 leading-none">{tab.label}</span>
-          </button>
-        ))}
       </div>
 
-      {/* Desktop Pill Tabs */}
-      <div className="hidden md:flex p-1 bg-zinc-900/80 border border-white/5 rounded-full backdrop-blur-xl mb-12 w-fit mx-auto">
-        {tabs.map((tab) => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn(
-            "relative group px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap text-zinc-500 hover:text-zinc-300 cursor-pointer",
-            activeTab === tab.id && "text-white"
-          )}>
-            {activeTab === tab.id && <motion.div layoutId="folioActiveTab" className="absolute inset-0 bg-zinc-800 rounded-full" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />}
-            <tab.icon className={cn("w-4 h-4 relative z-10 transition-colors", activeTab === tab.id ? "text-white" : "text-zinc-500 group-hover:text-zinc-300")} />
+      {/* ── Tab Navigation ── */}
+      <div className="flex items-center gap-0.5 bg-zinc-900/60 border border-white/5 rounded-xl p-1 w-fit">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              'relative flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap',
+              activeTab === tab.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+            )}
+          >
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="folioTab"
+                className="absolute inset-0 bg-zinc-800 rounded-lg"
+                transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+              />
+            )}
+            <tab.icon className="w-3.5 h-3.5 relative z-10" />
             <span className="relative z-10">{tab.label}</span>
           </button>
         ))}
       </div>
 
+      {/* ── Tab Content ── */}
       <AnimatePresence mode="wait">
-        <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="min-h-[400px]">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* ─ Repos ─ */}
           {activeTab === 'repos' && (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl md:text-2xl font-medium tracking-tight">Repositories</h2>
-                <span className="text-sm text-zinc-500 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-                  {selectedRepoIds.length} Selected
-                </span>
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-baseline gap-3">
+                  <p className="text-[13px] font-medium text-zinc-300">
+                    {selectedRepoIds.length} selected
+                  </p>
+                  <span className="text-[11px] text-zinc-600">of {repos.length} repositories</span>
+                </div>
+                <div className="flex gap-2">
+                  <Dropdown
+                    value={sortBy}
+                    onChange={(val) => setSortBy(val as any)}
+                    options={[
+                      { label: 'Stars', value: 'stars' },
+                      { label: 'Name', value: 'name' },
+                      { label: 'Recently updated', value: 'updated-desc' },
+                    ]}
+                    icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+                    className="w-44"
+                  />
+                  <Dropdown
+                    value={filterLang}
+                    onChange={setFilterLang}
+                    options={languages.map((l) => ({ label: l, value: l }))}
+                    icon={<Filter className="w-3.5 h-3.5" />}
+                    className="w-36"
+                  />
+                </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <Dropdown value={sortBy} onChange={(val) => setSortBy(val as any)} options={[{ label: 'Sort by Stars', value: 'stars' }, { label: 'Sort by Name', value: 'name' }]} icon={<ArrowUpDown className="w-4 h-4" />} className="w-full sm:w-64" />
-                <Dropdown value={filterLang} onChange={setFilterLang} options={languages.map(l => ({ label: l, value: l }))} icon={<Filter className="w-4 h-4" />} className="w-full sm:w-48" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sortedRepos.map((repo, i) => (
+                  <RepoCard
+                    key={repo.id}
+                    repo={repo}
+                    isSelected={selectedRepoIds.includes(repo.id)}
+                    onToggle={() => toggleRepoSelection(repo.id)}
+                    index={i}
+                  />
+                ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAndSortedRepos.map((repo, i) => <RepoCard key={repo.id} repo={repo} isSelected={selectedRepoIds.includes(repo.id)} onToggle={() => toggleRepoSelection(repo.id)} index={i} />)}
-              </div>
-
-              {/* Load More */}
               {repoPagination && repoPagination.currentPage < repoPagination.totalPages && (
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center pt-2">
                   <button
                     onClick={async () => {
                       setIsLoadingMore(true);
@@ -272,388 +419,417 @@ export default function FolioControlPage() {
                       setIsLoadingMore(false);
                     }}
                     disabled={isLoadingMore}
-                    className="px-8 py-3 bg-zinc-900 border border-white/10 text-sm font-bold text-white rounded-xl hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 border border-white/8 text-[13px] font-medium text-zinc-300 rounded-xl hover:bg-zinc-800 transition-all disabled:opacity-40"
                   >
-                    {isLoadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                    {isLoadingMore ? 'Loading...' : `Load More (${repos.length} / ${repoPagination.totalItems})`}
+                    {isLoadingMore ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Plus className="w-3.5 h-3.5" />
+                    )}
+                    {isLoadingMore
+                      ? 'Loading...'
+                      : `Load more (${repos.length} / ${repoPagination.totalItems})`}
                   </button>
                 </div>
               )}
             </div>
           )}
 
+          {/* ─ Skills ─ */}
           {activeTab === 'skills' && (
-            <div className="space-y-8 max-w-2xl mx-auto">
-              <h2 className="text-xl md:text-2xl font-medium tracking-tight text-center">Skills & Tech Stack</h2>
-              <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 space-y-8">
-                <form onSubmit={handleAddSkill} className="relative">
-                  <input type="text" value={newSkill} onChange={e => setNewSkill(e.target.value)} placeholder="Add a skill (e.g. React)" className="w-full bg-zinc-950/50 border border-white/10 rounded-xl pl-4 pr-12 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
-                  <button type="submit" disabled={!newSkill.trim()} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white text-black rounded-lg disabled:opacity-50"><Plus className="w-5 h-5" /></button>
-                </form>
-                <div className="flex flex-wrap gap-3">
-                  {skills.map(skill => <SkillBadge key={skill} skill={skill} onDelete={() => setSkillToDelete(skill)} />)}
+            <div className="max-w-2xl space-y-5">
+              <form onSubmit={handleAddSkill} className="relative">
+                <input
+                  type="text"
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  placeholder="Add a skill — e.g. React, TypeScript, Figma"
+                  className="w-full bg-zinc-900/50 border border-white/8 rounded-xl pl-4 pr-14 py-3.5 text-[13px] text-white placeholder-zinc-600 focus:outline-none focus:border-white/15 transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={!newSkill.trim()}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white text-zinc-950 rounded-lg text-sm font-bold disabled:opacity-30 hover:bg-zinc-100 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </form>
+
+              {skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((skill) => (
+                    <SkillBadge
+                      key={skill}
+                      skill={skill}
+                      onDelete={() => setSkillToDelete(skill)}
+                    />
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center justify-center h-32 border border-dashed border-white/6 rounded-2xl">
+                  <p className="text-sm text-zinc-600">No skills added yet.</p>
+                </div>
+              )}
             </div>
           )}
 
+          {/* ─ Professional ─ */}
           {activeTab === 'professional' && (
-            <div className="space-y-32 max-w-6xl mx-auto py-12">
-              {/* Experience Section */}
-              <section className="space-y-16">
-                <header className="flex items-center justify-between border-b border-white/5 pb-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
-                      <Briefcase className="w-6 h-6 text-indigo-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white tracking-tight">Work Experience</h2>
-                      <p className="text-xs text-zinc-500">Your professional journey and contributions.</p>
-                    </div>
+            <div className="space-y-12 max-w-4xl">
+              {/* Experience */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-[15px] font-semibold text-white">Work Experience</h2>
+                    <p className="text-[12px] text-zinc-500 mt-0.5">{experiences.length} entries</p>
                   </div>
-                  <button onClick={() => { setEditingExp(null); setShowExpModal(true); }} className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center gap-2 group shadow-xl">
-                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add Experience
+                  <button
+                    onClick={() => { setEditingExp(null); setShowExpModal(true); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add
                   </button>
-                </header>
+                </div>
 
-                <div className="space-y-16 relative">
-                  {/* Vertical Line Connector */}
-                  <div className="absolute left-[3.1rem] top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-white/5 to-transparent hidden md:block" />
-
-                  {experiences.map((exp, index) => {
-                    const colors = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
-                    const color = colors[index % colors.length];
-
-                    return (
+                {experiences.length === 0 ? (
+                  <div className="flex items-center justify-center h-28 border border-dashed border-white/6 rounded-2xl">
+                    <p className="text-sm text-zinc-600">No experience entries. Sync GitHub or import a resume.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {experiences.map((exp) => (
                       <motion.div
                         key={exp.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="relative group flex flex-col md:flex-row gap-6 md:gap-0 items-start md:items-center"
+                        layout
+                        className="group flex items-start justify-between gap-4 p-4 bg-zinc-900/30 border border-white/5 rounded-2xl hover:border-white/8 hover:bg-zinc-900/50 transition-all"
                       >
-                        {/* 01. Number and Label */}
-                        <div className="w-24 shrink-0 md:pr-4">
-                          <span className="block text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-1">XP</span>
-                          <span className="text-5xl font-black tracking-tighter text-zinc-800 group-hover:text-zinc-200 transition-colors duration-500">
-                            {(index + 1).toString().padStart(2, '0')}
-                          </span>
-                        </div>
-
-                        {/* 02. Company and Actions */}
-                        <div className="w-full md:w-64 md:px-8 space-y-3 shrink-0">
-                          <h3 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-indigo-400 transition-colors">
-                            {exp.company}
-                          </h3>
-                          <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => { setEditingExp(exp); setShowExpModal(true); }} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-all"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={async () => {
-                                await deleteExperience(exp.id);
-                                addNotification('Experience removed.');
-                              }} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </div>
-                        </div>
-
-                        {/* 03. Connector & Point */}
-                        <div className="hidden md:flex flex-1 items-center px-4">
-                          <div className="flex-1 h-px bg-gradient-to-r from-white/5 via-white/10 to-transparent" style={{ backgroundColor: `${color}20` }} />
-                          <div className="w-2.5 h-2.5 rounded-full shrink-0 mr-12 transition-all duration-500 group-hover:scale-125" style={{ backgroundColor: color, boxShadow: `0 0 20px ${color}60` }} />
-                        </div>
-
-                        {/* 04. Details and List */}
-                        <div className="flex-[1.5] space-y-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-3">
-                              <div className="md:hidden w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                              <h4 className="text-base font-bold text-zinc-200 tracking-tight">{exp.position}</h4>
-                            </div>
-                            <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                              <span>{exp.startDate && new Date(exp.startDate).getFullYear()}</span>
-                              <span className="w-4 h-px bg-zinc-800" />
-                              <span className={cn(exp.isCurrent ? "text-indigo-400" : "")}>
-                                {exp.isCurrent ? 'PRESENT' : (exp.endDate && new Date(exp.endDate).getFullYear())}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-[14px] font-semibold text-white truncate">{exp.position}</span>
+                            {exp.isCurrent && (
+                              <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/15 rounded-full text-[9px] font-semibold text-indigo-400 uppercase tracking-wider shrink-0">
+                                Current
                               </span>
-                            </p>
+                            )}
                           </div>
-                          <p className="text-sm text-zinc-500 leading-relaxed max-w-lg group-hover:text-zinc-400 transition-colors">
-                            {exp.description}
+                          <p className="text-[12px] text-zinc-400">{exp.company}</p>
+                          <p className="text-[11px] text-zinc-600 mt-0.5">
+                            {exp.startDate && new Date(exp.startDate).getFullYear()}
+                            {' — '}
+                            {exp.isCurrent ? 'Present' : exp.endDate && new Date(exp.endDate).getFullYear()}
                           </p>
+                          {exp.description && (
+                            <p className="text-[12px] text-zinc-500 mt-1.5 leading-relaxed line-clamp-2">
+                              {exp.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <button
+                            onClick={() => { setEditingExp(exp); setShowExpModal(true); }}
+                            className="p-1.5 rounded-lg text-zinc-600 hover:text-white hover:bg-white/5 transition-all"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await deleteExperience(exp.id);
+                              addNotification('Experience removed.');
+                            }}
+                            className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/8 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </motion.div>
-                    );
-                  })}
-                  {experiences.length === 0 && <div className="p-12 border border-dashed border-white/5 rounded-[2.5rem] text-center text-zinc-600 font-medium">No experience data found. Try syncing from GitHub or uploading a resume.</div>}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
 
-              {/* Education Section */}
-              <section className="space-y-16">
-                <header className="flex items-center justify-between border-b border-white/5 pb-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-lg shadow-purple-500/5">
-                      <GraduationCap className="w-6 h-6 text-purple-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white tracking-tight">Education</h2>
-                      <p className="text-xs text-zinc-500">Academic foundation and certifications.</p>
-                    </div>
+              {/* Education */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-[15px] font-semibold text-white">Education</h2>
+                    <p className="text-[12px] text-zinc-500 mt-0.5">{education.length} entries</p>
                   </div>
-                  <button onClick={() => { setEditingEdu(null); setShowEduModal(true); }} className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center gap-2 group shadow-xl">
-                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add Education
+                  <button
+                    onClick={() => { setEditingEdu(null); setShowEduModal(true); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add
                   </button>
-                </header>
+                </div>
 
-                <div className="space-y-16 relative">
-                  <div className="absolute left-[3.1rem] top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-white/5 to-transparent hidden md:block" />
-
-                  {education.map((edu, index) => {
-                    const colors = ['#ec4899', '#a855f7', '#6366f1', '#06b6d4', '#10b981'];
-                    const color = colors[index % colors.length];
-
-                    return (
+                {education.length === 0 ? (
+                  <div className="flex items-center justify-center h-28 border border-dashed border-white/6 rounded-2xl">
+                    <p className="text-sm text-zinc-600">No education entries found.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {education.map((edu) => (
                       <motion.div
                         key={edu.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="relative group flex flex-col md:flex-row gap-6 md:gap-0 items-start md:items-center"
+                        layout
+                        className="group flex items-start justify-between gap-4 p-4 bg-zinc-900/30 border border-white/5 rounded-2xl hover:border-white/8 hover:bg-zinc-900/50 transition-all"
                       >
-                        <div className="w-24 shrink-0 md:pr-4">
-                          <span className="block text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-1">EDU</span>
-                          <span className="text-5xl font-black tracking-tighter text-zinc-800 group-hover:text-zinc-200 transition-colors duration-500">
-                            {(index + 1).toString().padStart(2, '0')}
-                          </span>
-                        </div>
-
-                        <div className="w-full md:w-64 md:px-8 space-y-3 shrink-0">
-                          <h3 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-purple-400 transition-colors">
-                            {edu.school}
-                          </h3>
-                          <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => { setEditingEdu(edu); setShowEduModal(true); }} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-all"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={async () => {
-                                await deleteEducation(edu.id);
-                                addNotification('Education entry removed.');
-                              }} className="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </div>
-                        </div>
-
-                        <div className="hidden md:flex flex-1 items-center px-4">
-                          <div className="flex-1 h-px bg-gradient-to-r from-white/5 via-white/10 to-transparent" style={{ backgroundColor: `${color}20` }} />
-                          <div className="w-2.5 h-2.5 rounded-full shrink-0 mr-12 transition-all duration-500 group-hover:scale-125" style={{ backgroundColor: color, boxShadow: `0 0 20px ${color}60` }} />
-                        </div>
-
-                        <div className="flex-[1.5] space-y-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-3">
-                              <div className="md:hidden w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                              <h4 className="text-base font-bold text-zinc-200 tracking-tight">
-                                {edu.degree} {edu.fieldOfStudy && <span className="text-zinc-500 font-normal">in {edu.fieldOfStudy}</span>}
-                              </h4>
-                            </div>
-                            <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                              <span>{edu.startDate && new Date(edu.startDate).getFullYear()}</span>
-                              <span className="w-4 h-px bg-zinc-800" />
-                              <span>{edu.endDate && new Date(edu.endDate).getFullYear()}</span>
-                            </p>
-                          </div>
-                          <p className="text-sm text-zinc-500 leading-relaxed max-w-lg group-hover:text-zinc-400 transition-colors">
-                            {edu.description}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[14px] font-semibold text-white truncate">{edu.school}</p>
+                          <p className="text-[12px] text-zinc-400 mt-0.5">
+                            {edu.degree}
+                            {edu.fieldOfStudy && <span className="text-zinc-500"> · {edu.fieldOfStudy}</span>}
+                          </p>
+                          <p className="text-[11px] text-zinc-600 mt-0.5">
+                            {edu.startDate && new Date(edu.startDate).getFullYear()}
+                            {edu.endDate && ` — ${new Date(edu.endDate).getFullYear()}`}
                           </p>
                         </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <button
+                            onClick={() => { setEditingEdu(edu); setShowEduModal(true); }}
+                            className="p-1.5 rounded-lg text-zinc-600 hover:text-white hover:bg-white/5 transition-all"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await deleteEducation(edu.id);
+                              addNotification('Education removed.');
+                            }}
+                            className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/8 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </motion.div>
-                    );
-                  })}
-                  {education.length === 0 && <div className="p-12 border border-dashed border-white/5 rounded-[2.5rem] text-center text-zinc-600 font-medium">No education entries found.</div>}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
             </div>
           )}
 
+          {/* ─ Testimonials ─ */}
           {activeTab === 'testimonials' && (
-            <div className="space-y-12 max-w-6xl mx-auto py-8">
-              <div className="flex flex-col items-center justify-center mb-12 text-center relative">
-                {/* Background Glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-yellow-500/5 blur-[120px] rounded-full pointer-events-none" />
-
-                <div className="flex gap-3 relative z-10">
-                  <button 
-                    onClick={() => { setEditingTestimonial(null); setShowTestimonialModal(true); }}
-                    className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-full flex items-center gap-2 shadow-xl hover:scale-105 transition-transform cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" /> Add Testimonial
-                  </button>
-                    <button 
-                      onClick={() => {
-                        const url = `${window.location.origin}/review/${githubUser?.login}`;
-                        navigator.clipboard.writeText(url);
-                        addNotification('Review link copied to clipboard!', 'success');
-                      }}
-                      className="px-5 py-2.5 bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-full flex items-center gap-2 hover:bg-zinc-800 transition-all cursor-pointer"
-                    >
-                    <Link className="w-4 h-4" /> Copy Review Link
-                  </button>
-                </div>
-              </div>
-
-              {/* Stats / Inbox Summary */}
-              <div className="flex items-center gap-6 mb-8 px-4 py-3 bg-zinc-900/30 border border-white/5 rounded-2xl w-fit mx-auto md:mx-0">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                  <span className="text-xs font-bold text-zinc-400">Published: {testimonials.filter(t => t.isApproved).length}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={cn("w-2 h-2 rounded-full", testimonials.filter(t => !t.isApproved).length > 0 ? "bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "bg-zinc-700")} />
-                  <span className="text-xs font-bold text-zinc-400">Pending: {testimonials.filter(t => !t.isApproved).length}</span>
-                </div>
-              </div>
-
-              <div className={testimonials.length > 0 ? "columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6" : ""}>
-                {testimonials.length === 0 && (
-                  <div className="p-16 border border-dashed border-white/5 rounded-[2.5rem] text-center flex flex-col items-center justify-center min-h-[300px]">
-                    <Sparkles className="w-8 h-8 text-zinc-700 mb-4" />
-                    <p className="text-zinc-400 font-medium text-lg mb-2">No voices heard yet.</p>
-                    <p className="text-zinc-600 text-sm max-w-sm">Use the Add Testimonial button above to let your network speak for you and build your credibility.</p>
+            <div className="space-y-5 max-w-5xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-[12px] text-zinc-400">
+                      {testimonials.filter((t) => t.isApproved).length} published
+                    </span>
                   </div>
-                )}
-                {testimonials.map(t => {
-                  const isFeatured = (t as any).isFeatured;
-                  return (
+                  {testimonials.filter((t) => !t.isApproved).length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="text-[12px] text-zinc-400">
+                        {testimonials.filter((t) => !t.isApproved).length} pending
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/review/${githubUser?.login}`;
+                      navigator.clipboard.writeText(url);
+                      addNotification('Review link copied.', 'success');
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all"
+                  >
+                    <Link className="w-3.5 h-3.5" />
+                    Copy review link
+                  </button>
+                  <button
+                    onClick={() => { setEditingTestimonial(null); setShowTestimonialModal(true); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-950 rounded-xl text-[13px] font-semibold hover:bg-zinc-100 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {testimonials.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-44 border border-dashed border-white/6 rounded-2xl gap-3">
+                  <Star className="w-6 h-6 text-zinc-700" />
+                  <p className="text-sm text-zinc-600">No testimonials yet.</p>
+                </div>
+              ) : (
+                <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                  {testimonials.map((t) => (
                     <div
                       key={t.id}
                       className={cn(
-                        "break-inside-avoid relative flex flex-col rounded-[1.5rem] transition-all duration-300 group",
-                        isFeatured
-                          ? "bg-[#181a20] border border-[#0088ff] shadow-[0_0_40px_-5px_rgba(0,136,255,0.25)] z-10 lg:scale-[1.02]"
-                          : "bg-[#13141b] border border-white/5 hover:border-white/10"
+                        'break-inside-avoid group relative rounded-2xl border p-5 transition-all',
+                        t.isApproved
+                          ? 'bg-zinc-900/40 border-white/6 hover:border-white/10'
+                          : 'bg-zinc-900/20 border-white/4'
                       )}
                     >
-                      <div className="p-8 flex flex-col h-full">
-                        <p className={cn(
-                          "leading-[1.7] font-light mb-8",
-                          isFeatured ? "text-[15px] sm:text-[17px] text-white font-normal" : "text-[14px] sm:text-[15px] text-zinc-300"
-                        )}>
-                          "{t.content}"
-                        </p>
-                        <div className="flex items-center gap-4 mt-auto">
-                          <img src={t.avatarUrl || ''} alt={t.name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
-                          <div className="flex flex-col leading-tight">
-                            <span className={cn("font-medium", isFeatured ? "text-[15px] text-white" : "text-[14px] text-zinc-300")}>{t.name}</span>
-                            <span className={cn("text-[12px] mt-0.5", isFeatured ? "text-zinc-400" : "text-zinc-500")}>{t.role}</span>
+                      {!t.isApproved && (
+                        <div className="absolute top-4 right-4 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] font-semibold uppercase tracking-wider rounded-md">
+                          Pending
+                        </div>
+                      )}
+
+                      <p className="text-[13px] text-zinc-300 leading-[1.7] mb-4">
+                        &ldquo;{t.content}&rdquo;
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          {t.avatarUrl ? (
+                            <img
+                              src={t.avatarUrl}
+                              alt={t.name}
+                              className="w-8 h-8 rounded-full object-cover border border-white/8"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs text-zinc-400">
+                              {t.name[0]?.toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-[12px] font-semibold text-zinc-200 leading-none">
+                              {t.name}
+                            </p>
+                            <p className="text-[11px] text-zinc-500 mt-0.5">{t.role}</p>
                           </div>
-                          <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                            {!t.isApproved && (
-                              <button onClick={async (e) => { 
-                                  e.stopPropagation(); 
-                                  await approveTestimonial(t.id); 
-                                  addNotification('Testimonial approved.', 'success');
-                                }} className="p-1.5 bg-white/10 hover:bg-green-500/20 rounded-md text-zinc-500 hover:text-green-400" title="Approve Review"><CheckCircle2 className="w-3.5 h-3.5" /></button>
-                            )}
-                            <button onClick={(e) => { e.stopPropagation(); setEditingTestimonial(t); setShowTestimonialModal(true); }} className="p-1.5 hover:bg-white/10 rounded-md text-zinc-500 hover:text-white"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={async (e) => { 
-                                e.stopPropagation(); 
-                                await deleteTestimonial(t.id); 
-                                addNotification('Testimonial deleted.');
-                              }} className="p-1.5 hover:bg-red-500/10 rounded-md text-zinc-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </div>
+                        </div>
+
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {!t.isApproved && (
+                            <button
+                              onClick={async () => {
+                                await approveTestimonial(t.id);
+                                addNotification('Testimonial approved.', 'success');
+                              }}
+                              className="p-1.5 rounded-lg text-zinc-600 hover:text-emerald-400 hover:bg-emerald-500/8 transition-all"
+                              title="Approve"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setEditingTestimonial(t); setShowTestimonialModal(true); }}
+                            className="p-1.5 rounded-lg text-zinc-600 hover:text-white hover:bg-white/5 transition-all"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await deleteTestimonial(t.id);
+                              addNotification('Testimonial deleted.');
+                            }}
+                            className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/8 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
-
-                      {!t.isApproved && (
-                        <div className="absolute top-4 right-4 bg-amber-500/20 border border-amber-500/30 text-amber-500 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md backdrop-blur-md">
-                          Pending Approval
-                        </div>
-                      )}
-
-                      {isFeatured && t.isApproved && (
-                        <div className="w-full bg-[#0088ff] text-white text-center py-3.5 text-sm font-semibold rounded-b-[1.4rem] cursor-pointer hover:bg-[#0077ee] transition-colors -mt-1 relative z-10">
-                          View Full Case Study
-                        </div>
-                      )}
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
+          {/* ─ Assets ─ */}
           {activeTab === 'assets' && (
-            <div className="space-y-8 max-w-6xl mx-auto py-4">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl md:text-2xl font-medium tracking-tight">Assets</h2>
-                <div className="flex items-center gap-3">
-                  <Dropdown value="newest" onChange={() => { }} options={[{ label: 'Newest First', value: 'newest' }]} className="w-40 hidden md:block" />
-                  <Dropdown value="grid" onChange={() => { }} options={[{ label: 'Grid View', value: 'grid' }]} className="w-36 hidden md:block" />
-                  <label className="px-5 py-2.5 bg-white text-black text-xs font-bold rounded-xl flex items-center gap-2 shadow-xl hover:bg-zinc-200 transition-colors cursor-pointer relative overflow-hidden">
-                    {isUploadingAsset ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    {isUploadingAsset ? 'Uploading...' : 'Upload'}
-                    <input 
-                      type="file" 
-                      className="absolute inset-0 opacity-0 cursor-pointer" 
-                      disabled={isUploadingAsset}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setIsUploadingAsset(true);
-                        try {
-                          await uploadAsset(file);
-                          addNotification(`${file.name} uploaded successfully.`, 'success');
-                        } catch (err) {
-                          console.error("Asset upload failed", err);
-                          addNotification('Failed to upload asset.', 'error');
-                        } finally {
-                          setIsUploadingAsset(false);
-                          e.target.value = '';
-                        }
-                      }} 
-                    />
-                  </label>
-                </div>
+            <div className="space-y-5 max-w-5xl">
+              <div className="flex items-center justify-between">
+                <p className="text-[13px] text-zinc-400">
+                  {assets.length} {assets.length === 1 ? 'file' : 'files'}
+                </p>
+                <label
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2 bg-white text-zinc-950 rounded-xl text-[13px] font-semibold hover:bg-zinc-100 transition-all cursor-pointer',
+                    isUploadingAsset && 'opacity-50 pointer-events-none'
+                  )}
+                >
+                  {isUploadingAsset ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="w-3.5 h-3.5" />
+                  )}
+                  {isUploadingAsset ? 'Uploading...' : 'Upload'}
+                  <input
+                    type="file"
+                    className="hidden"
+                    disabled={isUploadingAsset}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setIsUploadingAsset(true);
+                      try {
+                        await uploadAsset(file);
+                        addNotification(`${file.name} uploaded.`, 'success');
+                      } catch {
+                        addNotification('Upload failed.', 'error');
+                      } finally {
+                        setIsUploadingAsset(false);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </label>
               </div>
 
-              <div className={assets.length > 0 ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5" : ""}>
-                {assets.length === 0 && (
-                  <div className="p-16 border border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center text-center min-h-[300px]">
-                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-5">
-                      <FolderOpen className="w-8 h-8 text-zinc-500" />
+              {assets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 border border-dashed border-white/6 rounded-2xl gap-3">
+                  <FolderOpen className="w-7 h-7 text-zinc-700" />
+                  <p className="text-sm text-zinc-600">No assets uploaded yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {assets.map((asset) => (
+                    <div
+                      key={asset.id}
+                      className="group relative bg-zinc-900/30 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all flex flex-col"
+                    >
+                      {/* Thumbnail */}
+                      <div className="aspect-square flex items-center justify-center bg-zinc-950/40 text-zinc-700 group-hover:text-zinc-500 transition-colors">
+                        {asset.type === 'image' && asset.url ? (
+                          <img
+                            src={asset.url}
+                            alt={asset.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          ICON_FOR_TYPE[asset.type] ?? <FileText className="w-8 h-8" />
+                        )}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="px-3 py-2 flex items-center justify-between border-t border-white/4">
+                        <p className="text-[11px] text-zinc-500 truncate flex-1 mr-1">{asset.name}</p>
+                        <button
+                          onClick={async () => {
+                            await deleteAsset(asset.id);
+                            addNotification('Asset deleted.');
+                          }}
+                          className="p-1 rounded-md text-zinc-700 hover:text-red-400 hover:bg-red-500/8 transition-all opacity-0 group-hover:opacity-100 shrink-0"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-zinc-300 font-medium mb-2 text-lg">Your vault is empty</p>
-                    <p className="text-zinc-500 text-sm max-w-sm">Upload images, videos, audio, or documents to store them securely. They'll be organized right here.</p>
-                  </div>
-                )}
-                {assets.map(asset => (
-                  <div key={asset.id} className="group relative bg-[#18181b] border border-white/5 rounded-[1.5rem] p-3 hover:border-indigo-500/50 hover:bg-indigo-500/5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.15)] transition-all cursor-pointer flex flex-col h-full">
-                    <div className="w-full aspect-[4/3] bg-zinc-900/60 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-indigo-500/10 transition-colors">
-                      {asset.type === 'image' && <ImageIcon className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
-                      {asset.type === 'video' && <Play className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors fill-zinc-500 group-hover:fill-indigo-400/20" />}
-                      {asset.type === 'audio' && <Music className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
-                      {asset.type === 'code' && <Code2 className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
-                      {asset.type === 'archive' && <FileArchive className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
-                      {asset.type === 'doc' && <FileText className="w-12 h-12 md:w-16 md:h-16 text-zinc-500 group-hover:text-indigo-400 transition-colors" />}
-                    </div>
-                    <div className="flex items-center justify-between px-2 pb-1 mt-auto">
-                      <p className="text-xs font-medium text-zinc-400 truncate w-[85%] group-hover:text-indigo-300 transition-colors">{asset.name}</p>
-                      <button 
-                        onClick={async (e) => { 
-                          e.stopPropagation(); 
-                          await deleteAsset(asset.id); 
-                          addNotification('Asset deleted.');
-                        }}
-                        className="text-zinc-500 hover:text-red-400 transition-colors p-1.5 -mr-1.5 bg-white/0 hover:bg-red-500/10 rounded-lg group/btn"
-                        title="Delete Asset"
-                      >
-                        <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Modals */}
+      {/* ── Modals ── */}
       <Modal isOpen={showEduModal} onClose={() => setShowEduModal(false)} title={editingEdu ? 'Edit Education' : 'Add Education'}>
         <EducationForm
           initialData={editingEdu || undefined}
@@ -695,11 +871,10 @@ export default function FolioControlPage() {
             try {
               updateCustomData(data);
               await saveProfile();
-              addNotification('Profile saved successfully.', 'success');
+              addNotification('Profile saved.', 'success');
               setShowProfileModal(false);
-            } catch (err) {
-              console.error('Failed to save profile:', err);
-              addNotification('Failed to save profile.', 'error');
+            } catch {
+              addNotification('Failed to save.', 'error');
             } finally {
               setIsSavingProfile(false);
             }
@@ -709,16 +884,18 @@ export default function FolioControlPage() {
         />
       </Modal>
 
-      <Modal isOpen={showTestimonialModal} onClose={() => setShowTestimonialModal(false)} title={editingTestimonial ? (editingTestimonial.isApproved ? 'Edit Testimonial' : 'Review Testimonial') : 'Add New Testimonial'}>
-        <TestimonialForm 
+      <Modal
+        isOpen={showTestimonialModal}
+        onClose={() => setShowTestimonialModal(false)}
+        title={editingTestimonial ? 'Edit Testimonial' : 'Add Testimonial'}
+      >
+        <TestimonialForm
           initialData={editingTestimonial || undefined}
           onSubmit={async (data) => {
             if (editingTestimonial) {
-               // If it was already approved, update normally. If not, auto-approve upon edit/save
-               await updateTestimonial(editingTestimonial.id, { ...data, isApproved: true });
-               addNotification('Testimonial updated and approved.', 'success');
-            }
-            else {
+              await updateTestimonial(editingTestimonial.id, { ...data, isApproved: true });
+              addNotification('Testimonial updated.', 'success');
+            } else {
               await addTestimonial(data);
               addNotification('Testimonial added.', 'success');
             }
@@ -728,104 +905,32 @@ export default function FolioControlPage() {
         />
       </Modal>
 
-      <Modal isOpen={!!skillToDelete} onClose={() => setSkillToDelete(null)} title="Remove Skill?">
-        <div className="text-center p-6 space-y-6">
-          <p className="text-zinc-400">Are you sure you want to remove <span className="text-white font-bold">{skillToDelete}</span>?</p>
-          <div className="flex gap-3">
-            <button onClick={() => setSkillToDelete(null)} className="flex-1 py-3 bg-zinc-900 rounded-xl font-bold">Cancel</button>
-            <button onClick={() => { 
-                setSkills(skills.filter(s => s !== skillToDelete)); 
-                addNotification(`Skill "${skillToDelete}" removed.`);
-                setSkillToDelete(null); 
-              }} className="flex-1 py-3 bg-red-600 rounded-xl font-bold">Remove</button>
-          </div>
-        </div>
-      </Modal>
+      {/* Skill delete confirm */}
+      <AnimatePresence>
+        {skillToDelete && (
+          <ConfirmDialog
+            title={`Remove "${skillToDelete}"?`}
+            desc="This will remove the skill from your profile."
+            onConfirm={() => {
+              setSkills(skills.filter((s) => s !== skillToDelete));
+              addNotification(`"${skillToDelete}" removed.`);
+              setSkillToDelete(null);
+            }}
+            onCancel={() => setSkillToDelete(null)}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Premium Success Modal */}
-      {mounted && createPortal(
-        <AnimatePresence>
-          {showSuccessModal && (
-            <div className="fixed inset-0 flex items-center justify-center p-4 z-[99999]">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowSuccessModal(false)}
-                className="absolute inset-0 bg-black/90 backdrop-blur-md"
-              />
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="relative w-full max-w-sm bg-gradient-to-b from-zinc-900 to-black border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(79,70,229,0.3)]"
-              >
-                {/* Animated Background Element */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
-
-                {/* Close Button */}
-                <button
-                  onClick={() => setShowSuccessModal(false)}
-                  className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all group z-[20]"
-                >
-                  <X className="w-4 h-4 text-zinc-500 group-hover:text-white" />
-                </button>
-
-                <div className="relative p-10 flex flex-col items-center text-center space-y-8">
-                  {/* Success Icon Wrapper */}
-                  <div className="relative">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", damping: 12, delay: 0.2 }}
-                      className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-500/20 rotate-12"
-                    >
-                      <CheckCircle2 className="w-12 h-12 text-white -rotate-12" />
-                    </motion.div>
-
-                    {/* Decorative Sparkles */}
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.5, 1, 0.5]
-                      }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      className="absolute -top-2 -right-2 p-2 bg-zinc-800 rounded-full border border-white/10"
-                    >
-                      <Sparkles className="w-4 h-4 text-yellow-500" />
-                    </motion.div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-bold tracking-tight text-white whitespace-nowrap">
-                      {successSource === 'github' ? 'GitHub Synced!' : 'Resume Imported!'}
-                    </h3>
-                    <div className="flex flex-col gap-1.5 mt-4">
-                      <div className="flex items-center gap-2 justify-center text-sm font-medium">
-                        <span className="text-zinc-500">Education added:</span>
-                        <span className="text-white bg-indigo-500/20 px-2 py-0.5 rounded-md">{importedCounts.edu}</span>
-                      </div>
-                      <div className="flex items-center gap-2 justify-center text-sm font-medium">
-                        <span className="text-zinc-500">Experience added:</span>
-                        <span className="text-white bg-purple-500/20 px-2 py-0.5 rounded-md">{importedCounts.exp}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setShowSuccessModal(false)}
-                    className="w-full py-4 bg-white text-black text-sm font-bold rounded-2xl hover:bg-zinc-200 transition-all shadow-lg active:scale-[0.98]"
-                  >
-                    Continue to Dashboard
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>, 
-        document.body
-      )}
+      {/* Success modal */}
+      <AnimatePresence>
+        {mounted && showSuccessModal && (
+          <SuccessModal
+            source={successSource}
+            counts={importedCounts}
+            onClose={() => setShowSuccessModal(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
