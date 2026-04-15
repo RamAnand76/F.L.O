@@ -260,13 +260,8 @@ export default function SeoPage() {
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all disabled:opacity-40"
+            className="flex items-center gap-2 px-6 py-2 bg-zinc-900 border border-white/8 text-zinc-300 rounded-xl text-[13px] font-medium hover:bg-zinc-800 transition-all disabled:opacity-40"
           >
-            {isAnalyzing ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            )}
             {isAnalyzing ? 'Analyzing...' : 'AI Analyze'}
           </button>
 
@@ -274,17 +269,12 @@ export default function SeoPage() {
             onClick={handleSave}
             disabled={isSaving || !isDirty}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium transition-all',
+              'flex items-center gap-2 px-6 py-2 rounded-xl text-[13px] font-medium transition-all',
               isDirty
                 ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/15'
                 : 'bg-zinc-900 border border-white/8 text-zinc-600 cursor-not-allowed'
             )}
           >
-            {isSaving ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5" />
-            )}
             {isSaving ? 'Saving...' : 'Save'}
           </button>
         </div>

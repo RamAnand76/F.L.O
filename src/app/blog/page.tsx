@@ -160,10 +160,9 @@ function MarkdownEditor({
           <button
             onClick={onSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[13px] font-medium transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[13px] font-medium transition-all disabled:opacity-50"
           >
-            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            {isSaving ? 'Saving' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>
@@ -550,9 +549,8 @@ export default function BlogPage() {
         </div>
         <button
           onClick={openNewPost}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-white text-zinc-950 rounded-xl text-[13px] font-semibold hover:bg-zinc-100 transition-colors shadow-sm"
+          className="self-start sm:self-auto flex items-center gap-2 px-6 py-2.5 bg-white text-zinc-950 rounded-xl text-[13px] font-semibold hover:bg-zinc-100 transition-colors shadow-sm"
         >
-          <Plus className="w-4 h-4" />
           New Post
         </button>
       </div>
