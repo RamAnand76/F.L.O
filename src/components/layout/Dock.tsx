@@ -13,7 +13,6 @@ const navItems = [
   { path: '/folio-control', label: 'Folio Control', icon: SlidersHorizontal },
   { path: '/templates', label: 'Templates', icon: LayoutTemplate },
   { path: '/preview', label: 'Preview & Editor', icon: MonitorPlay },
-  { path: '/inbox', label: 'Inbox', icon: Inbox },
   { path: '/seo', label: 'SEO & OG', icon: TrendingUp },
   { path: '/blog', label: 'Blog', icon: BookOpen },
 ];

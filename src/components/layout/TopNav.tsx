@@ -31,7 +31,11 @@ export function TopNav() {
 
   return (
     <div className="fixed top-6 right-4 sm:right-6 lg:right-8 z-[100] flex items-center gap-2 sm:gap-3">
-      <button className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#18181b]/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-[#27272a] transition-all shadow-lg relative group">
+      <button 
+        onClick={() => router.push('/inbox')}
+        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#18181b]/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-[#27272a] transition-all shadow-lg relative group"
+        title="Inbox"
+      >
         <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
         <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-400 rounded-full border-2 border-[#18181b] group-hover:scale-110 transition-transform"></span>
       </button>

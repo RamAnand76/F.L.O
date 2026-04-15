@@ -89,7 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       
       <main className={cn(
         "relative z-10 w-full mx-auto transition-all duration-500 min-h-screen",
-        !isFullWidthPage ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-32" : "max-w-none px-0 pt-0 pb-0"
+        !isFullWidthPage ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-32" : "max-w-none px-0 pt-0 pb-0"
       )}
       style={!isFullWidthPage ? { fontSize: '80%' } : {}}>
         {!isFullWidthPage && !isAuthPage && <TopNav />}

@@ -139,7 +139,19 @@ export default function SeoPage() {
     (async () => {
       try {
         const s = await seoService.getSettings();
-        setSettings(s);
+        // Merge with defaults so missing fields (e.g. keywords on first load) stay safe
+        setSettings((prev) => ({
+          ...prev,
+          ...s,
+          keywords: Array.isArray(s.keywords) ? s.keywords : prev.keywords,
+          metaTitle: s.metaTitle ?? prev.metaTitle,
+          metaDescription: s.metaDescription ?? prev.metaDescription,
+          ogTitle: s.ogTitle ?? prev.ogTitle,
+          ogDescription: s.ogDescription ?? prev.ogDescription,
+          twitterCard: s.twitterCard ?? prev.twitterCard,
+          robotsIndex: s.robotsIndex ?? prev.robotsIndex,
+          robotsFollow: s.robotsFollow ?? prev.robotsFollow,
+        }));
       } catch {
         setSettings((prev) => ({
           ...prev,
@@ -164,7 +176,11 @@ export default function SeoPage() {
     setIsSaving(true);
     try {
       const saved = await seoService.updateSettings(settings);
-      setSettings(saved);
+      setSettings((prev) => ({
+        ...prev,
+        ...saved,
+        keywords: Array.isArray(saved.keywords) ? saved.keywords : prev.keywords,
+      }));
       setIsDirty(false);
       addNotification('SEO settings saved.', 'success');
     } catch {
