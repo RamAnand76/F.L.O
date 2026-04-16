@@ -13,7 +13,9 @@ import {
   Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getAssetUrl } from '@/lib/api-client';
 import { Education, Experience } from '@/services/profile.service';
+
 
 import { RepoCard } from '@/components/features/dashboard/RepoCard';
 import { SkillBadge } from '@/components/features/dashboard/SkillBadge';
@@ -645,7 +647,7 @@ export default function FolioControlPage() {
                         <div className="flex items-center gap-2.5">
                           {t.avatarUrl ? (
                             <img
-                              src={t.avatarUrl}
+                              src={getAssetUrl(t.avatarUrl)}
                               alt={t.name}
                               className="w-8 h-8 rounded-full object-cover border border-white/8"
                             />
@@ -754,7 +756,7 @@ export default function FolioControlPage() {
                       <div className="aspect-square flex items-center justify-center bg-zinc-950/40 text-zinc-700 group-hover:text-zinc-500 transition-colors">
                         {asset.type === 'image' && asset.url ? (
                           <img
-                            src={asset.url}
+                            src={getAssetUrl(asset.url)}
                             alt={asset.name}
                             className="w-full h-full object-cover"
                           />

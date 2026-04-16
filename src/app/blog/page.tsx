@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 import { blogService, BlogPost, BlogPostListItem } from '@/services/blog.service';
 import { useStore } from '@/store/useStore';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { getAssetUrl } from '@/lib/api-client';
+
 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -606,7 +608,7 @@ export default function BlogPage() {
               {post.coverImageUrl ? (
                 <div className="h-32 overflow-hidden shrink-0">
                   <img
-                    src={post.coverImageUrl}
+                    src={getAssetUrl(post.coverImageUrl)}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   />

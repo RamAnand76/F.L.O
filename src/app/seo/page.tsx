@@ -11,6 +11,8 @@ import {
 import { cn } from '@/lib/utils';
 import { seoService, SeoSettings, SeoScore } from '@/services/seo.service';
 import { useStore } from '@/store/useStore';
+import { getAssetUrl } from '@/lib/api-client';
+
 
 const TITLE_MAX = 60;
 const DESC_MAX = 160;
@@ -463,8 +465,9 @@ export default function SeoPage() {
                   <div className="flex gap-4 items-start">
                     <div className="w-28 h-16 shrink-0 bg-zinc-950/80 border border-white/6 rounded-xl overflow-hidden flex items-center justify-center">
                       {settings.ogImageUrl ? (
-                        <img src={settings.ogImageUrl} alt="OG" className="w-full h-full object-cover" />
+                        <img src={getAssetUrl(settings.ogImageUrl)} alt="OG" className="w-full h-full object-cover" />
                       ) : (
+
                         <ImageIcon className="w-6 h-6 text-zinc-700" />
                       )}
                     </div>
@@ -653,8 +656,9 @@ export default function SeoPage() {
               >
                 <div className="bg-zinc-100 h-36 flex items-center justify-center">
                   {settings.ogImageUrl ? (
-                    <img src={settings.ogImageUrl} alt="preview" className="w-full h-full object-cover" />
+                    <img src={getAssetUrl(settings.ogImageUrl)} alt="preview" className="w-full h-full object-cover" />
                   ) : (
+
                     <div className="flex flex-col items-center gap-2 text-zinc-400">
                       <ImageIcon className="w-7 h-7" />
                       <span className="text-[11px]">Upload an image</span>
@@ -684,8 +688,9 @@ export default function SeoPage() {
               >
                 <div className="bg-zinc-100 h-44 flex items-center justify-center">
                   {settings.ogImageUrl ? (
-                    <img src={settings.ogImageUrl} alt="preview" className="w-full h-full object-cover" />
+                    <img src={getAssetUrl(settings.ogImageUrl)} alt="preview" className="w-full h-full object-cover" />
                   ) : (
+
                     <div className="flex flex-col items-center gap-2 text-zinc-400">
                       <ImageIcon className="w-8 h-8" />
                       <span className="text-[11px]">1200 × 630px recommended</span>

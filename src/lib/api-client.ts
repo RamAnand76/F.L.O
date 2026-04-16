@@ -1,5 +1,16 @@
-
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+export const BACKEND_URL = BASE_URL.includes('/api') ? BASE_URL.split('/api')[0] : BASE_URL;
+
+export const getAssetUrl = (url: string | null) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  
+  // Ensure we don't have double slashes when joining
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${BACKEND_URL}${cleanUrl}`;
+};
+
+
 
 class ApiClient {
   private accessToken: string | null = null;
