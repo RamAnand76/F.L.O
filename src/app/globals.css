@@ -67,3 +67,80 @@ input[type="reset"] {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* Toastrr Customization - True Premium Dark Theme */
+.toast-wrapper .toast {
+  border: none !important;
+  background: transparent !important;
+  overflow: visible;
+}
+
+.toast-wrapper .toastContainer {
+  background: rgba(18, 18, 21, 0.8) !important; /* Deep Zinc dark */
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 14px !important;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 20px 25px -5px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  padding: 14px 18px !important;
+}
+
+/* Remove the murky library gradient */
+.toast-wrapper .toastContainer.gradient {
+  background-image: none !important;
+}
+
+/* Better icon alignment */
+.toast-wrapper .toast .icon {
+  margin-right: 4px !important;
+}
+
+/* Close button - sleek and integrated */
+.toast-wrapper .toast .closeIcon {
+  top: 12px !important;
+  right: 12px !important;
+  width: 22px !important;
+  height: 22px !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important; /* Squircle looks more modern than circle for close btn */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-wrapper .toast .closeIcon svg {
+  width: 10px !important;
+  height: 10px !important;
+  opacity: 0.6;
+}
+
+.toast-wrapper .toast .closeIcon:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+.toast-wrapper .toast .closeIcon:hover svg {
+  opacity: 1;
+}
+
+/* Premium typography */
+.toast-wrapper .toast .message {
+  font-family: inherit;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.95) !important;
+  line-height: 1.4;
+}
+
+/* Subtle ripple */
+.toast-wrapper .toast .icon::before {
+  display: none !important; /* Removing the dated ripple effect for a cleaner look */
+}
+
+
