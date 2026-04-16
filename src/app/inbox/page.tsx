@@ -6,52 +6,10 @@ import { Mail, Star, Trash2, Search, Loader2, RefreshCw, MailOpen } from 'lucide
 import { cn } from '@/lib/utils';
 import { inboxService, InboxMessage } from '@/services/inbox.service';
 import { useStore } from '@/store/useStore';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+
 
 type FilterType = 'all' | 'unread' | 'starred';
-
-function DeleteDialog({
-  onConfirm,
-  onCancel,
-}: {
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-    >
-      <motion.div
-        initial={{ scale: 0.96, y: 8 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.96, y: 8 }}
-        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-zinc-900 border border-white/8 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-      >
-        <h3 className="text-[15px] font-semibold text-white mb-1.5">Delete message?</h3>
-        <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-          This action cannot be undone. The message will be permanently removed.
-        </p>
-        <div className="flex gap-2.5 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 rounded-lg transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
 
 function MessageAvatar({ name }: { name: string }) {
   const initials = name
@@ -399,15 +357,17 @@ export default function InboxPage() {
         </div>
       </div>
 
-      {/* Delete confirm dialog */}
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <DeleteDialog
-            onConfirm={() => handleDelete(showDeleteConfirm)}
-            onCancel={() => setShowDeleteConfirm(null)}
-          />
-        )}
-      </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={!!showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(null)}
+        onConfirm={() => showDeleteConfirm && handleDelete(showDeleteConfirm)}
+        title="Delete Message"
+        description="This action cannot be undone. The message will be permanently removed from your inbox."
+        confirmLabel="Delete"
+        type="danger"
+      />
+
     </div>
   );
 }

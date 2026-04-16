@@ -23,7 +23,9 @@ import { EducationForm } from '@/components/features/folio/EducationForm';
 import { ExperienceForm } from '@/components/features/folio/ExperienceForm';
 import { TestimonialForm } from '@/components/features/folio/TestimonialForm';
 import { ProfileEditForm } from '@/components/features/folio/ProfileEditForm';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Testimonial } from '@/services/testimonials.service';
+
 
 export type FolioTab = 'repos' | 'skills' | 'professional' | 'testimonials' | 'assets';
 
@@ -36,51 +38,7 @@ const ICON_FOR_TYPE: Record<string, React.ReactNode> = {
   doc: <FileText className="w-8 h-8 text-zinc-600" />,
 };
 
-// ─── Simple inline confirm dialog ────────────────────────────────────────────
-function ConfirmDialog({
-  title,
-  desc,
-  onConfirm,
-  onCancel,
-}: {
-  title: string;
-  desc: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[600] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-    >
-      <motion.div
-        initial={{ scale: 0.96, y: 8 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.96, y: 8 }}
-        className="bg-zinc-900 border border-white/8 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-      >
-        <h3 className="text-[15px] font-semibold text-white mb-1.5">{title}</h3>
-        <p className="text-[13px] text-zinc-500 leading-relaxed mb-6">{desc}</p>
-        <div className="flex gap-2.5 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-[13px] font-medium text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 text-[13px] font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 rounded-lg transition-colors"
-          >
-            Remove
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
+
 
 // ─── Success Modal ────────────────────────────────────────────────────────────
 function SuccessModal({
@@ -183,6 +141,11 @@ export default function FolioControlPage() {
   const [sortBy, setSortBy] = useState<'stars' | 'name' | 'updated-desc'>('stars');
   const [filterLang, setFilterLang] = useState<string>('All');
   const [skillToDelete, setSkillToDelete] = useState<string | null>(null);
+  const [expToDelete, setExpToDelete] = useState<string | null>(null);
+  const [eduToDelete, setEduToDelete] = useState<string | null>(null);
+  const [testimonialToDelete, setTestimonialToDelete] = useState<string | null>(null);
+  const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
+
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -533,14 +496,12 @@ export default function FolioControlPage() {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={async () => {
-                              await deleteExperience(exp.id);
-                              addNotification('Experience removed.');
-                            }}
+                            onClick={() => setExpToDelete(exp.id)}
                             className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/8 transition-all"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
+
                         </div>
                       </motion.div>
                     ))}
@@ -595,14 +556,12 @@ export default function FolioControlPage() {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={async () => {
-                              await deleteEducation(edu.id);
-                              addNotification('Education removed.');
-                            }}
+                            onClick={() => setEduToDelete(edu.id)}
                             className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/8 transition-all"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
+
                         </div>
                       </motion.div>
                     ))}
@@ -723,14 +682,12 @@ export default function FolioControlPage() {
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={async () => {
-                              await deleteTestimonial(t.id);
-                              addNotification('Testimonial deleted.');
-                            }}
+                            onClick={() => setTestimonialToDelete(t.id)}
                             className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/8 transition-all"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
+
                         </div>
                       </div>
                     </div>
@@ -810,15 +767,13 @@ export default function FolioControlPage() {
                       <div className="px-3 py-2 flex items-center justify-between border-t border-white/4">
                         <p className="text-[11px] text-zinc-500 truncate flex-1 mr-1">{asset.name}</p>
                         <button
-                          onClick={async () => {
-                            await deleteAsset(asset.id);
-                            addNotification('Asset deleted.');
-                          }}
+                          onClick={() => setAssetToDelete(asset.id)}
                           className="p-1 rounded-md text-zinc-700 hover:text-red-400 hover:bg-red-500/8 transition-all opacity-0 group-hover:opacity-100 shrink-0"
                           title="Delete"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
+
                       </div>
                     </div>
                   ))}
@@ -905,21 +860,87 @@ export default function FolioControlPage() {
         />
       </Modal>
 
-      {/* Skill delete confirm */}
-      <AnimatePresence>
-        {skillToDelete && (
-          <ConfirmDialog
-            title={`Remove "${skillToDelete}"?`}
-            desc="This will remove the skill from your profile."
-            onConfirm={() => {
-              setSkills(skills.filter((s) => s !== skillToDelete));
-              addNotification(`"${skillToDelete}" removed.`);
-              setSkillToDelete(null);
-            }}
-            onCancel={() => setSkillToDelete(null)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Deletion confirmations */}
+      <ConfirmModal
+        isOpen={!!skillToDelete}
+        onClose={() => setSkillToDelete(null)}
+        onConfirm={async () => {
+          if (skillToDelete) {
+            setSkills(skills.filter((s) => s !== skillToDelete));
+            addNotification(`"${skillToDelete}" removed.`);
+            setSkillToDelete(null);
+          }
+        }}
+        title="Remove Skill"
+        description={`Are you sure you want to remove "${skillToDelete}" from your profile?`}
+        confirmLabel="Remove"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={!!expToDelete}
+        onClose={() => setExpToDelete(null)}
+        onConfirm={async () => {
+          if (expToDelete) {
+            await deleteExperience(expToDelete);
+            addNotification('Experience removed.');
+            setExpToDelete(null);
+          }
+        }}
+        title="Delete Experience"
+        description="This action cannot be undone. Are you sure you want to delete this experience entry?"
+        confirmLabel="Delete"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={!!eduToDelete}
+        onClose={() => setEduToDelete(null)}
+        onConfirm={async () => {
+          if (eduToDelete) {
+            await deleteEducation(eduToDelete);
+            addNotification('Education removed.');
+            setEduToDelete(null);
+          }
+        }}
+        title="Delete Education"
+        description="This action cannot be undone. Are you sure you want to delete this education entry?"
+        confirmLabel="Delete"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={!!testimonialToDelete}
+        onClose={() => setTestimonialToDelete(null)}
+        onConfirm={async () => {
+          if (testimonialToDelete) {
+            await deleteTestimonial(testimonialToDelete);
+            addNotification('Testimonial deleted.');
+            setTestimonialToDelete(null);
+          }
+        }}
+        title="Delete Testimonial"
+        description="Are you sure you want to delete this testimonial? It will be permanently removed."
+        confirmLabel="Delete"
+        type="danger"
+      />
+
+      <ConfirmModal
+        isOpen={!!assetToDelete}
+        onClose={() => setAssetToDelete(null)}
+        onConfirm={async () => {
+          if (assetToDelete) {
+            await deleteAsset(assetToDelete);
+            addNotification('Asset deleted.');
+            setAssetToDelete(null);
+          }
+        }}
+        title="Delete Asset"
+        description="Are you sure you want to delete this asset? This action will remove it permanently."
+        confirmLabel="Delete"
+        type="danger"
+      />
+
 
       {/* Success modal */}
       <AnimatePresence>

@@ -5,14 +5,19 @@ import { motion } from 'motion/react';
 import { useStore } from '@/store/useStore';
 import { User, Mail, MapPin, AlignLeft, Save, Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { PromptModal } from '@/components/ui/PromptModal';
+
 
 export default function ProfilePage() {
   const githubUser = useStore((state) => state.githubUser);
   const customData = useStore((state) => state.customData);
   const updateCustomData = useStore((state) => state.updateCustomData);
   const saveProfile = useStore((state) => state.saveProfile);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const { toast } = useToast();
+   const [isSaving, setIsSaving] = React.useState(false);
+   const [isEnhancing, setIsEnhancing] = React.useState(false);
+   const [showEnhanceModal, setShowEnhanceModal] = React.useState(false);
+   const { toast } = useToast();
+
 
   if (!githubUser) return null;
 
@@ -125,21 +130,12 @@ export default function ProfilePage() {
               </label>
               <button
                 type="button"
-                onClick={async () => {
-                  const userPrompt = window.prompt('How would you like to enhance your bio? (e.g. "Make it more professional")');
-                  if (userPrompt) {
-                    try {
-                      await useStore.getState().enhanceWithAI('bio', userPrompt);
-                      toast.success('Bio enhanced with AI!');
-                    } catch (error) {
-                      toast.error('AI enhancement failed. Please try again.');
-                    }
-                  }
-                }}
+                onClick={() => setShowEnhanceModal(true)}
                 className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
               >
                 <Sparkles className="w-3 h-3" /> Enhance with AI
               </button>
+
             </div>
             <textarea
               id="bio"
@@ -164,6 +160,29 @@ export default function ProfilePage() {
           </div>
         </form>
       </motion.div>
+
+      <PromptModal
+        isOpen={showEnhanceModal}
+        onClose={() => setShowEnhanceModal(false)}
+        onConfirm={async (userPrompt) => {
+          setIsEnhancing(true);
+          try {
+            await useStore.getState().enhanceWithAI('bio', userPrompt);
+            toast.success('Bio enhanced with AI!');
+            setShowEnhanceModal(false);
+          } catch (error) {
+            toast.error('AI enhancement failed. Please try again.');
+          } finally {
+            setIsEnhancing(false);
+          }
+        }}
+        title="Enhance with AI"
+        description="Tell the AI how you'd like to rewrite your bio. For example: 'Make it more professional and focus on my React experience'."
+        placeholder="e.g. Make it more professional..."
+        confirmLabel="Enhance"
+        loading={isEnhancing}
+      />
+
     </div>
   );
 }

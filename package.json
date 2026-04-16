@@ -18,12 +18,14 @@
     "express": "^4.21.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "next": "16.2.2",
+    "next": "15.1.0",
+
     "postcss": "^8.5.8",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "tailwind-merge": "^3.5.0",
     "tech-stack-icons": "^3.7.1",
+    "toastrr": "^1.0.4",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
@@ -33,7 +35,8 @@
     "@types/react-dom": "19.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.2",
+    "eslint-config-next": "15.1.0",
+
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2"
