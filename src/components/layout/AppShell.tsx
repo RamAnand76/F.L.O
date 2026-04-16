@@ -79,7 +79,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const isFullWidthPage = isPublicPortfolio || ['preview', 'templates'].some(p => pathname?.includes(p));
+  const isEditingBlog = useStore((state) => state.isEditingBlog);
+  const isFullWidthPage = isPublicPortfolio || ['preview', 'templates'].some(p => pathname?.includes(p)) || isEditingBlog;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans overflow-x-hidden selection:bg-indigo-500/30">
@@ -87,26 +88,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-zinc-950 to-zinc-950" />
       
       <main className={cn(
-        "relative z-10 w-full mx-auto transition-all duration-500 min-h-screen",
-        !isFullWidthPage ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-32" : "max-w-none px-0 pt-0 pb-0"
+        "relative w-full mx-auto transition-all duration-500 min-h-screen",
+        (!isFullWidthPage && !isEditingBlog) ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-32 z-10" : "max-w-none px-0 pt-0 pb-0 z-10"
       )}
-      style={!isFullWidthPage ? { fontSize: '80%' } : {}}>
-        {!isFullWidthPage && !isAuthPage && <TopNav />}
+      style={(!isFullWidthPage && !isEditingBlog) ? { fontSize: '80%' } : {}}>
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}
-            initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            initial={isEditingBlog ? { opacity: 0 } : { opacity: 0, y: 20, filter: 'blur(10px)' }}
+            animate={isEditingBlog ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={isEditingBlog ? { opacity: 0 } : { opacity: 0, y: -20, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="w-full h-full"
           >
             {children}
           </motion.div>
         </AnimatePresence>
+        {!isAuthPage && <TopNav />}
       </main>
 
+
       {!isAuthPage && githubUser && <Dock />}
+
+
 
     </div>
   );

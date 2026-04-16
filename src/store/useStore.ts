@@ -112,7 +112,10 @@ export interface AppState {
   publishPortfolio: (published: boolean) => Promise<void>;
   
   hasFetchedInitialData: boolean;
+  isEditingBlog: boolean;
+  setIsEditingBlog: (val: boolean) => void;
 }
+
 
 import { aiService } from '@/services/ai.service';
 
@@ -121,7 +124,9 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       isAuthenticated: false,
       hasFetchedInitialData: false,
+      isEditingBlog: false,
       githubUser: null,
+
       repos: [],
       repoPagination: null,
       selectedRepoIds: [],
@@ -153,7 +158,9 @@ export const useStore = create<AppState>()(
       removeNotification: (id) => set((state) => ({
         notifications: state.notifications.filter(n => n.id !== id)
       })),
+      setIsEditingBlog: (val) => set({ isEditingBlog: val }),
       setIsAuthenticated: (val) => set({ isAuthenticated: val }),
+
       setGithubUser: (user) => set((state) => ({ 
         githubUser: user,
         customData: {

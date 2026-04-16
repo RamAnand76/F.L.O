@@ -6,6 +6,9 @@ import {
   Plus, Trash2, Pencil, Search, Clock,
   Save, ArrowLeft, Loader2, X,
   Globe, Lock, FileText, Image as ImageIcon, Upload,
+  Link as LinkIcon, Code2, List, MessageSquare,
+
+
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { blogService, BlogPost, BlogPostListItem } from '@/services/blog.service';
@@ -17,19 +20,22 @@ import { getAssetUrl } from '@/lib/api-client';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function renderMarkdownPreview(md: string): string {
+  if (!md) return '';
+  
   return md
-    .replace(/^### (.+)$/gm, '<h3 class="text-base font-semibold mt-6 mb-2 text-white">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-lg font-semibold mt-8 mb-3 text-white">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-8 mb-4 text-white">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em class="text-zinc-200 italic">$1</em>')
-    .replace(/`(.+?)`/g, '<code class="bg-zinc-800 text-emerald-300 px-1.5 py-0.5 rounded text-[13px] font-mono">$1</code>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-indigo-400 underline hover:text-indigo-300" target="_blank">$1</a>')
-    .replace(/^- (.+)$/gm, '<li class="text-zinc-300 ml-4 list-disc mb-1">$1</li>')
-    .replace(/^> (.+)$/gm, '<blockquote class="border-l-2 border-white/10 pl-4 text-zinc-500 my-4">$1</blockquote>')
-    .replace(/\n\n/g, '</p><p class="text-zinc-400 leading-[1.8] mb-4">')
+    .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mt-10 mb-5 text-white tracking-tight">$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-12 mb-6 text-white tracking-tight border-b border-white/[0.06] pb-3">$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1 class="text-5xl font-extrabold mt-14 mb-8 text-white tracking-tighter leading-tight">$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em class="italic text-zinc-300">$1</em>')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-500/30 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-indigo-500/40 bg-indigo-500/[0.03] pl-8 py-5 my-10 text-zinc-300 italic rounded-r-2xl transition-all leading-relaxed">$1</blockquote>')
+    .replace(/`(.*?)`/g, '<code class="bg-zinc-800/80 text-indigo-300 px-2 py-1 rounded-lg font-mono text-[0.85em] border border-white/5">$1</code>')
+    .replace(/^- (.*$)/gm, '<li class="flex items-start gap-4 mb-3 ml-2 before:content-[\'→\'] before:text-indigo-500 before:font-black text-zinc-400">$1</li>')
+    .replace(/\n\n/g, '</p><p class="mb-6 leading-loose text-zinc-400 text-[16px]">')
     .replace(/\n/g, '<br />');
 }
+
 
 function formatRelative(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -101,15 +107,16 @@ function MarkdownEditor({
   };
 
   const toolbarItems = [
-    { label: 'H1', action: () => insert('# ') },
-    { label: 'H2', action: () => insert('## ') },
-    { label: 'H3', action: () => insert('### ') },
-    { label: 'B', action: () => insert('**', '**'), cls: 'font-bold' },
-    { label: 'I', action: () => insert('*', '*'), cls: 'italic' },
-    { label: '`', action: () => insert('`', '`'), cls: 'font-mono' },
-    { label: '[ ]', action: () => insert('[', '](url)') },
-    { label: '—', action: () => insert('\n- ') },
-    { label: '❝', action: () => insert('\n> ') },
+    { label: 'H1', icon: <span className="font-bold">H1</span>, action: () => insert('# ') },
+    { label: 'H2', icon: <span className="font-bold">H2</span>, action: () => insert('## ') },
+    { label: 'Bold', icon: <span className="font-bold">B</span>, action: () => insert('**', '**') },
+    { label: 'Italic', icon: <span className="italic">I</span>, action: () => insert('*', '*') },
+    { label: 'Link', icon: <LinkIcon className="w-3.5 h-3.5" />, action: () => insert('[', '](url)') },
+
+    { label: 'Code', icon: <Code2 className="w-3.5 h-3.5" />, action: () => insert('`', '`') },
+    { label: 'Quote', icon: <MessageSquare className="w-3.5 h-3.5" />, action: () => insert('\n> ') },
+    { label: 'List', icon: <List className="w-3.5 h-3.5" />, action: () => insert('\n- ') },
+
   ];
 
   const addTag = () => {
@@ -121,205 +128,192 @@ function MarkdownEditor({
   };
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 shrink-0">
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-[13px] font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
+    <div className="flex flex-col h-screen bg-[#09090b] text-zinc-300 overflow-hidden">
 
-        <div className="flex gap-0.5 bg-zinc-900 border border-white/8 rounded-lg p-0.5">
-          {(['write', 'split', 'preview'] as EditorView[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={cn(
-                'px-3 py-1 rounded-md text-[11px] font-medium capitalize transition-all',
-                view === v ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
-              )}
-            >
-              {v}
-            </button>
-          ))}
+      {/* Top bar - FIXED */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#09090b]/80 backdrop-blur-xl shrink-0 z-50">
+        <div className="flex items-center gap-6">
+          <button
+            onClick={onClose}
+            className="group flex items-center gap-2 text-zinc-500 hover:text-white transition-all text-[13px] font-medium"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Exit Editor
+          </button>
+          
+          <div className="h-4 w-px bg-white/[0.06]" />
+
+          <div className="flex gap-1 bg-zinc-900/50 border border-white/[0.06] rounded-xl p-1 shadow-inner">
+            {(['write', 'split', 'preview'] as EditorView[]).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={cn(
+                  'px-4 py-1.5 rounded-lg text-[11px] font-semibold capitalize transition-all',
+                  view === v 
+                    ? 'bg-zinc-800 text-white shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-300'
+                )}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] text-zinc-600 hidden sm:block">
-            {wordCount} words · {readTime} min read
-          </span>
-          <span
-            className={cn(
-              'px-2 py-0.5 rounded-full text-[10px] font-semibold border',
-              draft.status === 'published'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-zinc-800 border-white/8 text-zinc-500'
-            )}
-          >
-            {draft.status}
-          </span>
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3 text-[11px] font-medium text-zinc-600 tracking-tight">
+             <span>{wordCount} Words</span>
+             <span className="w-1 h-1 rounded-full bg-zinc-800" />
+             <span>{readTime} Min Read</span>
+          </div>
+          
           <button
             onClick={onSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[13px] font-medium transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-8 py-2.5 bg-white text-zinc-950 hover:bg-zinc-100 rounded-xl text-[13px] font-bold transition-all shadow-xl shadow-white/5 active:scale-95 disabled:opacity-40"
           >
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-3.5 h-3.5" />
+                Save Post
+              </>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Meta strip */}
-      <div className="px-5 py-3 border-b border-white/5 space-y-2.5 shrink-0">
-        <input
-          value={draft.title}
-          onChange={(e) => setDraft((prev) => ({ ...prev, title: e.target.value }))}
-          placeholder="Post title..."
-          className="w-full text-[22px] font-semibold text-white bg-transparent focus:outline-none placeholder-zinc-700 tracking-tight"
-        />
+      {/* Editor Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left: Input Areas */}
+        <div className={cn(
+          "flex flex-col border-r border-white/10 bg-zinc-950/20",
+          view === 'preview' ? "hidden" : view === 'write' ? "w-full" : "w-1/2"
+        )}>
+           {/* Static Header Parts inside Left */}
+           <div className="shrink-0">
+             {/* Cover & Meta */}
+             <div className="p-8 border-b border-white/[0.04] space-y-6">
+                {/* Optional Cover Preview */}
+                {draft.coverImageUrl && (
+                  <div className="relative w-full h-40 rounded-2xl overflow-hidden group border border-white/5 mb-6">
+                    <img src={getAssetUrl(draft.coverImageUrl)} className="w-full h-full object-cover" alt="Cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button 
+                        onClick={() => coverRef.current?.click()}
+                        className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-all"
+                      >
+                        Replace Cover
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            value={draft.excerpt}
-            onChange={(e) => setDraft((prev) => ({ ...prev, excerpt: e.target.value }))}
-            placeholder="Short excerpt..."
-            className="flex-1 min-w-[180px] bg-transparent text-[12px] text-zinc-500 placeholder-zinc-700 focus:outline-none focus:text-zinc-300 transition-colors"
-          />
+                <div className="space-y-4">
+                  <input
+                    value={draft.title}
+                    onChange={(e) => setDraft((prev) => ({ ...prev, title: e.target.value }))}
+                    placeholder="The title of your story..."
+                    className="w-full text-4xl font-bold text-white bg-transparent focus:outline-none placeholder-zinc-800 tracking-tight leading-tight"
+                  />
 
-          {/* Tags */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {draft.tags.map((t) => (
-              <span
-                key={t}
-                className="flex items-center gap-1 px-2.5 py-1 bg-zinc-900 border border-white/6 rounded-lg text-[11px] text-zinc-400"
-              >
-                {t}
-                <button
-                  onClick={() =>
-                    setDraft((prev) => ({ ...prev, tags: prev.tags.filter((x) => x !== t) }))
-                  }
-                  className="text-zinc-600 hover:text-red-400 transition-colors"
-                >
-                  <X className="w-2.5 h-2.5" />
-                </button>
-              </span>
-            ))}
-            <input
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              placeholder="+ tag"
-              className="w-16 bg-transparent text-[11px] text-zinc-500 placeholder-zinc-700 focus:outline-none focus:text-zinc-300 border-b border-white/5 pb-0.5 transition-colors"
-            />
-          </div>
+                  <textarea
+                    value={draft.excerpt}
+                    onChange={(e) => setDraft((prev) => ({ ...prev, excerpt: e.target.value }))}
+                    placeholder="Give readers a quick summary (excerpt)..."
+                    rows={2}
+                    className="w-full bg-transparent text-[15px] text-zinc-500 placeholder-zinc-800 focus:outline-none focus:text-zinc-400 transition-colors resize-none leading-relaxed"
+                  />
+                </div>
 
-          {/* Publish toggle */}
-          <button
-            onClick={() =>
-              setDraft((prev) => ({
-                ...prev,
-                status: prev.status === 'published' ? 'draft' : 'published',
-              }))
-            }
-            className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-all',
-              draft.status === 'published'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-zinc-900 border-white/6 text-zinc-500 hover:text-zinc-300'
-            )}
-          >
-            {draft.status === 'published' ? (
-              <Globe className="w-3 h-3" />
-            ) : (
-              <Lock className="w-3 h-3" />
-            )}
-            {draft.status === 'published' ? 'Published' : 'Draft'}
-          </button>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  {/* Status Toggle */}
+                  <button
+                    onClick={() => setDraft(prev => ({ ...prev, status: prev.status === 'published' ? 'draft' : 'published' }))}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all",
+                      draft.status === 'published' 
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                        : "bg-zinc-900 border-white/[0.06] text-zinc-500"
+                    )}
+                  >
+                    {draft.status === 'published' ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                    {draft.status.toUpperCase()}
+                  </button>
 
-          {/* Cover upload */}
-          <label
-            className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border cursor-pointer transition-all bg-zinc-900 border-white/6 text-zinc-500 hover:text-zinc-300',
-              isUploadingCover && 'opacity-50 pointer-events-none'
-            )}
-          >
-            {isUploadingCover ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <ImageIcon className="w-3 h-3" />
-            )}
-            {draft.coverImageUrl ? 'Change cover' : 'Cover'}
-            <input
-              ref={coverRef}
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={onCoverUpload}
-            />
-          </label>
+                  <div className="flex items-center gap-2 ml-auto">
+                      {draft.tags.map(t => (
+                        <span key={t} className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 border border-white/[0.05] rounded-lg text-[11px] font-medium text-zinc-400">
+                          {t}
+                          <button onClick={() => setDraft(p => ({ ...p, tags: p.tags.filter(x => x !== t) }))} className="hover:text-red-400 transition-colors">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                      <input
+                        value={tagInput}
+                        onChange={e => setTagInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                        placeholder="+ tag"
+                        className="w-16 bg-transparent text-[11px] text-zinc-600 focus:text-zinc-300 focus:outline-none"
+                      />
+                  </div>
+                </div>
+             </div>
+
+             {/* Toolbar */}
+             <div className="px-6 py-2 border-b border-white/[0.04] bg-zinc-900/10 flex items-center gap-1">
+                {toolbarItems.map((t) => (
+                  <button
+                    key={t.label}
+                    onClick={t.action}
+                    title={t.label}
+                    className="w-9 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-100 hover:bg-white/[0.06] transition-all"
+                  >
+                    {t.icon}
+                  </button>
+                ))}
+             </div>
+           </div>
+
+           <input ref={coverRef} type="file" className="hidden" accept="image/*" onChange={onCoverUpload} />
+
+           {/* Writing Space - SCROLLABLE */}
+           <div className="flex-1 overflow-y-auto custom-scrollbar">
+             <textarea
+               ref={textareaRef}
+               value={value}
+               onChange={(e) => onChange(e.target.value)}
+               placeholder="Tell your story..."
+               className="w-full h-full min-h-[500px] bg-transparent p-10 focus:outline-none text-[16px] leading-loose resize-none placeholder-zinc-800"
+             />
+           </div>
         </div>
-      </div>
-
-      {/* Formatting toolbar */}
-      <div className="flex items-center gap-0.5 px-4 py-1.5 border-b border-white/[0.04] shrink-0">
-        {toolbarItems.map((t) => (
-          <button
-            key={t.label}
-            onClick={t.action}
-            title={t.label}
-            className={cn(
-              'w-8 h-7 flex items-center justify-center text-[12px] rounded-md text-zinc-600 hover:text-white hover:bg-white/5 transition-all',
-              t.cls
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Editor body */}
-      <div
-        className={cn(
-          'flex-1 flex overflow-hidden',
-          view === 'split' && 'divide-x divide-white/[0.04]'
-        )}
-      >
-        {(view === 'write' || view === 'split') && (
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={`Start writing in Markdown...\n\n# Introduction\n\n## The Problem\n\n## The Solution\n\n## Results`}
-            className={cn(
-              'bg-transparent resize-none focus:outline-none text-zinc-300 text-[14px] leading-[1.9] font-mono p-6 custom-scrollbar',
-              view === 'split' ? 'w-1/2' : 'w-full'
-            )}
-          />
-        )}
 
         {(view === 'preview' || view === 'split') && (
-          <div
-            className={cn(
-              'overflow-y-auto p-6 text-zinc-400 text-[14px] leading-[1.9] custom-scrollbar',
-              view === 'split' ? 'w-1/2' : 'w-full'
-            )}
-            dangerouslySetInnerHTML={{
-              __html: `<p class="text-zinc-400 leading-[1.9] mb-4">${renderMarkdownPreview(value || '')}</p>`,
-            }}
-          />
+          <div className={cn('overflow-y-auto p-10 custom-scrollbar bg-white/[0.01]', view === 'split' ? 'w-1/2' : 'w-full max-w-4xl mx-auto px-12 py-20')}>
+             <div className="prose-custom max-w-none" dangerouslySetInnerHTML={{ __html: `<div class="text-zinc-400 font-serif leading-loose">${renderMarkdownPreview(value || '')}</div>` }} />
+          </div>
         )}
       </div>
+
     </div>
   );
 }
 
 
 
+
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function BlogPage() {
-  const { addNotification } = useStore();
+  const { addNotification, setIsEditingBlog } = useStore();
+
 
   const [posts, setPosts] = useState<BlogPostListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -481,10 +475,25 @@ export default function BlogPage() {
   };
 
   // Full-screen editor
+  useEffect(() => {
+    setIsEditingBlog(isEditorOpen);
+    if (isEditorOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { 
+      document.body.style.overflow = ''; 
+      setIsEditingBlog(false);
+    };
+  }, [isEditorOpen, setIsEditingBlog]);
+
+
   if (isEditorOpen) {
     return (
-      <div className="fixed inset-0 z-40" style={{ paddingBottom: '80px' }}>
+      <div className="fixed inset-0 z-40">
         <MarkdownEditor
+
           value={draft.content}
           onChange={(content) => setDraft((prev) => ({ ...prev, content }))}
           onSave={handleSave}
@@ -499,6 +508,7 @@ export default function BlogPage() {
       </div>
     );
   }
+
 
   const pubCount = posts.filter((p) => p.status === 'published').length;
   const draftCount = posts.filter((p) => p.status === 'draft').length;
