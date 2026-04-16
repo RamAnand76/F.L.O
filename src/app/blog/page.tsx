@@ -128,9 +128,9 @@ function MarkdownEditor({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#09090b] text-zinc-300 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-96px)] bg-[#09090b] text-zinc-300 overflow-hidden relative">
+      {/* Top bar - STICKY to container */}
 
-      {/* Top bar - FIXED */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#09090b]/80 backdrop-blur-xl shrink-0 z-50">
         <div className="flex items-center gap-6">
           <button
@@ -491,23 +491,21 @@ export default function BlogPage() {
 
   if (isEditorOpen) {
     return (
-      <div className="fixed inset-0 z-40">
-        <MarkdownEditor
-
-          value={draft.content}
-          onChange={(content) => setDraft((prev) => ({ ...prev, content }))}
-          onSave={handleSave}
-          isSaving={isSaving}
-          draft={draft}
-          setDraft={setDraft}
-          onClose={() => setIsEditorOpen(false)}
-          editingPost={editingPost}
-          isUploadingCover={isUploadingCover}
-          onCoverUpload={handleCoverUpload}
-        />
-      </div>
+      <MarkdownEditor
+        value={draft.content}
+        onChange={(content) => setDraft((prev) => ({ ...prev, content }))}
+        onSave={handleSave}
+        isSaving={isSaving}
+        draft={draft}
+        setDraft={setDraft}
+        onClose={() => setIsEditorOpen(false)}
+        editingPost={editingPost}
+        isUploadingCover={isUploadingCover}
+        onCoverUpload={handleCoverUpload}
+      />
     );
   }
+
 
 
   const pubCount = posts.filter((p) => p.status === 'published').length;

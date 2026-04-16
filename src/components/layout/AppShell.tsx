@@ -89,9 +89,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       
       <main className={cn(
         "relative w-full mx-auto transition-all duration-500 min-h-screen",
-        (!isFullWidthPage && !isEditingBlog) ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-32 z-10" : "max-w-none px-0 pt-0 pb-0 z-10"
+        (!isFullWidthPage && !isEditingBlog) ? "max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-32 z-10" : "max-w-none px-0 pt-24 pb-0 z-10"
       )}
       style={(!isFullWidthPage && !isEditingBlog) ? { fontSize: '80%' } : {}}>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}
